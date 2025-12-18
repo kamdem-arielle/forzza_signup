@@ -17,11 +17,11 @@ export class RegisterComponent implements OnInit, OnDestroy {
   isLoading: boolean = false;
   promoCode: string | null = null;
   
-  // Password visibility toggle
+
   showPassword: boolean = false;
   showConfirmPassword: boolean = false;
   
-  // Polling state
+
   isPolling: boolean = false;
   pollingMessage: string = '';
   registeredSignupId: number | null = null;
@@ -46,7 +46,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
       this.promoCode = params['promo_code'] || null;
     });
 
-    // Check if there's a pending signup in localStorage
+
     const storedSignupId = localStorage.getItem('pendingSignupId');
     if (storedSignupId) {
       this.registeredSignupId = parseInt(storedSignupId, 10);
@@ -105,7 +105,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
           this.message = this.translate.instant('register.successMessage');
           this.registerForm.reset();
           
-          // Store signup ID and start polling
+
           this.registeredSignupId = response.data.id;
           if (this.registeredSignupId !== null) {
             localStorage.setItem('pendingSignupId', this.registeredSignupId.toString());
@@ -128,7 +128,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
   }
 
   private startPolling(signupId: number): void {
-    interval(30000) // Poll every 30 seconds
+    interval(30000) 
       .pipe(
         switchMap(() => this.apiService.getSignupById(signupId)),
         takeUntil(this.destroy$),
@@ -137,10 +137,10 @@ export class RegisterComponent implements OnInit, OnDestroy {
             return response.data.status !== 'APPROVED';
           }
           return true;
-        }, true), // Include the final emission
+        }, true),
         tap((response) => {
           if (response.success && response.data && response.data.status === 'APPROVED') {
-            // Clear storage and redirect
+
             localStorage.removeItem('pendingSignupId');
             this.isPolling = false;
             this.pollingMessage = '';

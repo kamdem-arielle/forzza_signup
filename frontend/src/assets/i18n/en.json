@@ -54,6 +54,16 @@
     "approved": "Approved",
     "noPending": "No pending signups",
     "noApproved": "No approved signups",
+    "filters": {
+      "name": "Name",
+      "namePlaceholder": "Search by name",
+      "phone": "Phone",
+      "phonePlaceholder": "Search by phone",
+      "promoCode": "Promo code",
+      "promoCodePlaceholder": "Search by promo code",
+      "search": "Search",
+      "reset": "Reset"
+    },
     "table": {
       "id": "ID",
       "username": "Username",

@@ -14,12 +14,15 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   approvedSignups: Signup[] = [];
   pending$ = new BehaviorSubject<Signup[]>([]);
   approved$ = new BehaviorSubject<Signup[]>([]);
+  nameFilter = '';
+  phoneFilter = '';
+  promoFilter = '';
   private destroy$ = new Subject<void>();
   private initialized = false;
   private newPendingIds = new Set<number>();
   private newApprovedIds = new Set<number>();
-  approvingIds = new Set<number>(); // Track which signups are being approved
-  visiblePasswordIds = new Set<number>(); // Track which passwords are visible
+  approvingIds = new Set<number>(); 
+  visiblePasswordIds = new Set<number>(); 
   message: string = '';
   isSuccess: boolean = false;
   isLoading: boolean = false;
@@ -46,16 +49,13 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
         this.apiService.getSignupsByStatus('PENDING').subscribe({
           next: (response) => {
             const data = (response.success && response.data) ? response.data : [];
-            // Sort newest first
             const sorted = [...data].sort((a, b) => (new Date(b.created_at || '').getTime()) - (new Date(a.created_at || '').getTime()));
-            // Detect new items
-            const prev = this.pending$.value;
-            const newItems = sorted.filter(s => !prev.find(p => p.id === s.id));
+            const prevRaw = this.pendingSignups;
+            const newItems = sorted.filter(s => !prevRaw.find(p => p.id === s.id));
             this.pendingSignups = sorted;
-            this.pending$.next(sorted);
+            this.applyFiltersForAll();
             if (this.initialized && newItems.length > 0) {
               this.showMessage(this.translate.instant('dashboard.newSignup'), true);
-              // Mark new ones for one-time animation
               newItems.forEach(n => this.markPendingAsNew(n.id));
             }
           },
@@ -70,9 +70,8 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
             const data = (response.success && response.data) ? response.data : [];
             const sorted = [...data].sort((a, b) => (new Date(b.created_at || '').getTime()) - (new Date(a.created_at || '').getTime()));
             this.approvedSignups = sorted;
-            this.approved$.next(sorted);
+            this.applyFiltersForAll();
             if (!this.initialized) {
-              // After both streams processed first time, mark initialized
               this.initialized = true;
             }
           },
@@ -85,21 +84,18 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   }
 
   approveSignup(id: number): void {
-    this.approvingIds.add(id); // Set loading state for this specific signup
+    this.approvingIds.add(id);
     
     this.apiService.approveSignup(id).subscribe({
       next: (response) => {
-        this.approvingIds.delete(id); // Remove loading state
+        this.approvingIds.delete(id);
         
         if (response.success) {
           const prevPending = this.pending$.value;
           const moved = prevPending.find(s => s.id === id);
-          // Remove from pending immediately
           const updatedPending = prevPending.filter(s => s.id !== id);
           this.pendingSignups = updatedPending;
           this.pending$.next(updatedPending);
-
-          // Add to approved immediately (optimistic)
           if (moved) {
             const updatedApproved = [{ ...moved, status: 'APPROVED' as 'APPROVED' }, ...this.approved$.value];
             this.approvedSignups = updatedApproved;
@@ -113,7 +109,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
         }
       },
       error: (error) => {
-        this.approvingIds.delete(id); // Remove loading state on error
+        this.approvingIds.delete(id);
         this.showMessage(error.error?.message || this.translate.instant('dashboard.approveError'), false);
       }
     });
@@ -163,6 +159,37 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
   isApprovedNew(id: number): boolean {
     return this.newApprovedIds.has(id);
+  }
+
+  applyFilters(): void {
+    this.applyFiltersForAll();
+  }
+
+  resetFilters(): void {
+    this.nameFilter = '';
+    this.phoneFilter = '';
+    this.promoFilter = '';
+    this.applyFiltersForAll();
+  }
+
+  private applyFiltersForAll(): void {
+    this.pending$.next(this.filterList(this.pendingSignups));
+    this.approved$.next(this.filterList(this.approvedSignups));
+  }
+
+  private filterList(list: Signup[]): Signup[] {
+    return list.filter(item => {
+      const matchesName = this.nameFilter
+        ? (item.username || '').toLowerCase().includes(this.nameFilter.toLowerCase())
+        : true;
+      const matchesPhone = this.phoneFilter
+        ? (item.phone || '').toLowerCase().includes(this.phoneFilter.toLowerCase())
+        : true;
+      const matchesPromo = this.promoFilter
+        ? (item.promo_code || '').toLowerCase().includes(this.promoFilter.toLowerCase())
+        : true;
+      return matchesName && matchesPhone && matchesPromo;
+    });
   }
 
   private markPendingAsNew(id: number): void {

@@ -8,23 +8,42 @@
     {{ message }}
   </div>
 
+  <div class="filter-bar">
+    <div class="filter-group">
+      <label>{{ 'dashboard.filters.name' | translate }}</label>
+      <input type="text" [(ngModel)]="nameFilter" [placeholder]="'dashboard.filters.namePlaceholder' | translate">
+    </div>
+    <div class="filter-group">
+      <label>{{ 'dashboard.filters.phone' | translate }}</label>
+      <input type="text" [(ngModel)]="phoneFilter" [placeholder]="'dashboard.filters.phonePlaceholder' | translate">
+    </div>
+    <div class="filter-group">
+      <label>{{ 'dashboard.filters.promoCode' | translate }}</label>
+      <input type="text" [(ngModel)]="promoFilter" [placeholder]="'dashboard.filters.promoCodePlaceholder' | translate">
+    </div>
+    <div class="filter-actions">
+      <button class="btn-primary" (click)="applyFilters()">{{ 'dashboard.filters.search' | translate }}</button>
+      <button class="btn-secondary" (click)="resetFilters()">{{ 'dashboard.filters.reset' | translate }}</button>
+    </div>
+  </div>
+
   <div class="tabs">
     <button 
       class="tab" 
       [class.active]="activeTab === 'pending'" 
       (click)="setTab('pending')">
-      {{ 'dashboard.pending' | translate }} ({{ pendingSignups.length }})
+      {{ 'dashboard.pending' | translate }} ({{ ((pending$ | async) || []).length }})
     </button>
     <button 
       class="tab" 
       [class.active]="activeTab === 'approved'" 
       (click)="setTab('approved')">
-      {{ 'dashboard.approved' | translate }} ({{ approvedSignups.length }})
+      {{ 'dashboard.approved' | translate }} ({{ ((pending$ | async) || []).length }})
     </button>
   </div>
 
   <div class="tab-content" *ngIf="activeTab === 'pending'">
-    <div *ngIf="pendingSignups.length === 0" class="empty-state">
+    <div *ngIf="((pending$ | async) || []).length === 0" class="empty-state">
       {{ 'dashboard.noPending' | translate }}
     </div>
     <div class="table-responsive" *ngIf="((pending$ | async) || []).length > 0">
@@ -71,7 +90,7 @@
   </div>
 
   <div class="tab-content" *ngIf="activeTab === 'approved'">
-    <div *ngIf="approvedSignups.length === 0" class="empty-state">
+    <div *ngIf="((pending$ | async) || []).length === 0" class="empty-state">
       {{ 'dashboard.noApproved' | translate }}
     </div>
     <div class="table-responsive" *ngIf="((approved$ | async) || []).length > 0">

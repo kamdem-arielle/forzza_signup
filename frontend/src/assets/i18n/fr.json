@@ -54,6 +54,16 @@
     "approved": "Approuvé",
     "noPending": "Aucune inscription en attente",
     "noApproved": "Aucune inscription approuvée",
+    "filters": {
+      "name": "Nom",
+      "namePlaceholder": "Rechercher par nom",
+      "phone": "Téléphone",
+      "phonePlaceholder": "Rechercher par téléphone",
+      "promoCode": "Code promo",
+      "promoCodePlaceholder": "Rechercher par code promo",
+      "search": "Rechercher",
+      "reset": "Réinitialiser"
+    },
     "table": {
       "id": "ID",
       "username": "Nom d'utilisateur",
