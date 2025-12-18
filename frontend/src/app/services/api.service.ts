@@ -9,6 +9,7 @@ export interface Signup {
   phone: string;
   password?: string;
   promo_code?: string;
+  notes?: string;
   status: 'PENDING' | 'APPROVED';
   created_at?: string;
   approved_at?: string;
@@ -46,5 +47,9 @@ export class ApiService {
 
   approveSignup(id: number): Observable<ApiResponse> {
     return this.http.put<ApiResponse>(`${this.baseUrl}/api/signups/${id}/status`, { status: 'APPROVED' });
+  }
+
+  updateSignupNotes(id: number, notes: string): Observable<ApiResponse<Signup>> {
+    return this.http.patch<ApiResponse<Signup>>(`${this.baseUrl}/api/signups/${id}/notes`, { notes });
   }
 }

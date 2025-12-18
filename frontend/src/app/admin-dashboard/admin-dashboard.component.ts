@@ -18,11 +18,14 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   phoneFilter = '';
   promoFilter = '';
   private destroy$ = new Subject<void>();
-  private initialized = false;
+  private firstPendingLoad = true;
   private newPendingIds = new Set<number>();
   private newApprovedIds = new Set<number>();
   approvingIds = new Set<number>(); 
-  visiblePasswordIds = new Set<number>(); 
+  visiblePasswordIds = new Set<number>();
+  editingNoteId: number | null = null;
+  noteText: string = '';
+  savingNoteIds = new Set<number>();
   message: string = '';
   isSuccess: boolean = false;
   isLoading: boolean = false;
@@ -54,10 +57,12 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
             const newItems = sorted.filter(s => !prevRaw.find(p => p.id === s.id));
             this.pendingSignups = sorted;
             this.applyFiltersForAll();
-            if (this.initialized && newItems.length > 0) {
+            // Only show notification for new items on subsequent polls (not first load)
+            if (!this.firstPendingLoad && newItems.length > 0) {
               this.showMessage(this.translate.instant('dashboard.newSignup'), true);
               newItems.forEach(n => this.markPendingAsNew(n.id));
             }
+            this.firstPendingLoad = false;
           },
           error: (error) => {
             this.showMessage(error.error?.message || this.translate.instant('dashboard.loadError'), false);
@@ -71,9 +76,6 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
             const sorted = [...data].sort((a, b) => (new Date(b.created_at || '').getTime()) - (new Date(a.created_at || '').getTime()));
             this.approvedSignups = sorted;
             this.applyFiltersForAll();
-            if (!this.initialized) {
-              this.initialized = true;
-            }
           },
           error: (error) => {
             this.isLoading = false;
@@ -200,6 +202,52 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   private markApprovedAsNew(id: number): void {
     this.newApprovedIds.add(id);
     setTimeout(() => this.newApprovedIds.delete(id), 1000);
+  }
+
+  startEditingNote(signup: Signup): void {
+    this.editingNoteId = signup.id;
+    this.noteText = signup.notes || '';
+  }
+
+  cancelEditingNote(): void {
+    this.editingNoteId = null;
+    this.noteText = '';
+  }
+
+  saveNote(signup: Signup): void {
+    if (this.savingNoteIds.has(signup.id)) return;
+    
+    this.savingNoteIds.add(signup.id);
+    this.apiService.updateSignupNotes(signup.id, this.noteText).subscribe({
+      next: (response) => {
+        this.savingNoteIds.delete(signup.id);
+        if (response.success) {
+          // Update local data
+          const updateList = (list: Signup[]) => 
+            list.map(s => s.id === signup.id ? { ...s, notes: this.noteText } : s);
+          this.pendingSignups = updateList(this.pendingSignups);
+          this.approvedSignups = updateList(this.approvedSignups);
+          this.applyFiltersForAll();
+          this.showMessage(this.translate.instant('dashboard.noteSaved'), true);
+        } else {
+          this.showMessage(response.message || this.translate.instant('dashboard.noteError'), false);
+        }
+        this.editingNoteId = null;
+        this.noteText = '';
+      },
+      error: (error) => {
+        this.savingNoteIds.delete(signup.id);
+        this.showMessage(error.error?.message || this.translate.instant('dashboard.noteError'), false);
+      }
+    });
+  }
+
+  isEditingNote(id: number): boolean {
+    return this.editingNoteId === id;
+  }
+
+  isSavingNote(id: number): boolean {
+    return this.savingNoteIds.has(id);
   }
 
   ngOnDestroy(): void {

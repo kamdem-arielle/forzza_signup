@@ -38,31 +38,33 @@
       class="tab" 
       [class.active]="activeTab === 'approved'" 
       (click)="setTab('approved')">
-      {{ 'dashboard.approved' | translate }} ({{ ((pending$ | async) || []).length }})
+      {{ 'dashboard.approved' | translate }} ({{ ((approved$ | async) || []).length }})
     </button>
   </div>
 
   <div class="tab-content" *ngIf="activeTab === 'pending'">
-    <div *ngIf="((pending$ | async) || []).length === 0" class="empty-state">
-      {{ 'dashboard.noPending' | translate }}
-    </div>
-    <div class="table-responsive" *ngIf="((pending$ | async) || []).length > 0">
-    <table class="data-table">
+    <ng-container *ngIf="pending$ | async as pendingList">
+      <div *ngIf="pendingList.length === 0" class="empty-state">
+        {{ 'dashboard.noPending' | translate }}
+      </div>
+      <div class="table-responsive" *ngIf="pendingList.length > 0">
+      <table class="data-table">
 
-      <thead>
-        <tr>
-          <!-- <th>{{ 'dashboard.table.id' | translate }}</th> -->
-          <th>{{ 'dashboard.table.username' | translate }}</th>
-          <th>{{ 'dashboard.table.phone' | translate }}</th>
-          <th>{{ 'dashboard.table.password' | translate }}</th>
-          <th>{{ 'dashboard.table.status' | translate }}</th>
-          <th>{{ 'dashboard.table.promoCode' | translate }}</th>
-          <th>{{ 'dashboard.table.createdAt' | translate }}</th>
-          <th>{{ 'dashboard.table.action' | translate }}</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let signup of (pending$ | async) || []" [class.new-row]="isPendingNew(signup.id)">
+        <thead>
+          <tr>
+            <!-- <th>{{ 'dashboard.table.id' | translate }}</th> -->
+            <th>{{ 'dashboard.table.username' | translate }}</th>
+            <th>{{ 'dashboard.table.phone' | translate }}</th>
+            <th>{{ 'dashboard.table.password' | translate }}</th>
+            <th>{{ 'dashboard.table.status' | translate }}</th>
+            <th>{{ 'dashboard.table.promoCode' | translate }}</th>
+            <th>{{ 'dashboard.table.createdAt' | translate }}</th>
+            <th>{{ 'dashboard.table.notes' | translate }}</th>
+            <th>{{ 'dashboard.table.action' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let signup of pendingList" [class.new-row]="isPendingNew(signup.id)">
           <!-- <td>{{ signup.id }}</td> -->
           <td>{{ signup.username }}</td>
           <td>{{ signup.phone }}</td>
@@ -77,6 +79,23 @@
           <td><span class="status pending">{{ ('status.' + (signup.status || '').toLowerCase()) | translate }}</span></td>
           <td>{{ signup.promo_code || '-' }}</td>
           <td>{{ signup.created_at | date:'short' }}</td>
+          <td class="notes-cell">
+            <div *ngIf="!isEditingNote(signup.id)" class="note-display" (click)="startEditingNote(signup)">
+              <span *ngIf="signup.notes">{{ signup.notes }}</span>
+              <span *ngIf="!signup.notes" class="add-note-hint">{{ 'dashboard.addNote' | translate }}</span>
+              <i class="fas fa-edit edit-icon"></i>
+            </div>
+            <div *ngIf="isEditingNote(signup.id)" class="note-edit">
+              <textarea [(ngModel)]="noteText" [placeholder]="'dashboard.notePlaceholder' | translate" rows="2"></textarea>
+              <div class="note-actions">
+                <button class="btn-save-note" (click)="saveNote(signup)" [disabled]="isSavingNote(signup.id)">
+                  <span *ngIf="isSavingNote(signup.id)" class="btn-spinner"></span>
+                  {{ isSavingNote(signup.id) ? '' : ('dashboard.save' | translate) }}
+                </button>
+                <button class="btn-cancel-note" (click)="cancelEditingNote()">{{ 'dashboard.cancel' | translate }}</button>
+              </div>
+            </div>
+          </td>
           <td>
             <button class="btn-approve" (click)="approveSignup(signup.id)" [disabled]="isApproving(signup.id)">
               <span *ngIf="isApproving(signup.id)" class="btn-spinner"></span>
@@ -87,28 +106,31 @@
       </tbody>
     </table>
     </div>
+  </ng-container>
   </div>
 
   <div class="tab-content" *ngIf="activeTab === 'approved'">
-    <div *ngIf="((pending$ | async) || []).length === 0" class="empty-state">
-      {{ 'dashboard.noApproved' | translate }}
-    </div>
-    <div class="table-responsive" *ngIf="((approved$ | async) || []).length > 0">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <!-- <th>{{ 'dashboard.table.id' | translate }}</th> -->
-          <th>{{ 'dashboard.table.username' | translate }}</th>
-          <th>{{ 'dashboard.table.phone' | translate }}</th>
-          <th>{{ 'dashboard.table.password' | translate }}</th>
-          <th>{{ 'dashboard.table.promoCode' | translate }}</th>
-          <th>{{ 'dashboard.table.status' | translate }}</th>
-          <th>{{ 'dashboard.table.createdAt' | translate }}</th>
-          <th>{{ 'dashboard.table.approvedAt' | translate }}</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let signup of (approved$ | async) || []" [class.new-row]="isApprovedNew(signup.id)">
+    <ng-container *ngIf="approved$ | async as approvedList">
+      <div *ngIf="approvedList.length === 0" class="empty-state">
+        {{ 'dashboard.noApproved' | translate }}
+      </div>
+      <div class="table-responsive" *ngIf="approvedList.length > 0">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <!-- <th>{{ 'dashboard.table.id' | translate }}</th> -->
+            <th>{{ 'dashboard.table.username' | translate }}</th>
+            <th>{{ 'dashboard.table.phone' | translate }}</th>
+            <th>{{ 'dashboard.table.password' | translate }}</th>
+            <th>{{ 'dashboard.table.promoCode' | translate }}</th>
+            <th>{{ 'dashboard.table.status' | translate }}</th>
+            <th>{{ 'dashboard.table.createdAt' | translate }}</th>
+            <th>{{ 'dashboard.table.approvedAt' | translate }}</th>
+            <th>{{ 'dashboard.table.notes' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let signup of approvedList" [class.new-row]="isApprovedNew(signup.id)">
           <!-- <td>{{ signup.id }}</td> -->
           <td>{{ signup.username }}</td>
           <td>{{ signup.phone }}</td>
@@ -124,9 +146,28 @@
           <td><span class="status approved">{{ ('status.' + (signup.status || '').toLowerCase()) | translate }}</span></td>
           <td>{{ signup.created_at | date:'short' }}</td>
           <td>{{ signup.approved_at | date:'short' }}</td>
+          <td class="notes-cell">
+            <div *ngIf="!isEditingNote(signup.id)" class="note-display" (click)="startEditingNote(signup)">
+              <span *ngIf="signup.notes">{{ signup.notes }}</span>
+              <span *ngIf="!signup.notes" class="add-note-hint">{{ 'dashboard.addNote' | translate }}</span>
+              <i class="fas fa-edit edit-icon"></i>
+            </div>
+            <div *ngIf="isEditingNote(signup.id)" class="note-edit">
+              <textarea [(ngModel)]="noteText" [placeholder]="'dashboard.notePlaceholder' | translate" rows="2"></textarea>
+              <div class="note-actions">
+                <button class="btn-save-note" (click)="saveNote(signup)" [disabled]="isSavingNote(signup.id)">
+                  <span *ngIf="isSavingNote(signup.id)" class="btn-spinner"></span>
+                  {{ isSavingNote(signup.id) ? '' : ('dashboard.save' | translate) }}
+                </button>
+                <button class="btn-cancel-note" (click)="cancelEditingNote()">{{ 'dashboard.cancel' | translate }}</button>
+              </div>
+            </div>
+          </td>
         </tr>
       </tbody>
     </table>
     </div>
+    </ng-container>
   </div>
 </div>
+

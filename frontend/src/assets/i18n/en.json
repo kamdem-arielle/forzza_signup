@@ -70,6 +70,7 @@
       "phone": "Phone",
       "password": "Password",
       "promoCode": "Promo Code",
+      "notes": "Notes",
       "status": "Status",
       "createdAt": "Created At",
       "approvedAt": "Approved At",
@@ -79,7 +80,13 @@
     "approveSuccess": "Signup approved successfully!",
     "approveError": "Failed to approve signup",
     "loadError": "Failed to load signups",
-    "newSignup": "New signup received!"
+    "newSignup": "New signup received!",
+    "addNote": "Add note",
+    "notePlaceholder": "Enter note...",
+    "noteSaved": "Note saved successfully!",
+    "noteError": "Failed to save note",
+    "save": "Save",
+    "cancel": "Cancel"
   },
   "status": {
     "pending": "PENDING",

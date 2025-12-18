@@ -70,6 +70,7 @@
       "phone": "Téléphone",
       "password": "Mot de passe",
       "promoCode": "Code Promo",
+      "notes": "Notes",
       "status": "Statut",
       "createdAt": "Date de création",
       "approvedAt": "Date d'approbation",
@@ -79,7 +80,13 @@
     "approveSuccess": "Inscription approuvée avec succès !",
     "approveError": "Échec de l'approbation",
     "loadError": "Échec du chargement des inscriptions",
-    "newSignup": "Nouvelle inscription reçue !"
+    "newSignup": "Nouvelle inscription reçue !",
+    "addNote": "Ajouter une note",
+    "notePlaceholder": "Entrer une note...",
+    "noteSaved": "Note enregistrée avec succès !",
+    "noteError": "Échec de l'enregistrement de la note",
+    "save": "Enregistrer",
+    "cancel": "Annuler"
   },
   "status": {
     "pending": "EN ATTENTE",

@@ -368,3 +368,94 @@ h2 {
 .toggle-password-btn i {
   font-size: 14px;
 }
+
+/* Notes column styles */
+.notes-cell {
+  min-width: 150px;
+  max-width: 200px;
+}
+
+.note-display {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.note-display:hover {
+  background: #f0f0f0;
+}
+
+.note-display span {
+  flex: 1;
+  white-space: normal;
+  word-break: break-word;
+  font-size: 13px;
+}
+
+.add-note-hint {
+  color: #999;
+  font-style: italic;
+}
+
+.edit-icon {
+  color: #004E92;
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.note-display:hover .edit-icon {
+  opacity: 1;
+}
+
+.note-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.note-edit textarea {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 13px;
+  resize: vertical;
+  min-height: 50px;
+}
+
+.note-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.btn-save-note,
+.btn-cancel-note {
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-save-note {
+  background: #004E92;
+  color: #fff;
+}
+
+.btn-save-note:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.btn-cancel-note {
+  background: #f0f0f0;
+  color: #333;
+}
