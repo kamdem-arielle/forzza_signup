@@ -1,5 +1,5 @@
 {
-  "name": "intro-to-backend",
+  "name": "backend",
   "version": "1.0.0",
   "description": "Express.js Node.js API project",
   "main": "server.js",

@@ -5,7 +5,7 @@ A Node.js API built with Express.js framework.
 ## Project Structure
 
 ```
-intro-to-backend/
+backend/
 ├── controllers/        # Request handlers
 ├── routes/            # API routes
 ├── .env              # Environment variables
