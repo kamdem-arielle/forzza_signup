@@ -54,7 +54,7 @@ class Signup {
   static async getByStatus(status) {
     try {
       const [rows] = await pool.query(
-        'SELECT id, username, phone, promo_code, password, status, created_at, approved_at FROM signups WHERE status = ? ORDER BY created_at DESC',
+        'SELECT id, username, phone, promo_code, password, status, notes, created_at, approved_at FROM signups WHERE status = ? ORDER BY created_at DESC',
         [status]
       );
       return rows;
@@ -70,7 +70,7 @@ class Signup {
   static async getAll() {
     try {
       const [rows] = await pool.query(
-        'SELECT id, username, phone, promo_code, password, status, created_at, approved_at FROM signups ORDER BY created_at DESC'
+        'SELECT id, username, phone, promo_code, password, status, notes, created_at, approved_at FROM signups ORDER BY created_at DESC'
       );
       return rows;
     } catch (error) {
@@ -86,10 +86,28 @@ class Signup {
   static async findById(id) {
     try {
       const [rows] = await pool.query(
-        'SELECT id, username, phone, promo_code, password, status, created_at, approved_at FROM signups WHERE id = ?',
+        'SELECT id, username, phone, promo_code, password, status, notes, created_at, approved_at FROM signups WHERE id = ?',
         [id]
       );
       return rows[0] || null;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Update signup notes
+   * @param {number} id - Signup ID
+   * @param {string} notes - Notes text
+   * @returns {Promise} Result of the update operation
+   */
+  static async updateNotes(id, notes) {
+    try {
+      const [result] = await pool.query(
+        'UPDATE signups SET notes = ? WHERE id = ?',
+        [notes, id]
+      );
+      return result;
     } catch (error) {
       throw error;
     }

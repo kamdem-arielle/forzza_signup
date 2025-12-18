@@ -190,3 +190,43 @@ exports.getSignupById = async (req, res) => {
     });
   }
 };
+
+/**
+ * Update signup notes
+ * Updates the notes field for a signup
+ */
+exports.updateNotes = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { notes } = req.body;
+
+    // Check if signup exists
+    const signup = await Signup.findById(id);
+    if (!signup) {
+      return res.status(404).json({
+        success: false,
+        message: 'Signup not found'
+      });
+    }
+
+    // Update notes
+    await Signup.updateNotes(id, notes || '');
+
+    // Fetch updated record
+    const updatedSignup = await Signup.findById(id);
+
+    res.json({
+      success: true,
+      message: 'Notes updated successfully',
+      data: updatedSignup
+    });
+
+  } catch (error) {
+    console.error('Update notes error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error updating notes',
+      error: error.message
+    });
+  }
+};
