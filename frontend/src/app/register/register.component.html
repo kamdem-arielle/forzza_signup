@@ -1,0 +1,70 @@
+<div class="cont">
+    <div class="register-container">
+  <h2>{{ 'register.title' | translate }}</h2>
+  <p class="subtitle">{{ 'register.subtitle' | translate }}</p>
+
+  <div *ngIf="message" class="message" [class.success]="isSuccess" [class.error]="!isSuccess">
+    {{ message }}
+  </div>
+
+  <div *ngIf="isPolling" class="polling-status">
+    <div class="spinner"></div>
+    <p>{{ pollingMessage }}</p>
+  </div>
+
+  <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" *ngIf="!isPolling">
+    <div class="form-group">
+      <label for="username">{{ 'register.username' | translate }}</label>
+      <input type="text" id="username" formControlName="username" [placeholder]="('register.usernamePlaceholder' | translate)">
+      <span class="validation-error" *ngIf="registerForm.get('username')?.touched && registerForm.get('username')?.hasError('required')">
+        {{ 'register.usernameRequired' | translate }}
+      </span>
+    </div>
+
+    <div class="form-group">
+      <label for="phone">{{ 'register.phone' | translate }}</label>
+      <input type="tel" id="phone" formControlName="phone" [placeholder]="('register.phonePlaceholder' | translate)">
+      <span class="validation-error" *ngIf="registerForm.get('phone')?.touched && registerForm.get('phone')?.hasError('required')">
+        {{ 'register.phoneRequired' | translate }}
+      </span>
+    </div>
+
+    <div class="form-group">
+      <label for="password">{{ 'register.password' | translate }}</label>
+      <div class="password-input-wrapper">
+        <input [type]="showPassword ? 'text' : 'password'" id="password" formControlName="password" [placeholder]="('register.passwordPlaceholder' | translate)">
+        <button type="button" class="toggle-password" (click)="togglePasswordVisibility()" tabindex="-1">
+          <i [class]="showPassword ? 'fas fa-eye' : 'fas fa-eye-slash'"></i>
+        </button>
+      </div>
+      <span class="validation-error" *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.hasError('required')">
+        {{ 'register.passwordRequired' | translate }}
+      </span>
+      <span class="validation-error" *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.hasError('minlength')">
+        {{ 'register.passwordMinLength' | translate }}
+      </span>
+    </div>
+
+    <div class="form-group">
+      <label for="confirmPassword">{{ 'register.confirmPassword' | translate }}</label>
+      <div class="password-input-wrapper">
+        <input [type]="showConfirmPassword ? 'text' : 'password'" id="confirmPassword" formControlName="confirmPassword" [placeholder]="('register.confirmPasswordPlaceholder' | translate)">
+        <button type="button" class="toggle-password" (click)="toggleConfirmPasswordVisibility()" tabindex="-1">
+          <i [class]="showConfirmPassword ? 'fas fa-eye' : 'fas fa-eye-slash'"></i>
+        </button>
+      </div>
+      <span class="validation-error" *ngIf="registerForm.get('confirmPassword')?.touched && registerForm.get('confirmPassword')?.hasError('required')">
+        {{ 'register.confirmPasswordRequired' | translate }}
+      </span>
+      <span class="validation-error" *ngIf="registerForm.errors?.['passwordMismatch'] && registerForm.get('confirmPassword')?.touched">
+        {{ 'register.passwordMismatch' | translate }}
+      </span>
+    </div>
+
+    <button type="submit" [disabled]="isLoading" class="btn-primary">
+      <span *ngIf="isLoading" class="btn-spinner"></span>
+      {{ (isLoading ? ('register.submitting' | translate) : ('register.submitButton' | translate)) }}
+    </button>
+  </form>
+</div>
+</div>

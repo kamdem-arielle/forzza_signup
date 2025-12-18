@@ -1,0 +1,22 @@
+/* Global Styles - Forzza Brand */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+}
+
+
+/* Brand Colors Reference:
+   Primary Blue: #004E92
+   Secondary Blue: #00B4DB
+   Dark: #1A1A1A
+   Accent Gold: #FFD700
+*/

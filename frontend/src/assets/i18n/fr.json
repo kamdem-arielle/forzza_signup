@@ -1,0 +1,78 @@
+{
+  "app": {
+    "title": "Forzza"
+  },
+  "nav": {
+    "register": "S'inscrire",
+    "admin": "Admin",
+    "logout": "Déconnexion"
+  },
+  "language": {
+    "en": "English",
+    "fr": "Français"
+  },
+  "register": {
+    "title": "Créer un compte",
+    "subtitle": "Inscrivez-vous pour commencer",
+    "username": "Nom d'utilisateur",
+    "usernamePlaceholder": "Entrez le nom d'utilisateur",
+    "usernameRequired": "Le nom d'utilisateur est requis",
+    "phone": "Téléphone",
+    "phonePlaceholder": "Entrez le numéro de téléphone",
+    "phoneRequired": "Le téléphone est requis",
+    "password": "Mot de passe",
+    "passwordPlaceholder": "Entrez le mot de passe",
+    "passwordRequired": "Le mot de passe est requis",
+    "passwordMinLength": "Le mot de passe doit contenir au moins 6 caractères",
+    "confirmPassword": "Confirmer le mot de passe",
+    "confirmPasswordPlaceholder": "Confirmez votre mot de passe",
+    "confirmPasswordRequired": "Veuillez confirmer votre mot de passe",
+    "passwordMismatch": "Les mots de passe ne correspondent pas",
+    "submitButton": "S'inscrire",
+    "submitting": "Inscription en cours...",
+    "successMessage": "Inscription réussie ! Votre demande est en attente d'approbation.",
+    "errorMessage": "L'inscription a échoué. Veuillez réessayer.",
+    "waitingApproval": "En attente d'approbation... Vous serez redirigé automatiquement une fois approuvé.",
+    "approved": "Approuvé ! Redirection vers Forzza..."
+  },
+  "adminLogin": {
+    "title": "Connexion Admin",
+    "subtitle": "Connectez-vous pour accéder au tableau de bord",
+    "username": "Nom d'utilisateur",
+    "usernamePlaceholder": "Entrez le nom d'utilisateur",
+    "usernameRequired": "Le nom d'utilisateur est requis",
+    "password": "Mot de passe",
+    "passwordPlaceholder": "Entrez le mot de passe",
+    "passwordRequired": "Le mot de passe est requis",
+    "submitButton": "Se connecter",
+    "submitting": "Connexion en cours...",
+    "invalidCredentials": "Nom d'utilisateur ou mot de passe invalide"
+  },
+  "dashboard": {
+    "title": "Tableau de bord Admin",
+    "pending": "En attente",
+    "approved": "Approuvé",
+    "noPending": "Aucune inscription en attente",
+    "noApproved": "Aucune inscription approuvée",
+    "table": {
+      "id": "ID",
+      "username": "Nom d'utilisateur",
+      "phone": "Téléphone",
+      "password": "Mot de passe",
+      "promoCode": "Code Promo",
+      "status": "Statut",
+      "createdAt": "Date de création",
+      "approvedAt": "Date d'approbation",
+      "action": "Action"
+    },
+    "approveButton": "Approuver",
+    "approveSuccess": "Inscription approuvée avec succès !",
+    "approveError": "Échec de l'approbation",
+    "loadError": "Échec du chargement des inscriptions",
+    "newSignup": "Nouvelle inscription reçue !"
+  },
+  "status": {
+    "pending": "EN ATTENTE",
+    "approved": "APPROUVÉ"
+  }
+}

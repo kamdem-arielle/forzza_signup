@@ -1,0 +1,34 @@
+
+<div class="cont">
+<div class="login-container">
+  <h2>{{ 'adminLogin.title' | translate }}</h2>
+  <p class="subtitle">{{ 'adminLogin.subtitle' | translate }}</p>
+
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label for="username">{{ 'adminLogin.username' | translate }}</label>
+      <input type="text" id="username" formControlName="username" [placeholder]="('adminLogin.usernamePlaceholder' | translate)">
+      <span class="validation-error" *ngIf="loginForm.get('username')?.touched && loginForm.get('username')?.hasError('required')">
+        {{ 'adminLogin.usernameRequired' | translate }}
+      </span>
+    </div>
+
+    <div class="form-group">
+      <label for="password">{{ 'adminLogin.password' | translate }}</label>
+      <input type="password" id="password" formControlName="password" [placeholder]="('adminLogin.passwordPlaceholder' | translate)">
+      <span class="validation-error" *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.hasError('required')">
+        {{ 'adminLogin.passwordRequired' | translate }}
+      </span>
+    </div>
+
+    <button type="submit" [disabled]="isLoading" class="btn-primary">
+      {{ (isLoading ? ('adminLogin.submitting' | translate) : ('adminLogin.submitButton' | translate)) }}
+    </button>
+  </form>
+</div>
+</div>
+

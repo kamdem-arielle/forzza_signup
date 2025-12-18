@@ -1,0 +1,113 @@
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h2>{{ 'dashboard.title' | translate }}</h2>
+    <button class="btn-logout" (click)="logout()">{{ 'nav.logout' | translate }}</button>
+  </div>
+
+  <div *ngIf="message" class="message" [class.success]="isSuccess" [class.error]="!isSuccess">
+    {{ message }}
+  </div>
+
+  <div class="tabs">
+    <button 
+      class="tab" 
+      [class.active]="activeTab === 'pending'" 
+      (click)="setTab('pending')">
+      {{ 'dashboard.pending' | translate }} ({{ pendingSignups.length }})
+    </button>
+    <button 
+      class="tab" 
+      [class.active]="activeTab === 'approved'" 
+      (click)="setTab('approved')">
+      {{ 'dashboard.approved' | translate }} ({{ approvedSignups.length }})
+    </button>
+  </div>
+
+  <div class="tab-content" *ngIf="activeTab === 'pending'">
+    <div *ngIf="pendingSignups.length === 0" class="empty-state">
+      {{ 'dashboard.noPending' | translate }}
+    </div>
+    <div class="table-responsive" *ngIf="((pending$ | async) || []).length > 0">
+    <table class="data-table">
+
+      <thead>
+        <tr>
+          <!-- <th>{{ 'dashboard.table.id' | translate }}</th> -->
+          <th>{{ 'dashboard.table.username' | translate }}</th>
+          <th>{{ 'dashboard.table.phone' | translate }}</th>
+          <th>{{ 'dashboard.table.password' | translate }}</th>
+          <th>{{ 'dashboard.table.status' | translate }}</th>
+          <th>{{ 'dashboard.table.promoCode' | translate }}</th>
+          <th>{{ 'dashboard.table.createdAt' | translate }}</th>
+          <th>{{ 'dashboard.table.action' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let signup of (pending$ | async) || []" [class.new-row]="isPendingNew(signup.id)">
+          <!-- <td>{{ signup.id }}</td> -->
+          <td>{{ signup.username }}</td>
+          <td>{{ signup.phone }}</td>
+          <td>
+            <div class="password-cell">
+              <span>{{ getPasswordDisplay(signup.password, signup.id) }}</span>
+              <button type="button" class="toggle-password-btn" (click)="togglePasswordVisibility(signup.id)">
+                <i [class]="isPasswordVisible(signup.id) ? 'fas fa-eye' : 'fas fa-eye-slash'"></i>
+              </button>
+            </div>
+          </td>
+          <td><span class="status pending">{{ ('status.' + (signup.status || '').toLowerCase()) | translate }}</span></td>
+          <td>{{ signup.promo_code || '-' }}</td>
+          <td>{{ signup.created_at | date:'short' }}</td>
+          <td>
+            <button class="btn-approve" (click)="approveSignup(signup.id)" [disabled]="isApproving(signup.id)">
+              <span *ngIf="isApproving(signup.id)" class="btn-spinner"></span>
+              {{ isApproving(signup.id) ? 'Approving...' : ('dashboard.approveButton' | translate) }}
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <div class="tab-content" *ngIf="activeTab === 'approved'">
+    <div *ngIf="approvedSignups.length === 0" class="empty-state">
+      {{ 'dashboard.noApproved' | translate }}
+    </div>
+    <div class="table-responsive" *ngIf="((approved$ | async) || []).length > 0">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <!-- <th>{{ 'dashboard.table.id' | translate }}</th> -->
+          <th>{{ 'dashboard.table.username' | translate }}</th>
+          <th>{{ 'dashboard.table.phone' | translate }}</th>
+          <th>{{ 'dashboard.table.password' | translate }}</th>
+          <th>{{ 'dashboard.table.promoCode' | translate }}</th>
+          <th>{{ 'dashboard.table.status' | translate }}</th>
+          <th>{{ 'dashboard.table.createdAt' | translate }}</th>
+          <th>{{ 'dashboard.table.approvedAt' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let signup of (approved$ | async) || []" [class.new-row]="isApprovedNew(signup.id)">
+          <!-- <td>{{ signup.id }}</td> -->
+          <td>{{ signup.username }}</td>
+          <td>{{ signup.phone }}</td>
+          <td>
+            <div class="password-cell">
+              <span>{{ getPasswordDisplay(signup.password, signup.id) }}</span>
+              <button type="button" class="toggle-password-btn" (click)="togglePasswordVisibility(signup.id)">
+                <i [class]="isPasswordVisible(signup.id) ? 'fas fa-eye' : 'fas fa-eye-slash'"></i>
+              </button>
+            </div>
+          </td>
+          <td>{{ signup.promo_code || '-' }}</td>
+          <td><span class="status approved">{{ ('status.' + (signup.status || '').toLowerCase()) | translate }}</span></td>
+          <td>{{ signup.created_at | date:'short' }}</td>
+          <td>{{ signup.approved_at | date:'short' }}</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>

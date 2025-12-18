@@ -1,0 +1,50 @@
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
+
+export interface Signup {
+  id: number;
+  username: string;
+  phone: string;
+  password?: string;
+  promo_code?: string;
+  status: 'PENDING' | 'APPROVED';
+  created_at?: string;
+  approved_at?: string;
+}
+
+export interface ApiResponse<T = any> {
+  success: boolean;
+  message?: string;
+  data?: T;
+}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class ApiService {
+  private baseUrl = environment.API_BASE_URL;
+
+  constructor(private http: HttpClient) {}
+
+  createSignup(payload: { username: string; phone: string; password: string; promo_code?: string }): Observable<ApiResponse> {
+    return this.http.post<ApiResponse>(`${this.baseUrl}/api/signups`, payload);
+  }
+
+  adminLogin(payload: { username: string; password: string }): Observable<ApiResponse> {
+    return this.http.post<ApiResponse>(`${this.baseUrl}/api/admin/login`, payload);
+  }
+
+  getSignupsByStatus(status: 'PENDING' | 'APPROVED'): Observable<ApiResponse<Signup[]>> {
+    return this.http.get<ApiResponse<Signup[]>>(`${this.baseUrl}/api/signups/status/${status}`);
+  }
+
+  getSignupById(id: number): Observable<ApiResponse<Signup>> {
+    return this.http.get<ApiResponse<Signup>>(`${this.baseUrl}/api/signups/${id}`);
+  }
+
+  approveSignup(id: number): Observable<ApiResponse> {
+    return this.http.put<ApiResponse>(`${this.baseUrl}/api/signups/${id}/status`, { status: 'APPROVED' });
+  }
+}

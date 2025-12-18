@@ -1,0 +1,78 @@
+{
+  "app": {
+    "title": "Forzza"
+  },
+  "nav": {
+    "register": "Register",
+    "admin": "Admin",
+    "logout": "Logout"
+  },
+  "language": {
+    "en": "English",
+    "fr": "Français"
+  },
+  "register": {
+    "title": "Create Account",
+    "subtitle": "Sign up to get started",
+    "username": "Username",
+    "usernamePlaceholder": "Enter username",
+    "usernameRequired": "Username is required",
+    "phone": "Phone",
+    "phonePlaceholder": "Enter phone number",
+    "phoneRequired": "Phone is required",
+    "password": "Password",
+    "passwordPlaceholder": "Enter password",
+    "passwordRequired": "Password is required",
+    "passwordMinLength": "Password must be at least 6 characters",
+    "confirmPassword": "Confirm Password",
+    "confirmPasswordPlaceholder": "Confirm your password",
+    "confirmPasswordRequired": "Please confirm your password",
+    "passwordMismatch": "Passwords do not match",
+    "submitButton": "Register",
+    "submitting": "Registering...",
+    "successMessage": "Registration successful! Your signup is pending approval.",
+    "errorMessage": "Registration failed. Please try again.",
+    "waitingApproval": "Waiting for approval... You will be redirected automatically once approved.",
+    "approved": "Approved! Redirecting to Forzza..."
+  },
+  "adminLogin": {
+    "title": "Admin Login",
+    "subtitle": "Sign in to access the dashboard",
+    "username": "Username",
+    "usernamePlaceholder": "Enter username",
+    "usernameRequired": "Username is required",
+    "password": "Password",
+    "passwordPlaceholder": "Enter password",
+    "passwordRequired": "Password is required",
+    "submitButton": "Sign In",
+    "submitting": "Signing in...",
+    "invalidCredentials": "Invalid username or password"
+  },
+  "dashboard": {
+    "title": "Admin Dashboard",
+    "pending": "Pending",
+    "approved": "Approved",
+    "noPending": "No pending signups",
+    "noApproved": "No approved signups",
+    "table": {
+      "id": "ID",
+      "username": "Username",
+      "phone": "Phone",
+      "password": "Password",
+      "promoCode": "Promo Code",
+      "status": "Status",
+      "createdAt": "Created At",
+      "approvedAt": "Approved At",
+      "action": "Action"
+    },
+    "approveButton": "Approve",
+    "approveSuccess": "Signup approved successfully!",
+    "approveError": "Failed to approve signup",
+    "loadError": "Failed to load signups",
+    "newSignup": "New signup received!"
+  },
+  "status": {
+    "pending": "PENDING",
+    "approved": "APPROVED"
+  }
+}
