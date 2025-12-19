@@ -32,6 +32,7 @@
     "submitting": "Registering...",
     "successMessage": "Registration successful! Your signup is pending approval.",
     "errorMessage": "Registration failed. Please try again.",
+    "phoneAlreadyRegistered": "This phone number is already registered.",
     "waitingApproval": "Waiting for approval... You will be redirected automatically once approved.",
     "approved": "Approved! Redirecting to Forzza..."
   },

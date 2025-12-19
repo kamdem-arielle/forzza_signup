@@ -122,7 +122,12 @@ export class RegisterComponent implements OnInit, OnDestroy {
       error: (error) => {
         this.isLoading = false;
         this.isSuccess = false;
-        this.message = error.error?.message || this.translate.instant('register.errorMessage');
+        // Check if error is due to phone already registered (409 Conflict)
+        if (error.status === 409) {
+          this.message = this.translate.instant('register.phoneAlreadyRegistered');
+        } else {
+          this.message = this.translate.instant('register.errorMessage');
+        }
       }
     });
   }

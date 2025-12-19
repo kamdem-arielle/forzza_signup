@@ -32,6 +32,7 @@
     "submitting": "Inscription en cours...",
     "successMessage": "Inscription réussie ! Votre demande est en attente d'approbation.",
     "errorMessage": "L'inscription a échoué. Veuillez réessayer.",
+    "phoneAlreadyRegistered": "Ce numéro de téléphone est déjà enregistré.",
     "waitingApproval": "En attente d'approbation... Vous serez redirigé automatiquement une fois approuvé.",
     "approved": "Approuvé ! Redirection vers Forzza..."
   },
