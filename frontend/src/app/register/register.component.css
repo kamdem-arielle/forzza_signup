@@ -62,6 +62,14 @@ input:focus {
   margin-top: 4px;
 }
 
+.password-hint {
+  display: block;
+  color: #666;
+  font-size: 11px;
+  margin-top: 4px;
+  font-style: italic;
+}
+
 .btn-primary {
 width: 100%;
 padding: 12px;

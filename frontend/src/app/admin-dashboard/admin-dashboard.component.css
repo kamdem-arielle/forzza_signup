@@ -170,9 +170,9 @@ h2 {
 
 /* Mobile phones */
 @media (max-width: 600px) {
-  .dashboard-container {
+  /* .dashboard-container {
     padding: 0 10px;
-  }
+  } */
   
   .data-table {
     min-width: 100%; /* Full width, scroll if needed */

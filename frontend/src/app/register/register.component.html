@@ -44,16 +44,17 @@
     <div class="form-group">
       <label for="password">{{ 'register.password' | translate }}</label>
       <div class="password-input-wrapper">
-        <input [type]="showPassword ? 'text' : 'password'" id="password" formControlName="password" [placeholder]="('register.passwordPlaceholder' | translate)">
+        <input [type]="showPassword ? 'text' : 'password'" id="password" formControlName="password" [placeholder]="('register.passwordPlaceholder' | translate)" (focus)="passwordFocused = true" (blur)="passwordFocused = false">
         <button type="button" class="toggle-password" (click)="togglePasswordVisibility()" tabindex="-1">
           <i [class]="showPassword ? 'fas fa-eye' : 'fas fa-eye-slash'"></i>
         </button>
       </div>
+      <span class="password-hint" *ngIf="passwordFocused && !registerForm.get('password')?.hasError('strongPassword')">{{ 'register.passwordHint' | translate }}</span>
       <span class="validation-error" *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.hasError('required')">
         {{ 'register.passwordRequired' | translate }}
       </span>
-      <span class="validation-error" *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.hasError('minlength')">
-        {{ 'register.passwordMinLength' | translate }}
+      <span class="validation-error" *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.hasError('strongPassword')">
+        {{ 'register.passwordWeak' | translate }}
       </span>
     </div>
 

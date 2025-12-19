@@ -20,7 +20,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
 
   showPassword: boolean = false;
   showConfirmPassword: boolean = false;
-  
+  passwordFocused: boolean = false;
 
   isPolling: boolean = false;
   pollingMessage: string = '';
@@ -37,7 +37,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
       firstName: ['', [Validators.required]],
       lastName: ['', [Validators.required]],
       phone: ['', [Validators.required]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      password: ['', [Validators.required, this.strongPasswordValidator()]],
       confirmPassword: ['', [Validators.required]]
     }, { validators: this.passwordMatchValidator() });
   }
@@ -79,6 +79,34 @@ export class RegisterComponent implements OnInit, OnDestroy {
       }
       
       return password.value === confirmPassword.value ? null : { passwordMismatch: true };
+    };
+  }
+
+  strongPasswordValidator() {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value;
+      if (!value) {
+        return null;
+      }
+
+      const hasMinLength = value.length >= 6;
+      const hasUpperCase = /[A-Z]/.test(value);
+      const hasLowerCase = /[a-z]/.test(value);
+      const hasDigit = /[0-9]/.test(value);
+
+      const passwordValid = hasMinLength && hasUpperCase && hasLowerCase && hasDigit;
+
+      if (!passwordValid) {
+        return {
+          strongPassword: {
+            hasMinLength,
+            hasUpperCase,
+            hasLowerCase,
+            hasDigit
+          }
+        };
+      }
+      return null;
     };
   }
 
