@@ -8,17 +8,19 @@ class Signup {
   
   /**
    * Create a new signup (user registration)
-   * @param {string} username - User's username
+   * @param {string} username - User's generated username
+   * @param {string} firstName - User's first name
+   * @param {string} lastName - User's last name
    * @param {string} phone - User's phone number
    * @param {string} password - User's password
    * @param {string|null} promoCode - Optional promo code
    * @returns {Promise} Result of the insert operation
    */
-  static async create(username, phone, password, promoCode = null) {
+  static async create(username, firstName, lastName, phone, password, promoCode = null) {
     try {
       const [result] = await pool.query(
-        'INSERT INTO signups (username, phone, password, promo_code, status, created_at) VALUES (?, ?, ?, ?, "PENDING", NOW())',
-        [username, phone, password, promoCode || null]
+        'INSERT INTO signups (username, first_name, last_name, phone, password, promo_code, status, created_at) VALUES (?, ?, ?, ?, ?, ?, "PENDING", NOW())',
+        [username, firstName, lastName, phone, password, promoCode || null]
       );
       return result;
     } catch (error) {
@@ -54,7 +56,7 @@ class Signup {
   static async getByStatus(status) {
     try {
       const [rows] = await pool.query(
-        'SELECT id, username, phone, promo_code, password, status, notes, created_at, approved_at FROM signups WHERE status = ? ORDER BY created_at DESC',
+        'SELECT id, username, first_name, last_name, phone, promo_code, password, status, notes, created_at, approved_at FROM signups WHERE status = ? ORDER BY created_at DESC',
         [status]
       );
       return rows;
@@ -70,7 +72,7 @@ class Signup {
   static async getAll() {
     try {
       const [rows] = await pool.query(
-        'SELECT id, username, phone, promo_code, password, status, notes, created_at, approved_at FROM signups ORDER BY created_at DESC'
+        'SELECT id, username, first_name, last_name, phone, promo_code, password, status, notes, created_at, approved_at FROM signups ORDER BY created_at DESC'
       );
       return rows;
     } catch (error) {
@@ -86,7 +88,7 @@ class Signup {
   static async findById(id) {
     try {
       const [rows] = await pool.query(
-        'SELECT id, username, phone, promo_code, password, status, notes, created_at, approved_at FROM signups WHERE id = ?',
+        'SELECT id, username, first_name, last_name, phone, promo_code, password, status, notes, created_at, approved_at FROM signups WHERE id = ?',
         [id]
       );
       return rows[0] || null;
@@ -123,6 +125,23 @@ class Signup {
       const [rows] = await pool.query(
         'SELECT id, username, phone, promo_code, status, created_at FROM signups WHERE phone = ?',
         [phone]
+      );
+      return rows[0] || null;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Find signup by username
+   * @param {string} username - Username to search for
+   * @returns {Promise} Signup record or null
+   */
+  static async findByUsername(username) {
+    try {
+      const [rows] = await pool.query(
+        'SELECT id, username FROM signups WHERE username = ?',
+        [username]
       );
       return rows[0] || null;
     } catch (error) {

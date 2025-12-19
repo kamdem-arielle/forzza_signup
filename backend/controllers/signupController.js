@@ -11,14 +11,14 @@ const Signup = require('../models/Signup');
  */
 exports.createSignup = async (req, res) => {
   try {
-    const { username, phone, password, promo_code, promoCode } = req.body;
+    const { firstName, lastName, phone, password, promo_code, promoCode } = req.body;
     const promoCodeValue = promo_code ?? promoCode ?? null;
 
     // Validate input
-    if (!username || !phone || !password) {
+    if (!firstName || !lastName || !phone || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Username, phone, and password are required'
+        message: 'First name, last name, phone, and password are required'
       });
     }
 
@@ -31,16 +31,38 @@ exports.createSignup = async (req, res) => {
       });
     }
 
-    // Create new signup with PENDING status
+    // Generate unique username: first initial + lastname + last 4 digits of phone
+    const firstInitial = firstName.charAt(0).toUpperCase();
+    const lastNameClean = lastName.replace(/\s+/g, '').toLowerCase();
+    const phoneLast4 = phone.slice(-4);
+    let baseUsername = `${firstInitial}${lastNameClean}${phoneLast4}`;
+    let generatedUsername = baseUsername;
+
+    // Check for username uniqueness and add random digit if needed
+    let isUnique = false;
+    while (!isUnique) {
+      const existingUser = await Signup.findByUsername(generatedUsername);
+      if (!existingUser) {
+        isUnique = true;
+      } else {
+        // Add random digit (0-9) to the username
+        const randomDigit = Math.floor(Math.random() * 10);
+        generatedUsername = `${baseUsername}${randomDigit}`;
+        // Update baseUsername to include the digit for next iteration if needed
+        baseUsername = generatedUsername;
+      }
+    }
+
+    // Create new signup with PENDING status and generated username
     // NOTE: In production, hash the password using bcrypt
-    const result = await Signup.create(username, phone, password, promoCodeValue);
+    const result = await Signup.create(generatedUsername, firstName, lastName, phone, password, promoCodeValue);
 
     res.status(201).json({
       success: true,
       message: 'Signup created successfully with pending status',
       data: {
         id: result.insertId,
-        username: username,
+        username: generatedUsername,
         phone: phone,
         promo_code: promoCodeValue,
         status: 'PENDING'
