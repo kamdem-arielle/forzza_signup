@@ -12,8 +12,10 @@ import { BehaviorSubject, Subject, interval, takeUntil, startWith } from 'rxjs';
 export class AdminDashboardComponent implements OnInit, OnDestroy {
   pendingSignups: Signup[] = [];
   approvedSignups: Signup[] = [];
+  archivedSignups: Signup[] = [];
   pending$ = new BehaviorSubject<Signup[]>([]);
   approved$ = new BehaviorSubject<Signup[]>([]);
+  archived$ = new BehaviorSubject<Signup[]>([]);
   nameFilter = '';
   phoneFilter = '';
   promoFilter = '';
@@ -21,7 +23,9 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   private firstPendingLoad = true;
   private newPendingIds = new Set<number>();
   private newApprovedIds = new Set<number>();
+  private newArchivedIds = new Set<number>();
   approvingIds = new Set<number>(); 
+  archivingIds = new Set<number>();
   visiblePasswordIds = new Set<number>();
   editingNoteId: number | null = null;
   noteText: string = '';
@@ -29,7 +33,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   message: string = '';
   isSuccess: boolean = false;
   isLoading: boolean = false;
-  activeTab: 'pending' | 'approved' = 'pending';
+  activeTab: 'pending' | 'approved' | 'archived' = 'pending';
 
   constructor(private apiService: ApiService, private router: Router, private translate: TranslateService) {}
 
@@ -57,7 +61,6 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
             const newItems = sorted.filter(s => !prevRaw.find(p => p.id === s.id));
             this.pendingSignups = sorted;
             this.applyFiltersForAll();
-            // Only show notification for new items on subsequent polls (not first load)
             if (!this.firstPendingLoad && newItems.length > 0) {
               this.showMessage(this.translate.instant('dashboard.newSignup'), true);
               newItems.forEach(n => this.markPendingAsNew(n.id));
@@ -79,6 +82,18 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
           },
           error: (error) => {
             this.isLoading = false;
+            this.showMessage(error.error?.message || this.translate.instant('dashboard.loadError'), false);
+          }
+        });
+
+        this.apiService.getSignupsByStatus('ARCHIVED').subscribe({
+          next: (response) => {
+            const data = (response.success && response.data) ? response.data : [];
+            const sorted = [...data].sort((a, b) => (new Date(b.created_at || '').getTime()) - (new Date(a.created_at || '').getTime()));
+            this.archivedSignups = sorted;
+            this.applyFiltersForAll();
+          },
+          error: (error) => {
             this.showMessage(error.error?.message || this.translate.instant('dashboard.loadError'), false);
           }
         });
@@ -143,7 +158,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     this.router.navigate(['/admin/login']);
   }
 
-  setTab(tab: 'pending' | 'approved'): void {
+  setTab(tab: 'pending' | 'approved' | 'archived'): void {
     this.activeTab = tab;
   }
 
@@ -163,6 +178,46 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     return this.newApprovedIds.has(id);
   }
 
+  isArchivedNew(id: number): boolean {
+    return this.newArchivedIds.has(id);
+  }
+
+  archiveSignup(id: number): void {
+    this.archivingIds.add(id);
+    
+    this.apiService.archiveSignup(id).subscribe({
+      next: (response) => {
+        this.archivingIds.delete(id);
+        
+        if (response.success) {
+          const prevApproved = this.approved$.value;
+          const moved = prevApproved.find(s => s.id === id);
+          const updatedApproved = prevApproved.filter(s => s.id !== id);
+          this.approvedSignups = updatedApproved;
+          this.approved$.next(updatedApproved);
+          if (moved) {
+            const updatedArchived = [{ ...moved, status: 'ARCHIVED' as 'ARCHIVED' }, ...this.archived$.value];
+            this.archivedSignups = updatedArchived;
+            this.archived$.next(updatedArchived);
+            this.markArchivedAsNew(moved.id);
+          }
+
+          this.showMessage(this.translate.instant('dashboard.archiveSuccess'), true);
+        } else {
+          this.showMessage(response.message || this.translate.instant('dashboard.archiveError'), false);
+        }
+      },
+      error: (error) => {
+        this.archivingIds.delete(id);
+        this.showMessage(error.error?.message || this.translate.instant('dashboard.archiveError'), false);
+      }
+    });
+  }
+
+  isArchiving(id: number): boolean {
+    return this.archivingIds.has(id);
+  }
+
   applyFilters(): void {
     this.applyFiltersForAll();
   }
@@ -177,6 +232,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   private applyFiltersForAll(): void {
     this.pending$.next(this.filterList(this.pendingSignups));
     this.approved$.next(this.filterList(this.approvedSignups));
+    this.archived$.next(this.filterList(this.archivedSignups));
   }
 
   private filterList(list: Signup[]): Signup[] {
@@ -204,6 +260,11 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     setTimeout(() => this.newApprovedIds.delete(id), 1000);
   }
 
+  private markArchivedAsNew(id: number): void {
+    this.newArchivedIds.add(id);
+    setTimeout(() => this.newArchivedIds.delete(id), 1000);
+  }
+
   startEditingNote(signup: Signup): void {
     this.editingNoteId = signup.id;
     this.noteText = signup.notes || '';
@@ -227,6 +288,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
             list.map(s => s.id === signup.id ? { ...s, notes: this.noteText } : s);
           this.pendingSignups = updateList(this.pendingSignups);
           this.approvedSignups = updateList(this.approvedSignups);
+          this.archivedSignups = updateList(this.archivedSignups);
           this.applyFiltersForAll();
           this.showMessage(this.translate.instant('dashboard.noteSaved'), true);
         } else {

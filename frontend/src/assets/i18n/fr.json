@@ -57,8 +57,10 @@
     "title": "Tableau de bord Admin",
     "pending": "En attente",
     "approved": "Approuvé",
+    "archived": "Archivé",
     "noPending": "Aucune inscription en attente",
     "noApproved": "Aucune inscription approuvée",
+    "noArchived": "Aucune inscription archivée",
     "filters": {
       "name": "Nom",
       "namePlaceholder": "Rechercher par nom",
@@ -82,8 +84,11 @@
       "action": "Action"
     },
     "approveButton": "Approuver",
+    "archiveButton": "Archiver",
     "approveSuccess": "Inscription approuvée avec succès !",
     "approveError": "Échec de l'approbation",
+    "archiveSuccess": "Inscription archivée avec succès !",
+    "archiveError": "Échec de l'archivage",
     "loadError": "Échec du chargement des inscriptions",
     "newSignup": "Nouvelle inscription reçue !",
     "addNote": "Ajouter une note",
@@ -95,6 +100,7 @@
   },
   "status": {
     "pending": "EN ATTENTE",
-    "approved": "APPROUVÉ"
+    "approved": "APPROUVÉ",
+    "archived": "ARCHIVÉ"
   }
 }

@@ -280,6 +280,11 @@ h2 {
   color: #155724;
 }
 
+.status.archived {
+  background: #e2e3e5;
+  color: #383d41;
+}
+
 .btn-approve {
   padding: 6px 14px;
   background: #004E92;
@@ -317,6 +322,30 @@ h2 {
 /* .btn-approve:hover {
   background: #e6c200;
 } */
+
+.btn-archive {
+  padding: 6px 14px;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-archive:hover {
+  background: #5a6268;
+}
+
+.btn-archive:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
 
 .message {
   padding: 12px;

@@ -57,8 +57,10 @@
     "title": "Admin Dashboard",
     "pending": "Pending",
     "approved": "Approved",
+    "archived": "Archived",
     "noPending": "No pending signups",
     "noApproved": "No approved signups",
+    "noArchived": "No archived signups",
     "filters": {
       "name": "Name",
       "namePlaceholder": "Search by name",
@@ -82,8 +84,11 @@
       "action": "Action"
     },
     "approveButton": "Approve",
+    "archiveButton": "Archive",
     "approveSuccess": "Signup approved successfully!",
     "approveError": "Failed to approve signup",
+    "archiveSuccess": "Signup archived successfully!",
+    "archiveError": "Failed to archive signup",
     "loadError": "Failed to load signups",
     "newSignup": "New signup received!",
     "addNote": "Add note",
@@ -95,6 +100,7 @@
   },
   "status": {
     "pending": "PENDING",
-    "approved": "APPROVED"
+    "approved": "APPROVED",
+    "archived": "ARCHIVED"
   }
 }

@@ -40,6 +40,12 @@
       (click)="setTab('approved')">
       {{ 'dashboard.approved' | translate }} ({{ ((approved$ | async) || []).length }})
     </button>
+    <button 
+      class="tab" 
+      [class.active]="activeTab === 'archived'" 
+      (click)="setTab('archived')">
+      {{ 'dashboard.archived' | translate }} ({{ ((archived$ | async) || []).length }})
+    </button>
   </div>
 
   <div class="tab-content" *ngIf="activeTab === 'pending'">
@@ -127,6 +133,7 @@
             <th>{{ 'dashboard.table.createdAt' | translate }}</th>
             <th>{{ 'dashboard.table.approvedAt' | translate }}</th>
             <th>{{ 'dashboard.table.notes' | translate }}</th>
+            <th>{{ 'dashboard.table.action' | translate }}</th>
           </tr>
         </thead>
         <tbody>
@@ -146,6 +153,69 @@
           <td><span class="status approved">{{ ('status.' + (signup.status || '').toLowerCase()) | translate }}</span></td>
           <td>{{ signup.created_at | date:'short' }}</td>
           <td>{{ signup.approved_at | date:'short' }}</td>
+          <td class="notes-cell">
+            <div *ngIf="!isEditingNote(signup.id)" class="note-display" (click)="startEditingNote(signup)">
+              <span *ngIf="signup.notes">{{ signup.notes }}</span>
+              <span *ngIf="!signup.notes" class="add-note-hint">{{ 'dashboard.addNote' | translate }}</span>
+              <i class="fas fa-edit edit-icon"></i>
+            </div>
+            <div *ngIf="isEditingNote(signup.id)" class="note-edit">
+              <textarea [(ngModel)]="noteText" [placeholder]="'dashboard.notePlaceholder' | translate" rows="2"></textarea>
+              <div class="note-actions">
+                <button class="btn-save-note" (click)="saveNote(signup)" [disabled]="isSavingNote(signup.id)">
+                  <span *ngIf="isSavingNote(signup.id)" class="btn-spinner"></span>
+                  {{ isSavingNote(signup.id) ? '' : ('dashboard.save' | translate) }}
+                </button>
+                <button class="btn-cancel-note" (click)="cancelEditingNote()">{{ 'dashboard.cancel' | translate }}</button>
+              </div>
+            </div>
+          </td>
+          <td>
+            <button class="btn-archive" (click)="archiveSignup(signup.id)" [disabled]="isArchiving(signup.id)">
+              <span *ngIf="isArchiving(signup.id)" class="btn-spinner"></span>
+              {{ isArchiving(signup.id) ? '' : ('dashboard.archiveButton' | translate) }}
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+    </ng-container>
+  </div>
+
+  <div class="tab-content" *ngIf="activeTab === 'archived'">
+    <ng-container *ngIf="archived$ | async as archivedList">
+      <div *ngIf="archivedList.length === 0" class="empty-state">
+        {{ 'dashboard.noArchived' | translate }}
+      </div>
+      <div class="table-responsive" *ngIf="archivedList.length > 0">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>{{ 'dashboard.table.username' | translate }}</th>
+            <th>{{ 'dashboard.table.phone' | translate }}</th>
+            <th>{{ 'dashboard.table.password' | translate }}</th>
+            <th>{{ 'dashboard.table.promoCode' | translate }}</th>
+            <th>{{ 'dashboard.table.status' | translate }}</th>
+            <th>{{ 'dashboard.table.createdAt' | translate }}</th>
+            <th>{{ 'dashboard.table.notes' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let signup of archivedList" [class.new-row]="isArchivedNew(signup.id)">
+          <td>{{ signup.username }}</td>
+          <td>{{ signup.phone }}</td>
+          <td>
+            <div class="password-cell">
+              <span>{{ getPasswordDisplay(signup.password, signup.id) }}</span>
+              <button type="button" class="toggle-password-btn" (click)="togglePasswordVisibility(signup.id)">
+                <i [class]="isPasswordVisible(signup.id) ? 'fas fa-eye' : 'fas fa-eye-slash'"></i>
+              </button>
+            </div>
+          </td>
+          <td>{{ signup.promo_code || '-' }}</td>
+          <td><span class="status archived">{{ ('status.' + (signup.status || '').toLowerCase()) | translate }}</span></td>
+          <td>{{ signup.created_at | date:'short' }}</td>
           <td class="notes-cell">
             <div *ngIf="!isEditingNote(signup.id)" class="note-display" (click)="startEditingNote(signup)">
               <span *ngIf="signup.notes">{{ signup.notes }}</span>

@@ -12,7 +12,7 @@ export interface Signup {
   password?: string;
   promo_code?: string;
   notes?: string;
-  status: 'PENDING' | 'APPROVED';
+  status: 'PENDING' | 'APPROVED' | 'ARCHIVED';
   created_at?: string;
   approved_at?: string;
 }
@@ -39,7 +39,7 @@ export class ApiService {
     return this.http.post<ApiResponse>(`${this.baseUrl}/api/admin/login`, payload);
   }
 
-  getSignupsByStatus(status: 'PENDING' | 'APPROVED'): Observable<ApiResponse<Signup[]>> {
+  getSignupsByStatus(status: 'PENDING' | 'APPROVED' | 'ARCHIVED'): Observable<ApiResponse<Signup[]>> {
     return this.http.get<ApiResponse<Signup[]>>(`${this.baseUrl}/api/signups/status/${status}`);
   }
 
@@ -49,6 +49,10 @@ export class ApiService {
 
   approveSignup(id: number): Observable<ApiResponse> {
     return this.http.put<ApiResponse>(`${this.baseUrl}/api/signups/${id}/status`, { status: 'APPROVED' });
+  }
+
+  archiveSignup(id: number): Observable<ApiResponse> {
+    return this.http.put<ApiResponse>(`${this.baseUrl}/api/signups/${id}/status`, { status: 'ARCHIVED' });
   }
 
   updateSignupNotes(id: number, notes: string): Observable<ApiResponse<Signup>> {
