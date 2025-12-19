@@ -81,7 +81,7 @@ exports.createSignup = async (req, res) => {
 
 /**
  * Update signup status
- * Changes signup status between PENDING and APPROVED
+ * Changes signup status between PENDING, APPROVED, and ARCHIVED
  */
 exports.updateStatus = async (req, res) => {
   try {
@@ -89,10 +89,10 @@ exports.updateStatus = async (req, res) => {
     const { status } = req.body;
 
     // Validate status
-    if (!status || !['PENDING', 'APPROVED'].includes(status)) {
+    if (!status || !['PENDING', 'APPROVED', 'ARCHIVED'].includes(status)) {
       return res.status(400).json({
         success: false,
-        message: 'Status must be either pending or approved'
+        message: 'Status must be pending, approved, or archived'
       });
     }
 

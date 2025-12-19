@@ -31,7 +31,7 @@ class Signup {
   /**
    * Update signup status
    * @param {number} id - Signup ID
-   * @param {string} status - New status (PENDING or APPROVED)
+   * @param {string} status - New status (PENDING, APPROVED, or ARCHIVED)
    * @returns {Promise} Result of the update operation
    */
   static async updateStatus(id, status) {
@@ -50,7 +50,7 @@ class Signup {
 
   /**
    * Fetch signups by status
-   * @param {string} status - Status to filter by (PENDING or APPROVED)
+   * @param {string} status - Status to filter by (PENDING, APPROVED, or ARCHIVED)
    * @returns {Promise} Array of signup records
    */
   static async getByStatus(status) {
