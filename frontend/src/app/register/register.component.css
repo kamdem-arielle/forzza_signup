@@ -130,6 +130,28 @@ margin-top: 20px;
   margin: 0;
 }
 
+.generated-username-box {
+  background: #fff;
+  border: 2px solid #004E92;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+.username-label {
+  color: #666;
+  font-size: 14px;
+  margin: 0 0 8px 0 !important;
+}
+
+.username-value {
+  color: #004E92;
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 !important;
+  letter-spacing: 1px;
+}
+
 .btn-primary:hover {
   opacity: 0.9;
 }

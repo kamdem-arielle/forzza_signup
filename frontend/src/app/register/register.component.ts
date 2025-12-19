@@ -16,7 +16,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
   isSuccess: boolean = false;
   isLoading: boolean = false;
   promoCode: string | null = null;
-  
+  generatedUsername: string = '';
 
   showPassword: boolean = false;
   showConfirmPassword: boolean = false;
@@ -34,7 +34,8 @@ export class RegisterComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute
   ) {
     this.registerForm = this.fb.group({
-      username: ['', [Validators.required]],
+      firstName: ['', [Validators.required]],
+      lastName: ['', [Validators.required]],
       phone: ['', [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', [Validators.required]]
@@ -48,11 +49,17 @@ export class RegisterComponent implements OnInit, OnDestroy {
 
 
     const storedSignupId = localStorage.getItem('pendingSignupId');
+    const storedUsername = localStorage.getItem('pendingUsername');
     if (storedSignupId) {
       this.registeredSignupId = parseInt(storedSignupId, 10);
+      this.generatedUsername = storedUsername || '';
       this.isPolling = true;
-      this.pollingMessage = this.translate.instant('register.waitingApproval') || 'Waiting for approval...';
       this.message = '';
+      
+      this.translate.get('register.waitingApproval').subscribe((translated: string) => {
+        this.pollingMessage = translated || 'Waiting for approval...';
+      });
+      
       this.startPolling(this.registeredSignupId);
     }
   }
@@ -107,8 +114,10 @@ export class RegisterComponent implements OnInit, OnDestroy {
           
 
           this.registeredSignupId = response.data.id;
+          this.generatedUsername = response.data.username;
           if (this.registeredSignupId !== null) {
             localStorage.setItem('pendingSignupId', this.registeredSignupId.toString());
+            localStorage.setItem('pendingUsername', this.generatedUsername);
             this.isPolling = true;
             this.pollingMessage = this.translate.instant('register.waitingApproval') || 'Waiting for approval...';
             this.message = '';
@@ -147,6 +156,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
           if (response.success && response.data && response.data.status === 'APPROVED') {
 
             localStorage.removeItem('pendingSignupId');
+            localStorage.removeItem('pendingUsername');
             this.isPolling = false;
             this.pollingMessage = '';
             this.isSuccess = true;

@@ -6,6 +6,8 @@ import { environment } from '../../environments/environment';
 export interface Signup {
   id: number;
   username: string;
+  first_name?: string;
+  last_name?: string;
   phone: string;
   password?: string;
   promo_code?: string;
@@ -29,7 +31,7 @@ export class ApiService {
 
   constructor(private http: HttpClient) {}
 
-  createSignup(payload: { username: string; phone: string; password: string; promo_code?: string }): Observable<ApiResponse> {
+  createSignup(payload: { firstName: string; lastName: string; phone: string; password: string; promo_code?: string }): Observable<ApiResponse> {
     return this.http.post<ApiResponse>(`${this.baseUrl}/api/signups`, payload);
   }
 

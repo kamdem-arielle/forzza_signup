@@ -9,15 +9,27 @@
 
   <div *ngIf="isPolling" class="polling-status">
     <div class="spinner"></div>
+    <div class="generated-username-box" *ngIf="generatedUsername">
+      <p class="username-label">{{ 'register.yourUsername' | translate }}</p>
+      <p class="username-value">{{ generatedUsername }}</p>
+    </div>
     <p>{{ pollingMessage }}</p>
   </div>
 
   <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" *ngIf="!isPolling">
     <div class="form-group">
-      <label for="username">{{ 'register.username' | translate }}</label>
-      <input type="text" id="username" formControlName="username" [placeholder]="('register.usernamePlaceholder' | translate)">
-      <span class="validation-error" *ngIf="registerForm.get('username')?.touched && registerForm.get('username')?.hasError('required')">
-        {{ 'register.usernameRequired' | translate }}
+      <label for="firstName">{{ 'register.firstName' | translate }}</label>
+      <input type="text" id="firstName" formControlName="firstName" [placeholder]="('register.firstNamePlaceholder' | translate)">
+      <span class="validation-error" *ngIf="registerForm.get('firstName')?.touched && registerForm.get('firstName')?.hasError('required')">
+        {{ 'register.firstNameRequired' | translate }}
+      </span>
+    </div>
+
+    <div class="form-group">
+      <label for="lastName">{{ 'register.lastName' | translate }}</label>
+      <input type="text" id="lastName" formControlName="lastName" [placeholder]="('register.lastNamePlaceholder' | translate)">
+      <span class="validation-error" *ngIf="registerForm.get('lastName')?.touched && registerForm.get('lastName')?.hasError('required')">
+        {{ 'register.lastNameRequired' | translate }}
       </span>
     </div>
 
