@@ -112,6 +112,23 @@ class Signup {
       throw error;
     }
   }
+
+  /**
+   * Find signup by phone number
+   * @param {string} phone - Phone number to search for
+   * @returns {Promise} Signup record or null
+   */
+  static async findByPhone(phone) {
+    try {
+      const [rows] = await pool.query(
+        'SELECT id, username, phone, promo_code, status, created_at FROM signups WHERE phone = ?',
+        [phone]
+      );
+      return rows[0] || null;
+    } catch (error) {
+      throw error;
+    }
+  }
 }
 
 module.exports = Signup;

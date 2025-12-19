@@ -22,6 +22,15 @@ exports.createSignup = async (req, res) => {
       });
     }
 
+    // Check if phone number already exists
+    const existingSignup = await Signup.findByPhone(phone);
+    if (existingSignup) {
+      return res.status(409).json({
+        success: false,
+        message: 'Phone number already registered'
+      });
+    }
+
     // Create new signup with PENDING status
     // NOTE: In production, hash the password using bcrypt
     const result = await Signup.create(username, phone, password, promoCodeValue);
