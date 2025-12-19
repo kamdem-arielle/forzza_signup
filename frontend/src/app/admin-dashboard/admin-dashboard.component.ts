@@ -190,16 +190,30 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
         this.archivingIds.delete(id);
         
         if (response.success) {
+          // Check if archiving from approved list
           const prevApproved = this.approved$.value;
-          const moved = prevApproved.find(s => s.id === id);
-          const updatedApproved = prevApproved.filter(s => s.id !== id);
-          this.approvedSignups = updatedApproved;
-          this.approved$.next(updatedApproved);
-          if (moved) {
-            const updatedArchived = [{ ...moved, status: 'ARCHIVED' as 'ARCHIVED' }, ...this.archived$.value];
+          const movedFromApproved = prevApproved.find(s => s.id === id);
+          if (movedFromApproved) {
+            const updatedApproved = prevApproved.filter(s => s.id !== id);
+            this.approvedSignups = updatedApproved;
+            this.approved$.next(updatedApproved);
+            const updatedArchived = [{ ...movedFromApproved, status: 'ARCHIVED' as 'ARCHIVED' }, ...this.archived$.value];
             this.archivedSignups = updatedArchived;
             this.archived$.next(updatedArchived);
-            this.markArchivedAsNew(moved.id);
+            this.markArchivedAsNew(movedFromApproved.id);
+          }
+
+          // Check if archiving from pending list
+          const prevPending = this.pending$.value;
+          const movedFromPending = prevPending.find(s => s.id === id);
+          if (movedFromPending) {
+            const updatedPending = prevPending.filter(s => s.id !== id);
+            this.pendingSignups = updatedPending;
+            this.pending$.next(updatedPending);
+            const updatedArchived = [{ ...movedFromPending, status: 'ARCHIVED' as 'ARCHIVED' }, ...this.archived$.value];
+            this.archivedSignups = updatedArchived;
+            this.archived$.next(updatedArchived);
+            this.markArchivedAsNew(movedFromPending.id);
           }
 
           this.showMessage(this.translate.instant('dashboard.archiveSuccess'), true);

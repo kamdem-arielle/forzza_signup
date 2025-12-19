@@ -103,10 +103,16 @@
             </div>
           </td>
           <td>
-            <button class="btn-approve" (click)="approveSignup(signup.id)" [disabled]="isApproving(signup.id)">
-              <span *ngIf="isApproving(signup.id)" class="btn-spinner"></span>
-              {{ isApproving(signup.id) ? 'Approving...' : ('dashboard.approveButton' | translate) }}
-            </button>
+            <div class="action-buttons">
+              <button class="btn-approve" (click)="approveSignup(signup.id)" [disabled]="isApproving(signup.id)">
+                <span *ngIf="isApproving(signup.id)" class="btn-spinner"></span>
+                {{ isApproving(signup.id) ? '' : ('dashboard.approveButton' | translate) }}
+              </button>
+              <button class="btn-archive" (click)="archiveSignup(signup.id)" [disabled]="isArchiving(signup.id)">
+                <span *ngIf="isArchiving(signup.id)" class="btn-spinner"></span>
+                {{ isArchiving(signup.id) ? '' : ('dashboard.archiveButton' | translate) }}
+              </button>
+            </div>
           </td>
         </tr>
       </tbody>
@@ -133,7 +139,7 @@
             <th>{{ 'dashboard.table.createdAt' | translate }}</th>
             <th>{{ 'dashboard.table.approvedAt' | translate }}</th>
             <th>{{ 'dashboard.table.notes' | translate }}</th>
-            <th>{{ 'dashboard.table.action' | translate }}</th>
+            <!-- <th>{{ 'dashboard.table.action' | translate }}</th> -->
           </tr>
         </thead>
         <tbody>
@@ -170,12 +176,12 @@
               </div>
             </div>
           </td>
-          <td>
+          <!-- <td>
             <button class="btn-archive" (click)="archiveSignup(signup.id)" [disabled]="isArchiving(signup.id)">
               <span *ngIf="isArchiving(signup.id)" class="btn-spinner"></span>
               {{ isArchiving(signup.id) ? '' : ('dashboard.archiveButton' | translate) }}
             </button>
-          </td>
+          </td> -->
         </tr>
       </tbody>
     </table>

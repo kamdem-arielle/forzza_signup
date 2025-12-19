@@ -323,6 +323,12 @@ h2 {
   background: #e6c200;
 } */
 
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  /* flex-wrap: wrap; */
+}
+
 .btn-archive {
   padding: 6px 14px;
   background: #6c757d;
