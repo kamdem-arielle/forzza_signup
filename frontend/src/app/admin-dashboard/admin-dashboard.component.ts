@@ -232,7 +232,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     return this.archivingIds.has(id);
   }
 
-  applyFilters(): void {
+  onFilterChange(): void {
     this.applyFiltersForAll();
   }
 

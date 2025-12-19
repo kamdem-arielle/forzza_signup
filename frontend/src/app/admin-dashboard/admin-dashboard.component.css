@@ -199,11 +199,6 @@ h2 {
     padding: 3px 8px;
     font-size: 11px;
   }
-  
-  .data-table th:first-child,
-  .data-table td:first-child {
-    display: none; /* Hide ID column on mobile too */
-  }
 }
 
 .data-table tbody tr.new-row {
