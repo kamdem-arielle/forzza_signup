@@ -136,7 +136,7 @@ exports.getByStatus = async (req, res) => {
     const { status } = req.params;
 
     // Validate status
-    if (!['PENDING', 'APPROVED'].includes(status)) {
+    if (!['PENDING', 'APPROVED', 'ARCHIVED'].includes(status)) {
       return res.status(400).json({
         success: false,
         message: 'Status must be either pending or approved'
