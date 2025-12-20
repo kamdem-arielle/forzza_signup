@@ -13,6 +13,7 @@ export class AdminLoginComponent {
   loginForm: FormGroup;
   errorMessage: string = '';
   isLoading: boolean = false;
+  showPassword: boolean = false;
 
   constructor(
     private fb: FormBuilder,
@@ -24,6 +25,10 @@ export class AdminLoginComponent {
       username: ['', [Validators.required]],
       password: ['', [Validators.required]]
     });
+  }
+
+  togglePassword(): void {
+    this.showPassword = !this.showPassword;
   }
 
   onSubmit(): void {
