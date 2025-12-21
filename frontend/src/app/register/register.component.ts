@@ -34,10 +34,10 @@ export class RegisterComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute
   ) {
     this.registerForm = this.fb.group({
-      firstName: ['', [Validators.required]],
-      lastName: ['', [Validators.required]],
-      phone: ['', [Validators.required]],
-      password: ['', [Validators.required, this.strongPasswordValidator()]],
+      firstName: ['', [Validators.required, this.noSpecialCharsValidator()]],
+      lastName: ['', [Validators.required, this.noSpecialCharsValidator()]],
+      phone: ['', [Validators.required, this.numbersOnlyValidator()]],
+      password: ['', [Validators.required, this.strongPasswordValidator(), this.noSpecialCharsValidator()]],
       confirmPassword: ['', [Validators.required]]
     }, { validators: this.passwordMatchValidator() });
   }
@@ -79,6 +79,30 @@ export class RegisterComponent implements OnInit, OnDestroy {
       }
       
       return password.value === confirmPassword.value ? null : { passwordMismatch: true };
+    };
+  }
+
+  noSpecialCharsValidator() {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value;
+      if (!value) {
+        return null;
+      }
+      // Only allow a-z, A-Z, 0-9, and basic punctuation (no accented or special characters)
+      const hasSpecialChars = /[^a-zA-Z0-9@._\-+()\s]/.test(value);
+      return hasSpecialChars ? { noSpecialChars: true } : null;
+    };
+  }
+
+  numbersOnlyValidator() {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value;
+      if (!value) {
+        return null;
+      }
+      // Only allow digits 0-9
+      const hasNonNumbers = /[^0-9]/.test(value);
+      return hasNonNumbers ? { numbersOnly: true } : null;
     };
   }
 

@@ -23,6 +23,9 @@
       <span class="validation-error" *ngIf="registerForm.get('firstName')?.touched && registerForm.get('firstName')?.hasError('required')">
         {{ 'register.firstNameRequired' | translate }}
       </span>
+      <span class="validation-error" *ngIf="registerForm.get('firstName')?.touched && registerForm.get('firstName')?.hasError('noSpecialChars')">
+        {{ 'register.noSpecialChars' | translate }}
+      </span>
     </div>
 
     <div class="form-group">
@@ -31,6 +34,9 @@
       <span class="validation-error" *ngIf="registerForm.get('lastName')?.touched && registerForm.get('lastName')?.hasError('required')">
         {{ 'register.lastNameRequired' | translate }}
       </span>
+      <span class="validation-error" *ngIf="registerForm.get('lastName')?.touched && registerForm.get('lastName')?.hasError('noSpecialChars')">
+        {{ 'register.noSpecialChars' | translate }}
+      </span>
     </div>
 
     <div class="form-group">
@@ -38,6 +44,9 @@
       <input type="tel" id="phone" formControlName="phone" [placeholder]="('register.phonePlaceholder' | translate)">
       <span class="validation-error" *ngIf="registerForm.get('phone')?.touched && registerForm.get('phone')?.hasError('required')">
         {{ 'register.phoneRequired' | translate }}
+      </span>
+      <span class="validation-error" *ngIf="registerForm.get('phone')?.touched && registerForm.get('phone')?.hasError('numbersOnly')">
+        {{ 'register.phoneNumbersOnly' | translate }}
       </span>
     </div>
 
@@ -55,6 +64,9 @@
       </span>
       <span class="validation-error" *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.hasError('strongPassword')">
         {{ 'register.passwordWeak' | translate }}
+      </span>
+      <span class="validation-error" *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.hasError('noSpecialChars')">
+        {{ 'register.noSpecialChars' | translate }}
       </span>
     </div>
 
