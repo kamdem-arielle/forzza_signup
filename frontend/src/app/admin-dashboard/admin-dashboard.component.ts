@@ -56,7 +56,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
         this.apiService.getSignupsByStatus('PENDING').subscribe({
           next: (response) => {
             const data = (response.success && response.data) ? response.data : [];
-            const sorted = [...data].sort((a, b) => (new Date(b.created_at || '').getTime()) - (new Date(a.created_at || '').getTime()));
+            const sorted = [...data].sort((a, b) => (new Date(a.created_at || '').getTime()) - (new Date(b.created_at || '').getTime()));
             const prevRaw = this.pendingSignups;
             const newItems = sorted.filter(s => !prevRaw.find(p => p.id === s.id));
             this.pendingSignups = sorted;
@@ -76,7 +76,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
           next: (response) => {
             this.isLoading = false;
             const data = (response.success && response.data) ? response.data : [];
-            const sorted = [...data].sort((a, b) => (new Date(b.created_at || '').getTime()) - (new Date(a.created_at || '').getTime()));
+            const sorted = [...data].sort((a, b) => (new Date(a.created_at || '').getTime()) - (new Date(b.created_at || '').getTime()));
             this.approvedSignups = sorted;
             this.applyFiltersForAll();
           },
@@ -89,7 +89,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
         this.apiService.getSignupsByStatus('ARCHIVED').subscribe({
           next: (response) => {
             const data = (response.success && response.data) ? response.data : [];
-            const sorted = [...data].sort((a, b) => (new Date(b.created_at || '').getTime()) - (new Date(a.created_at || '').getTime()));
+            const sorted = [...data].sort((a, b) => (new Date(a.created_at || '').getTime()) - (new Date(b.created_at || '').getTime()));
             this.archivedSignups = sorted;
             this.applyFiltersForAll();
           },
