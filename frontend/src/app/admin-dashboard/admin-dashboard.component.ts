@@ -48,7 +48,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
   startPolling(): void {
     this.isLoading = true;
-    const poll$ = interval(30000).pipe(startWith(0));
+    const poll$ = interval(5000).pipe(startWith(0));
 
     poll$
       .pipe(takeUntil(this.destroy$))
