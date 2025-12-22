@@ -148,6 +148,71 @@ class Signup {
       throw error;
     }
   }
+
+  /**
+   * Get all signups by promo code
+   * @param {string} promo_code - Promo code to filter by
+   * @returns {Promise} Array of signup records
+   */
+  static async getByPromoCode(promo_code) {
+    try {
+      const [rows] = await pool.query(
+        'SELECT id, username, first_name, last_name, phone, promo_code, password, status, notes, created_at, approved_at FROM signups WHERE promo_code = ? ORDER BY created_at DESC',
+        [promo_code]
+      );
+      return rows;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Get signups by promo code and status
+   * @param {string} promo_code - Promo code to filter by
+   * @param {string} status - Status to filter by (PENDING, APPROVED, or ARCHIVED)
+   * @returns {Promise} Array of signup records
+   */
+  static async getByPromoCodeAndStatus(promo_code, status) {
+    try {
+      const [rows] = await pool.query(
+        'SELECT id, username, first_name, last_name, phone, promo_code, password, status, notes, created_at, approved_at FROM signups WHERE promo_code = ? AND status = ? ORDER BY created_at DESC',
+        [promo_code, status]
+      );
+      return rows;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Get statistics by promo code
+   * @param {string} promo_code - Promo code to get stats for
+   * @returns {Promise} Stats object with counts
+   */
+  static async getStatsByPromoCode(promo_code) {
+    try {
+      const [rows] = await pool.query(
+        `SELECT 
+          COUNT(*) as total_signups,
+          SUM(CASE WHEN status = 'PENDING' THEN 1 ELSE 0 END) as pending_signups,
+          SUM(CASE WHEN status = 'APPROVED' THEN 1 ELSE 0 END) as approved_signups,
+          SUM(CASE WHEN status = 'ARCHIVED' THEN 1 ELSE 0 END) as archived_signups,
+          MAX(created_at) as last_signup_at
+         FROM signups 
+         WHERE promo_code = ?`,
+        [promo_code]
+      );
+      
+      const stats = rows[0];
+      stats.approval_rate = stats.total_signups > 0 
+        ? Math.round((stats.approved_signups / stats.total_signups) * 100) 
+        : 0;
+      
+      return stats;
+    } catch (error) {
+      throw error;
+    }
+  }
 }
 
 module.exports = Signup;
