@@ -56,6 +56,19 @@
     "submitting": "Connexion en cours...",
     "invalidCredentials": "Nom d'utilisateur ou mot de passe invalide"
   },
+  "agentLogin": {
+    "title": "Connexion Agent",
+    "subtitle": "Connectez-vous pour accéder à votre tableau de bord",
+    "username": "Nom d'utilisateur",
+    "usernamePlaceholder": "Entrez le nom d'utilisateur",
+    "usernameRequired": "Le nom d'utilisateur est requis",
+    "password": "Mot de passe",
+    "passwordPlaceholder": "Entrez le mot de passe",
+    "passwordRequired": "Le mot de passe est requis",
+    "submitButton": "Se connecter",
+    "submitting": "Connexion en cours...",
+    "invalidCredentials": "Nom d'utilisateur ou mot de passe invalide"
+  },
   "dashboard": {
     "title": "Tableau de bord Admin",
     "pending": "En attente",
@@ -99,7 +112,27 @@
     "noteSaved": "Note enregistrée avec succès !",
     "noteError": "Échec de l'enregistrement de la note",
     "save": "Enregistrer",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "pagination": {
+      "prev": "Précédent",
+      "next": "Suivant",
+      "page": "Page",
+      "of": "sur"
+    }
+  },
+  "agentDashboard": {
+    "title": "Tableau de bord Agent",
+    "noPending": "Aucune inscription en attente",
+    "noApproved": "Aucune inscription approuvée",
+    "noArchived": "Aucune inscription archivée",
+    "loadError": "Échec du chargement des inscriptions",
+    "newSignup": "Nouvelle inscription reçue !",
+    "stats": {
+      "totalSignups": "Total inscriptions",
+      "pending": "En attente",
+      "approved": "Approuvées",
+      "approvalRate": "Taux d'approbation"
+    }
   },
   "status": {
     "pending": "EN ATTENTE",

@@ -11,6 +11,8 @@ import { AppComponent } from './app.component';
 import { RegisterComponent } from './register/register.component';
 import { AdminLoginComponent } from './admin-login/admin-login.component';
 import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.component';
+import { AgentLoginComponent } from './agent-login/agent-login.component';
+import { AgentDashboardComponent } from './agent-dashboard/agent-dashboard.component';
 import { ApiService } from './services/api.service';
 
 // AoT requires an exported function for factories
@@ -23,7 +25,9 @@ export function HttpLoaderFactory(http: HttpClient) {
     AppComponent,
     RegisterComponent,
     AdminLoginComponent,
-    AdminDashboardComponent
+    AdminDashboardComponent,
+    AgentLoginComponent,
+    AgentDashboardComponent
   ],
   imports: [
     BrowserModule,

@@ -56,6 +56,19 @@
     "submitting": "Signing in...",
     "invalidCredentials": "Invalid username or password"
   },
+  "agentLogin": {
+    "title": "Agent Login",
+    "subtitle": "Sign in to access your dashboard",
+    "username": "Username",
+    "usernamePlaceholder": "Enter username",
+    "usernameRequired": "Username is required",
+    "password": "Password",
+    "passwordPlaceholder": "Enter password",
+    "passwordRequired": "Password is required",
+    "submitButton": "Sign In",
+    "submitting": "Signing in...",
+    "invalidCredentials": "Invalid username or password"
+  },
   "dashboard": {
     "title": "Admin Dashboard",
     "pending": "Pending",
@@ -99,7 +112,27 @@
     "noteSaved": "Note saved successfully!",
     "noteError": "Failed to save note",
     "save": "Save",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "pagination": {
+      "prev": "Previous",
+      "next": "Next",
+      "page": "Page",
+      "of": "of"
+    }
+  },
+  "agentDashboard": {
+    "title": "Agent Dashboard",
+    "noPending": "No pending signups",
+    "noApproved": "No approved signups",
+    "noArchived": "No archived signups",
+    "loadError": "Failed to load signups",
+    "newSignup": "New signup received!",
+    "stats": {
+      "totalSignups": "Total Signups",
+      "pending": "Pending",
+      "approved": "Approved",
+      "approvalRate": "Approval Rate"
+    }
   },
   "status": {
     "pending": "PENDING",

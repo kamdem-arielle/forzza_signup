@@ -35,6 +35,12 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   isLoading: boolean = false;
   activeTab: 'pending' | 'approved' | 'archived' = 'pending';
 
+  // Pagination
+  pageSize = 2;
+  pendingPage = 1;
+  approvedPage = 1;
+  archivedPage = 1;
+
   constructor(private apiService: ApiService, private router: Router, private translate: TranslateService) {}
 
   ngOnInit(): void {
@@ -162,6 +168,36 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     this.activeTab = tab;
   }
 
+  // Pagination methods
+  getPaginatedList(list: Signup[], page: number): Signup[] {
+    const start = (page - 1) * this.pageSize;
+    return list.slice(start, start + this.pageSize);
+  }
+
+  getTotalPages(list: Signup[]): number {
+    return Math.ceil(list.length / this.pageSize) || 1;
+  }
+
+  goToPage(tab: 'pending' | 'approved' | 'archived', page: number): void {
+    const list = tab === 'pending' ? this.pending$.value : tab === 'approved' ? this.approved$.value : this.archived$.value;
+    const totalPages = this.getTotalPages(list);
+    if (page < 1 || page > totalPages) return;
+    
+    if (tab === 'pending') this.pendingPage = page;
+    else if (tab === 'approved') this.approvedPage = page;
+    else this.archivedPage = page;
+  }
+
+  getCurrentPage(tab: 'pending' | 'approved' | 'archived'): number {
+    if (tab === 'pending') return this.pendingPage;
+    if (tab === 'approved') return this.approvedPage;
+    return this.archivedPage;
+  }
+
+  getPageNumbers(totalPages: number): number[] {
+    return Array.from({ length: totalPages }, (_, i) => i + 1);
+  }
+
   private showMessage(msg: string, success: boolean): void {
     this.message = msg;
     this.isSuccess = success;
@@ -233,6 +269,9 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   }
 
   onFilterChange(): void {
+    this.pendingPage = 1;
+    this.approvedPage = 1;
+    this.archivedPage = 1;
     this.applyFiltersForAll();
   }
 
@@ -240,6 +279,9 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     this.nameFilter = '';
     this.phoneFilter = '';
     this.promoFilter = '';
+    this.pendingPage = 1;
+    this.approvedPage = 1;
+    this.archivedPage = 1;
     this.applyFiltersForAll();
   }
 

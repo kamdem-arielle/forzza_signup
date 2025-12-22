@@ -17,6 +17,15 @@ export interface Signup {
   approved_at?: string;
 }
 
+export interface AgentStats {
+  total_signups: number;
+  pending_signups: number;
+  approved_signups: number;
+  archived_signups: number;
+  approval_rate: number;
+  last_signup_at?: string;
+}
+
 export interface ApiResponse<T = any> {
   success: boolean;
   message?: string;
@@ -35,6 +44,7 @@ export class ApiService {
     return this.http.post<ApiResponse>(`${this.baseUrl}/api/signups`, payload);
   }
 
+  // Admin endpoints
   adminLogin(payload: { username: string; password: string }): Observable<ApiResponse> {
     return this.http.post<ApiResponse>(`${this.baseUrl}/api/admin/login`, payload);
   }
@@ -57,5 +67,22 @@ export class ApiService {
 
   updateSignupNotes(id: number, notes: string): Observable<ApiResponse<Signup>> {
     return this.http.patch<ApiResponse<Signup>>(`${this.baseUrl}/api/signups/${id}/notes`, { notes });
+  }
+
+  // Agent endpoints
+  agentLogin(payload: { username: string; password: string }): Observable<ApiResponse> {
+    return this.http.post<ApiResponse>(`${this.baseUrl}/api/agents/login`, payload);
+  }
+
+  getAgentSignups(promo_code: string): Observable<ApiResponse<Signup[]>> {
+    return this.http.get<ApiResponse<Signup[]>>(`${this.baseUrl}/api/agents/${promo_code}/signups`);
+  }
+
+  getAgentSignupsByStatus(promo_code: string, status: 'PENDING' | 'APPROVED' | 'ARCHIVED'): Observable<ApiResponse<Signup[]>> {
+    return this.http.get<ApiResponse<Signup[]>>(`${this.baseUrl}/api/agents/${promo_code}/signups/status/${status}`);
+  }
+
+  getAgentStats(promo_code: string): Observable<ApiResponse<AgentStats>> {
+    return this.http.get<ApiResponse<AgentStats>>(`${this.baseUrl}/api/agents/${promo_code}/stats`);
   }
 }

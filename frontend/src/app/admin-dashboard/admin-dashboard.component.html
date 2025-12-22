@@ -69,7 +69,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let signup of pendingList" [class.new-row]="isPendingNew(signup.id)">
+          <tr *ngFor="let signup of getPaginatedList(pendingList, pendingPage)" [class.new-row]="isPendingNew(signup.id)">
           <!-- <td>{{ signup.id }}</td> -->
           <td>{{ signup.username }}</td>
           <td>{{ signup.phone }}</td>
@@ -116,6 +116,15 @@
         </tr>
       </tbody>
     </table>
+    <div class="pagination" *ngIf="getTotalPages(pendingList) > 1">
+      <button class="page-btn" (click)="goToPage('pending', pendingPage - 1)" [disabled]="pendingPage === 1">
+        &laquo; {{ 'dashboard.pagination.prev' | translate }}
+      </button>
+      <span class="page-info">{{ 'dashboard.pagination.page' | translate }} {{ pendingPage }} {{ 'dashboard.pagination.of' | translate }} {{ getTotalPages(pendingList) }}</span>
+      <button class="page-btn" (click)="goToPage('pending', pendingPage + 1)" [disabled]="pendingPage >= getTotalPages(pendingList)">
+        {{ 'dashboard.pagination.next' | translate }} &raquo;
+      </button>
+    </div>
     </div>
   </ng-container>
   </div>
@@ -142,7 +151,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let signup of approvedList" [class.new-row]="isApprovedNew(signup.id)">
+          <tr *ngFor="let signup of getPaginatedList(approvedList, approvedPage)" [class.new-row]="isApprovedNew(signup.id)">
           <!-- <td>{{ signup.id }}</td> -->
           <td>{{ signup.username }}</td>
           <td>{{ signup.phone }}</td>
@@ -184,6 +193,15 @@
         </tr>
       </tbody>
     </table>
+    <div class="pagination" *ngIf="getTotalPages(approvedList) > 1">
+      <button class="page-btn" (click)="goToPage('approved', approvedPage - 1)" [disabled]="approvedPage === 1">
+        &laquo; {{ 'dashboard.pagination.prev' | translate }}
+      </button>
+      <span class="page-info">{{ 'dashboard.pagination.page' | translate }} {{ approvedPage }} {{ 'dashboard.pagination.of' | translate }} {{ getTotalPages(approvedList) }}</span>
+      <button class="page-btn" (click)="goToPage('approved', approvedPage + 1)" [disabled]="approvedPage >= getTotalPages(approvedList)">
+        {{ 'dashboard.pagination.next' | translate }} &raquo;
+      </button>
+    </div>
     </div>
     </ng-container>
   </div>
@@ -207,7 +225,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let signup of archivedList" [class.new-row]="isArchivedNew(signup.id)">
+          <tr *ngFor="let signup of getPaginatedList(archivedList, archivedPage)" [class.new-row]="isArchivedNew(signup.id)">
           <td>{{ signup.username }}</td>
           <td>{{ signup.phone }}</td>
           <td>
@@ -241,6 +259,15 @@
         </tr>
       </tbody>
     </table>
+    <div class="pagination" *ngIf="getTotalPages(archivedList) > 1">
+      <button class="page-btn" (click)="goToPage('archived', archivedPage - 1)" [disabled]="archivedPage === 1">
+        &laquo; {{ 'dashboard.pagination.prev' | translate }}
+      </button>
+      <span class="page-info">{{ 'dashboard.pagination.page' | translate }} {{ archivedPage }} {{ 'dashboard.pagination.of' | translate }} {{ getTotalPages(archivedList) }}</span>
+      <button class="page-btn" (click)="goToPage('archived', archivedPage + 1)" [disabled]="archivedPage >= getTotalPages(archivedList)">
+        {{ 'dashboard.pagination.next' | translate }} &raquo;
+      </button>
+    </div>
     </div>
     </ng-container>
   </div>
