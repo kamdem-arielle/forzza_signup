@@ -276,6 +276,8 @@ exports.createAgent = async (req, res) => {
  */
 exports.getAllAgents = async (req, res) => {
   try {
+    // Update registration_count for all agents before fetching
+    await Agent.updateAllRegistrationCounts();
     const agents = await Agent.getAll();
 
     res.json({

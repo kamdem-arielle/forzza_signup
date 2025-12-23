@@ -86,10 +86,34 @@ class Agent {
    */
   static async getAll() {
     try {
+      // Get all agents with registration_count
       const [rows] = await pool.query(
-        'SELECT id, username, promo_code, name, phone, email, status, created_at, last_login_at FROM agents ORDER BY created_at DESC'
+        `SELECT a.id, a.username, a.promo_code, a.name, a.phone, a.email, a.status, a.created_at, a.last_login_at, a.registration_count
+         FROM agents a
+         ORDER BY a.created_at DESC`
       );
       return rows;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Update registration_count for all agents
+   * @returns {Promise} Result of the update operation
+   */
+  static async updateAllRegistrationCounts() {
+    try {
+      // Update registration_count for each agent based on signups table
+      await pool.query(
+        `UPDATE agents a
+         LEFT JOIN (
+           SELECT promo_code, COUNT(*) as reg_count
+           FROM signups
+           GROUP BY promo_code
+         ) s ON a.promo_code = s.promo_code
+         SET a.registration_count = IFNULL(s.reg_count, 0)`
+      );
     } catch (error) {
       throw error;
     }
