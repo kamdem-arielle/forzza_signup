@@ -134,6 +134,49 @@
       "approvalRate": "Taux d'approbation"
     }
   },
+  "adminNav": {
+    "dashboard": "Tableau de bord",
+    "signups": "Inscriptions",
+    "agents": "Agents",
+    "admin": "Admin"
+  },
+  "adminStats": {
+    "overview": "Aperçu des statistiques de votre plateforme",
+    "totalSignups": "Total inscriptions",
+    "pendingSignups": "En attente",
+    "approvedSignups": "Approuvées",
+    "archivedSignups": "Archivées",
+    "todaySignups": "Inscriptions du jour",
+    "weekSignups": "Cette semaine",
+    "activeAgents": "Agents actifs",
+    "topAgents": "Top agents par inscriptions",
+    "promoCode": "Code promo",
+    "signupsCount": "Inscriptions"
+  },
+  "adminAgents": {
+    "subtitle": "Gérer tous les agents de votre plateforme",
+    "search": "Rechercher",
+    "searchPlaceholder": "Rechercher par nom, utilisateur ou code promo...",
+    "status": "Statut",
+    "allStatus": "Tous les statuts",
+    "active": "Actif",
+    "inactive": "Inactif",
+    "noAgents": "Aucun agent trouvé",
+    "table": {
+      "name": "Nom",
+      "username": "Utilisateur",
+      "promoCode": "Code Promo",
+      "phone": "Téléphone",
+      "registrations": "Inscriptions",
+      "status": "Statut",
+      "lastLogin": "Dernière connexion",
+      "actions": "Actions"
+    },
+    "activate": "Activer",
+    "deactivate": "Désactiver",
+    "activated": "Agent activé avec succès !",
+    "deactivated": "Agent désactivé avec succès !"
+  },
   "status": {
     "pending": "EN ATTENTE",
     "approved": "APPROUVÉ",

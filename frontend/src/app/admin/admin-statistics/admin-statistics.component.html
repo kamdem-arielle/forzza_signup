@@ -1,0 +1,117 @@
+<div class="statistics-container">
+  <div class="page-header">
+    <h2>{{ 'adminNav.dashboard' | translate }}</h2>
+    <p class="page-subtitle">{{ 'adminStats.overview' | translate }}</p>
+  </div>
+
+  <div class="loading-spinner" *ngIf="isLoading">
+    <div class="spinner"></div>
+  </div>
+
+  <div class="stats-content" *ngIf="!isLoading">
+    <!-- Main Stats Cards -->
+    <div class="stats-grid">
+      <div class="stat-card total">
+        <div class="stat-icon">
+          <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ stats.totalSignups }}</span>
+          <span class="stat-label">{{ 'adminStats.totalSignups' | translate }}</span>
+        </div>
+      </div>
+
+      <div class="stat-card pending">
+        <div class="stat-icon">
+          <i class="fas fa-clock"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ stats.pendingSignups }}</span>
+          <span class="stat-label">{{ 'adminStats.pendingSignups' | translate }}</span>
+        </div>
+      </div>
+
+      <div class="stat-card approved">
+        <div class="stat-icon">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ stats.approvedSignups }}</span>
+          <span class="stat-label">{{ 'adminStats.approvedSignups' | translate }}</span>
+        </div>
+      </div>
+
+      <div class="stat-card archived">
+        <div class="stat-icon">
+          <i class="fas fa-archive"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ stats.archivedSignups }}</span>
+          <span class="stat-label">{{ 'adminStats.archivedSignups' | translate }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Secondary Stats -->
+    <div class="stats-row">
+      <div class="stat-card-wide today">
+        <div class="stat-icon">
+          <i class="fas fa-calendar-day"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ stats.todaySignups }}</span>
+          <span class="stat-label">{{ 'adminStats.todaySignups' | translate }}</span>
+        </div>
+      </div>
+
+      <div class="stat-card-wide week">
+        <div class="stat-icon">
+          <i class="fas fa-calendar-week"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ stats.weekSignups }}</span>
+          <span class="stat-label">{{ 'adminStats.weekSignups' | translate }}</span>
+        </div>
+      </div>
+
+      <div class="stat-card-wide agents">
+        <div class="stat-icon">
+          <i class="fas fa-user-tie"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ stats.activeAgents }} / {{ stats.totalAgents }}</span>
+          <span class="stat-label">{{ 'adminStats.activeAgents' | translate }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top Agents -->
+    <div class="top-agents-section" *ngIf="topAgents.length > 0">
+      <h3>{{ 'adminStats.topAgents' | translate }}</h3>
+      <div class="agents-table-wrapper">
+        <table class="agents-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>{{ 'adminStats.agentName' | translate }}</th>
+              <th>{{ 'adminStats.promoCode' | translate }}</th>
+              <th>{{ 'adminStats.signupsCount' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let agent of topAgents; let i = index">
+              <td>
+                <span class="rank" [class.gold]="i === 0" [class.silver]="i === 1" [class.bronze]="i === 2">{{ i + 1 }}</span>
+              </td>
+              <td>{{ agent.name }}</td>
+              <td>{{ agent.promo_code }}</td>
+              <td>
+                <span class="signup-count">{{ agent.signups }}</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

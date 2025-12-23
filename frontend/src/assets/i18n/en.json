@@ -84,6 +84,8 @@
       "phonePlaceholder": "Search by phone",
       "promoCode": "Promo code",
       "promoCodePlaceholder": "Search by promo code",
+      "agent": "Agent",
+      "agentPlaceholder": "Filter by agent",
       "search": "Search",
       "reset": "Reset"
     },
@@ -133,6 +135,50 @@
       "approved": "Approved",
       "approvalRate": "Approval Rate"
     }
+  },
+  "adminNav": {
+    "dashboard": "Dashboard",
+    "signups": "Signups",
+    "agents": "Agents",
+    "admin": "Admin"
+  },
+  "adminStats": {
+    "overview": "Overview of your platform statistics",
+    "totalSignups": "Total Signups",
+    "pendingSignups": "Pending",
+    "approvedSignups": "Approved",
+    "archivedSignups": "Archived",
+    "todaySignups": "Today's Signups",
+    "weekSignups": "This Week",
+    "activeAgents": "Active Agents",
+    "topAgents": "Top Agents by Signups",
+    "agentName": "Agent Name",
+    "promoCode": "Promo Code",
+    "signupsCount": "Signups"
+  },
+  "adminAgents": {
+    "subtitle": "Manage all agents in your platform",
+    "search": "Search",
+    "searchPlaceholder": "Search by name, username, or promo code...",
+    "status": "Status",
+    "allStatus": "All Status",
+    "active": "Active",
+    "inactive": "Inactive",
+    "noAgents": "No agents found",
+    "table": {
+      "name": "Name",
+      "username": "Username",
+      "promoCode": "Promo Code",
+      "phone": "Phone",
+      "registrations": "Registrations",
+      "status": "Status",
+      "lastLogin": "Last Login",
+      "actions": "Actions"
+    },
+    "activate": "Activate",
+    "deactivate": "Deactivate",
+    "activated": "Agent activated successfully!",
+    "deactivated": "Agent deactivated successfully!"
   },
   "status": {
     "pending": "PENDING",

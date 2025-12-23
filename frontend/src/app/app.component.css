@@ -6,9 +6,11 @@
   /* background: linear-gradient(135deg, #004E92, #00B4DB); */
   background-image: url(../assets/page-bg.jpg);
 background-position-x: -1px;
-position: absolute;
-width: 100%;
-top: 0px;
+  position: fixed;
+  width: 100%;
+  top: 0;
+  left: 0;
+  z-index: 2000;
   /* box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); */
 } 
 

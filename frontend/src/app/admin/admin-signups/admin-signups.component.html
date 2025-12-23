@@ -1,0 +1,267 @@
+<div class="signups-container">
+  <div class="page-header">
+    <h2>{{ 'adminNav.signups' | translate }}</h2>
+  </div>
+
+  <div *ngIf="message" class="message" [class.success]="isSuccess" [class.error]="!isSuccess">
+    {{ message }}
+  </div>
+
+  <div class="filter-bar">
+    <div class="filter-group">
+      <label>{{ 'dashboard.filters.agent' | translate }}</label>
+      <select class="styled-select" [(ngModel)]="selectedAgentPromo" (ngModelChange)="onAgentFilterChange()">
+        <option value="" disabled selected hidden>{{ 'dashboard.filters.agentPlaceholder' | translate }}</option>
+        <option *ngFor="let agent of agents" [value]="agent.promo_code">{{ agent.name }} &nbsp;—&nbsp; {{ agent.promo_code }}</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>{{ 'dashboard.filters.name' | translate }}</label>
+      <input type="text" [(ngModel)]="nameFilter" (ngModelChange)="onFilterChange()" [placeholder]="'dashboard.filters.namePlaceholder' | translate">
+    </div>
+    <div class="filter-group">
+      <label>{{ 'dashboard.filters.phone' | translate }}</label>
+      <input type="text" [(ngModel)]="phoneFilter" (ngModelChange)="onFilterChange()" [placeholder]="'dashboard.filters.phonePlaceholder' | translate">
+    </div>
+    <div class="filter-actions">
+      <button class="btn-secondary" (click)="resetFilters()">{{ 'dashboard.filters.reset' | translate }}</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button 
+      class="tab" 
+      [class.active]="activeTab === 'pending'" 
+      (click)="setTab('pending')">
+      {{ 'dashboard.pending' | translate }} ({{ ((pending$ | async) || []).length }})
+    </button>
+    <button 
+      class="tab" 
+      [class.active]="activeTab === 'approved'" 
+      (click)="setTab('approved')">
+      {{ 'dashboard.approved' | translate }} ({{ ((approved$ | async) || []).length }})
+    </button>
+    <button 
+      class="tab" 
+      [class.active]="activeTab === 'archived'" 
+      (click)="setTab('archived')">
+      {{ 'dashboard.archived' | translate }} ({{ ((archived$ | async) || []).length }})
+    </button>
+  </div>
+
+  <!-- Pending Tab -->
+  <div class="tab-content" *ngIf="activeTab === 'pending'">
+    <ng-container *ngIf="pending$ | async as pendingList">
+      <div *ngIf="pendingList.length === 0" class="empty-state">
+        {{ 'dashboard.noPending' | translate }}
+      </div>
+      <div class="table-responsive" *ngIf="pendingList.length > 0">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>{{ 'dashboard.table.username' | translate }}</th>
+              <th>{{ 'dashboard.table.phone' | translate }}</th>
+              <th>{{ 'dashboard.table.password' | translate }}</th>
+              <th>{{ 'dashboard.table.status' | translate }}</th>
+              <th>{{ 'dashboard.table.promoCode' | translate }}</th>
+              <th>{{ 'dashboard.table.createdAt' | translate }}</th>
+              <th>{{ 'dashboard.table.notes' | translate }}</th>
+              <th>{{ 'dashboard.table.action' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let signup of getPaginatedList(pendingList, pendingPage)" [class.new-row]="isPendingNew(signup.id)">
+              <td>{{ signup.username }}</td>
+              <td>{{ signup.phone }}</td>
+              <td>
+                <div class="password-cell">
+                  <span>{{ getPasswordDisplay(signup.password, signup.id) }}</span>
+                  <button type="button" class="toggle-password-btn" (click)="togglePasswordVisibility(signup.id)">
+                    <i [class]="isPasswordVisible(signup.id) ? 'fas fa-eye' : 'fas fa-eye-slash'"></i>
+                  </button>
+                </div>
+              </td>
+              <td><span class="status pending">{{ ('status.' + (signup.status || '').toLowerCase()) | translate }}</span></td>
+              <td>{{ signup.promo_code || '-' }}</td>
+              <td>{{ signup.created_at | date:'short' }}</td>
+              <td class="notes-cell">
+                <div *ngIf="!isEditingNote(signup.id)" class="note-display" (click)="startEditingNote(signup)">
+                  <span *ngIf="signup.notes">{{ signup.notes }}</span>
+                  <span *ngIf="!signup.notes" class="add-note-hint">{{ 'dashboard.addNote' | translate }}</span>
+                  <i class="fas fa-edit edit-icon"></i>
+                </div>
+                <div *ngIf="isEditingNote(signup.id)" class="note-edit">
+                  <textarea [(ngModel)]="noteText" [placeholder]="'dashboard.notePlaceholder' | translate" rows="2"></textarea>
+                  <div class="note-actions">
+                    <button class="btn-save-note" (click)="saveNote(signup)" [disabled]="isSavingNote(signup.id)">
+                      <span *ngIf="isSavingNote(signup.id)" class="btn-spinner"></span>
+                      {{ isSavingNote(signup.id) ? '' : ('dashboard.save' | translate) }}
+                    </button>
+                    <button class="btn-cancel-note" (click)="cancelEditingNote()">{{ 'dashboard.cancel' | translate }}</button>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="action-buttons">
+                  <button class="btn-approve" (click)="approveSignup(signup.id)" [disabled]="isApproving(signup.id)">
+                    <span *ngIf="isApproving(signup.id)" class="btn-spinner"></span>
+                    {{ isApproving(signup.id) ? '' : ('dashboard.approveButton' | translate) }}
+                  </button>
+                  <button class="btn-archive" (click)="archiveSignup(signup.id)" [disabled]="isArchiving(signup.id)">
+                    <span *ngIf="isArchiving(signup.id)" class="btn-spinner"></span>
+                    {{ isArchiving(signup.id) ? '' : ('dashboard.archiveButton' | translate) }}
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pagination" *ngIf="getTotalPages(pendingList) > 1">
+          <button class="page-btn" (click)="goToPage('pending', pendingPage - 1)" [disabled]="pendingPage === 1">
+            &laquo; {{ 'dashboard.pagination.prev' | translate }}
+          </button>
+          <span class="page-info">{{ 'dashboard.pagination.page' | translate }} {{ pendingPage }} {{ 'dashboard.pagination.of' | translate }} {{ getTotalPages(pendingList) }}</span>
+          <button class="page-btn" (click)="goToPage('pending', pendingPage + 1)" [disabled]="pendingPage >= getTotalPages(pendingList)">
+            {{ 'dashboard.pagination.next' | translate }} &raquo;
+          </button>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+
+  <!-- Approved Tab -->
+  <div class="tab-content" *ngIf="activeTab === 'approved'">
+    <ng-container *ngIf="approved$ | async as approvedList">
+      <div *ngIf="approvedList.length === 0" class="empty-state">
+        {{ 'dashboard.noApproved' | translate }}
+      </div>
+      <div class="table-responsive" *ngIf="approvedList.length > 0">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>{{ 'dashboard.table.username' | translate }}</th>
+              <th>{{ 'dashboard.table.phone' | translate }}</th>
+              <th>{{ 'dashboard.table.password' | translate }}</th>
+              <th>{{ 'dashboard.table.promoCode' | translate }}</th>
+              <th>{{ 'dashboard.table.status' | translate }}</th>
+              <th>{{ 'dashboard.table.createdAt' | translate }}</th>
+              <th>{{ 'dashboard.table.approvedAt' | translate }}</th>
+              <th>{{ 'dashboard.table.notes' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let signup of getPaginatedList(approvedList, approvedPage)" [class.new-row]="isApprovedNew(signup.id)">
+              <td>{{ signup.username }}</td>
+              <td>{{ signup.phone }}</td>
+              <td>
+                <div class="password-cell">
+                  <span>{{ getPasswordDisplay(signup.password, signup.id) }}</span>
+                  <button type="button" class="toggle-password-btn" (click)="togglePasswordVisibility(signup.id)">
+                    <i [class]="isPasswordVisible(signup.id) ? 'fas fa-eye' : 'fas fa-eye-slash'"></i>
+                  </button>
+                </div>
+              </td>
+              <td>{{ signup.promo_code || '-' }}</td>
+              <td><span class="status approved">{{ ('status.' + (signup.status || '').toLowerCase()) | translate }}</span></td>
+              <td>{{ signup.created_at | date:'short' }}</td>
+              <td>{{ signup.approved_at | date:'short' }}</td>
+              <td class="notes-cell">
+                <div *ngIf="!isEditingNote(signup.id)" class="note-display" (click)="startEditingNote(signup)">
+                  <span *ngIf="signup.notes">{{ signup.notes }}</span>
+                  <span *ngIf="!signup.notes" class="add-note-hint">{{ 'dashboard.addNote' | translate }}</span>
+                  <i class="fas fa-edit edit-icon"></i>
+                </div>
+                <div *ngIf="isEditingNote(signup.id)" class="note-edit">
+                  <textarea [(ngModel)]="noteText" [placeholder]="'dashboard.notePlaceholder' | translate" rows="2"></textarea>
+                  <div class="note-actions">
+                    <button class="btn-save-note" (click)="saveNote(signup)" [disabled]="isSavingNote(signup.id)">
+                      <span *ngIf="isSavingNote(signup.id)" class="btn-spinner"></span>
+                      {{ isSavingNote(signup.id) ? '' : ('dashboard.save' | translate) }}
+                    </button>
+                    <button class="btn-cancel-note" (click)="cancelEditingNote()">{{ 'dashboard.cancel' | translate }}</button>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pagination" *ngIf="getTotalPages(approvedList) > 1">
+          <button class="page-btn" (click)="goToPage('approved', approvedPage - 1)" [disabled]="approvedPage === 1">
+            &laquo; {{ 'dashboard.pagination.prev' | translate }}
+          </button>
+          <span class="page-info">{{ 'dashboard.pagination.page' | translate }} {{ approvedPage }} {{ 'dashboard.pagination.of' | translate }} {{ getTotalPages(approvedList) }}</span>
+          <button class="page-btn" (click)="goToPage('approved', approvedPage + 1)" [disabled]="approvedPage >= getTotalPages(approvedList)">
+            {{ 'dashboard.pagination.next' | translate }} &raquo;
+          </button>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+
+  <!-- Archived Tab -->
+  <div class="tab-content" *ngIf="activeTab === 'archived'">
+    <ng-container *ngIf="archived$ | async as archivedList">
+      <div *ngIf="archivedList.length === 0" class="empty-state">
+        {{ 'dashboard.noArchived' | translate }}
+      </div>
+      <div class="table-responsive" *ngIf="archivedList.length > 0">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>{{ 'dashboard.table.username' | translate }}</th>
+              <th>{{ 'dashboard.table.phone' | translate }}</th>
+              <th>{{ 'dashboard.table.password' | translate }}</th>
+              <th>{{ 'dashboard.table.promoCode' | translate }}</th>
+              <th>{{ 'dashboard.table.status' | translate }}</th>
+              <th>{{ 'dashboard.table.createdAt' | translate }}</th>
+              <th>{{ 'dashboard.table.notes' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let signup of getPaginatedList(archivedList, archivedPage)" [class.new-row]="isArchivedNew(signup.id)">
+              <td>{{ signup.username }}</td>
+              <td>{{ signup.phone }}</td>
+              <td>
+                <div class="password-cell">
+                  <span>{{ getPasswordDisplay(signup.password, signup.id) }}</span>
+                  <button type="button" class="toggle-password-btn" (click)="togglePasswordVisibility(signup.id)">
+                    <i [class]="isPasswordVisible(signup.id) ? 'fas fa-eye' : 'fas fa-eye-slash'"></i>
+                  </button>
+                </div>
+              </td>
+              <td>{{ signup.promo_code || '-' }}</td>
+              <td><span class="status archived">{{ ('status.' + (signup.status || '').toLowerCase()) | translate }}</span></td>
+              <td>{{ signup.created_at | date:'short' }}</td>
+              <td class="notes-cell">
+                <div *ngIf="!isEditingNote(signup.id)" class="note-display" (click)="startEditingNote(signup)">
+                  <span *ngIf="signup.notes">{{ signup.notes }}</span>
+                  <span *ngIf="!signup.notes" class="add-note-hint">{{ 'dashboard.addNote' | translate }}</span>
+                  <i class="fas fa-edit edit-icon"></i>
+                </div>
+                <div *ngIf="isEditingNote(signup.id)" class="note-edit">
+                  <textarea [(ngModel)]="noteText" [placeholder]="'dashboard.notePlaceholder' | translate" rows="2"></textarea>
+                  <div class="note-actions">
+                    <button class="btn-save-note" (click)="saveNote(signup)" [disabled]="isSavingNote(signup.id)">
+                      <span *ngIf="isSavingNote(signup.id)" class="btn-spinner"></span>
+                      {{ isSavingNote(signup.id) ? '' : ('dashboard.save' | translate) }}
+                    </button>
+                    <button class="btn-cancel-note" (click)="cancelEditingNote()">{{ 'dashboard.cancel' | translate }}</button>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pagination" *ngIf="getTotalPages(archivedList) > 1">
+          <button class="page-btn" (click)="goToPage('archived', archivedPage - 1)" [disabled]="archivedPage === 1">
+            &laquo; {{ 'dashboard.pagination.prev' | translate }}
+          </button>
+          <span class="page-info">{{ 'dashboard.pagination.page' | translate }} {{ archivedPage }} {{ 'dashboard.pagination.of' | translate }} {{ getTotalPages(archivedList) }}</span>
+          <button class="page-btn" (click)="goToPage('archived', archivedPage + 1)" [disabled]="archivedPage >= getTotalPages(archivedList)">
+            {{ 'dashboard.pagination.next' | translate }} &raquo;
+          </button>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+</div>

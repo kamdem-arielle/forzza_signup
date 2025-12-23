@@ -85,4 +85,19 @@ export class ApiService {
   getAgentStats(promo_code: string): Observable<ApiResponse<AgentStats>> {
     return this.http.get<ApiResponse<AgentStats>>(`${this.baseUrl}/api/agents/${promo_code}/stats`);
   }
+
+  // Admin - Get all signups
+  getSignups(): Observable<ApiResponse<Signup[]>> {
+    return this.http.get<ApiResponse<Signup[]>>(`${this.baseUrl}/api/signups`);
+  }
+
+  // Admin - Get all agents
+  getAllAgents(): Observable<ApiResponse<any[]>> {
+    return this.http.get<ApiResponse<any[]>>(`${this.baseUrl}/api/agents`);
+  }
+
+  // Admin - Update agent
+  updateAgent(id: number, data: { status?: string; name?: string; phone?: string }): Observable<ApiResponse> {
+    return this.http.put<ApiResponse>(`${this.baseUrl}/api/agents/${id}`, data);
+  }
 }

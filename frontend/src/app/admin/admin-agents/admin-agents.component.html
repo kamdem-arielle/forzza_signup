@@ -1,0 +1,103 @@
+<div class="agents-container">
+  <div class="page-header">
+    <h2>{{ 'adminNav.agents' | translate }}</h2>
+    <p class="page-subtitle">{{ 'adminAgents.subtitle' | translate }}</p>
+  </div>
+
+  <div *ngIf="message" class="message" [class.success]="isSuccess" [class.error]="!isSuccess">
+    {{ message }}
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-bar">
+    <div class="filter-group search-group">
+      <label>{{ 'adminAgents.search' | translate }}</label>
+      <div class="search-input-wrapper">
+        <input type="text" [(ngModel)]="searchTerm" (ngModelChange)="onFilterChange()" [placeholder]="'adminAgents.searchPlaceholder' | translate">
+      </div>
+    </div>
+    <div class="filter-group">
+      <label>{{ 'adminAgents.status' | translate }}</label>
+      <select [(ngModel)]="statusFilter" (ngModelChange)="onFilterChange()">
+        <option value="all">{{ 'adminAgents.allStatus' | translate }}</option>
+        <option value="active">{{ 'adminAgents.active' | translate }}</option>
+        <option value="inactive">{{ 'adminAgents.inactive' | translate }}</option>
+      </select>
+    </div>
+    <div class="filter-actions">
+      <button class="btn-secondary" (click)="resetFilters()">{{ 'dashboard.filters.reset' | translate }}</button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-spinner" *ngIf="isLoading">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Agents Table -->
+  <div class="table-card" *ngIf="!isLoading">
+    <div *ngIf="filteredAgents.length === 0" class="empty-state">
+      <i class="fas fa-user-tie"></i>
+      <p>{{ 'adminAgents.noAgents' | translate }}</p>
+    </div>
+
+    <div class="table-responsive" *ngIf="filteredAgents.length > 0">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>{{ 'adminAgents.table.name' | translate }}</th>
+            <th>{{ 'adminAgents.table.username' | translate }}</th>
+            <th>{{ 'adminAgents.table.promoCode' | translate }}</th>
+            <th>{{ 'adminAgents.table.phone' | translate }}</th>
+            <th>{{ 'adminAgents.table.registrations' | translate }}</th>
+            <th>{{ 'adminAgents.table.status' | translate }}</th>
+            <th>{{ 'adminAgents.table.lastLogin' | translate }}</th>
+            <th>{{ 'adminAgents.table.actions' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let agent of getPaginatedList()">
+            <td class="agent-name">
+              <div class="agent-avatar">{{ (agent.name ? agent.name.charAt(0).toUpperCase() : '?') }}</div>
+              <span>{{ agent.name || '(No Name)' }}</span>
+            </td>
+            <td>{{ agent.username }}</td>
+            <td>
+              <span class="promo-code">{{ agent.promo_code }}</span>
+            </td>
+            <td>{{ agent.phone || '-' }}</td>
+            <td>{{ agent.registration_count ?? 0 }}</td>
+            <td>
+              <span class="status-badge" [class.active]="agent.status === 'active'" [class.inactive]="agent.status === 'inactive'">
+                {{ ('adminAgents.' + agent.status) | translate }}
+              </span>
+            </td>
+            <td>{{ agent.last_login ? (agent.last_login | date:'short') : '-' }}</td>
+            <td>
+              <button 
+                class="btn-toggle" 
+                [class.deactivate]="agent.status === 'active'"
+                [class.activate]="agent.status === 'inactive'"
+                (click)="toggleAgentStatus(agent)">
+                {{ (agent.status === 'active' ? 'adminAgents.deactivate' : 'adminAgents.activate') | translate }}
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="getTotalPages() > 1">
+      <button class="page-btn" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">
+        &laquo; {{ 'dashboard.pagination.prev' | translate }}
+      </button>
+      <span class="page-info">
+        {{ 'dashboard.pagination.page' | translate }} {{ currentPage }} {{ 'dashboard.pagination.of' | translate }} {{ getTotalPages() }}
+      </span>
+      <button class="page-btn" (click)="goToPage(currentPage + 1)" [disabled]="currentPage >= getTotalPages()">
+        {{ 'dashboard.pagination.next' | translate }} &raquo;
+      </button>
+    </div>
+  </div>
+</div>

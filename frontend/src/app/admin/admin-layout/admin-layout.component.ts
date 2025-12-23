@@ -1,0 +1,49 @@
+import { Component, OnInit } from '@angular/core';
+import { Router, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs/operators';
+
+@Component({
+  selector: 'app-admin-layout',
+  templateUrl: './admin-layout.component.html',
+  styleUrls: ['./admin-layout.component.css']
+})
+export class AdminLayoutComponent implements OnInit {
+  currentRoute: string = '';
+  sidebarCollapsed: boolean = false;
+  adminName: string = '';
+
+  constructor(private router: Router) {}
+
+  ngOnInit(): void {
+    const admin = localStorage.getItem('admin');
+    if (!admin) {
+      this.router.navigate(['/admin/login']);
+      return;
+    }
+
+    const adminData = JSON.parse(admin);
+    this.adminName = adminData.username || 'Admin';
+
+    // Track current route for active state
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event: any) => {
+      this.currentRoute = event.urlAfterRedirects;
+    });
+
+    this.currentRoute = this.router.url;
+  }
+
+  toggleSidebar(): void {
+    this.sidebarCollapsed = !this.sidebarCollapsed;
+  }
+
+  isActive(route: string): boolean {
+    return this.currentRoute.includes(route);
+  }
+
+  logout(): void {
+    localStorage.removeItem('admin');
+    this.router.navigate(['/admin/login']);
+  }
+}

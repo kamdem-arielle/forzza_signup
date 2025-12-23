@@ -1,0 +1,46 @@
+<div class="admin-layout" [class.sidebar-collapsed]="sidebarCollapsed">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo" *ngIf="!sidebarCollapsed">
+        <span class="logo-text">{{ 'app.title' | translate }}</span>
+        <span class="logo-sub">Admin</span>
+      </div>
+      <div class="logo-icon" *ngIf="sidebarCollapsed">F</div>
+      <button class="toggle-btn" (click)="toggleSidebar()">
+        <i class="fas" [class.fa-chevron-left]="!sidebarCollapsed" [class.fa-chevron-right]="sidebarCollapsed"></i>
+      </button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a routerLink="/admin/dashboard" class="nav-item" [class.active]="isActive('/admin/dashboard')">
+        <i class="fas fa-chart-line"></i>
+        <span *ngIf="!sidebarCollapsed">{{ 'adminNav.dashboard' | translate }}</span>
+      </a>
+      <a routerLink="/admin/signups" class="nav-item" [class.active]="isActive('/admin/signups')">
+        <i class="fas fa-user-plus"></i>
+        <span *ngIf="!sidebarCollapsed">{{ 'adminNav.signups' | translate }}</span>
+      </a>
+      <a routerLink="/admin/agents" class="nav-item" [class.active]="isActive('/admin/agents')">
+        <i class="fas fa-users"></i>
+        <span *ngIf="!sidebarCollapsed">{{ 'adminNav.agents' | translate }}</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-info" *ngIf="!sidebarCollapsed">
+        <i class="fas fa-user-circle"></i>
+        <span>{{ adminName }}</span>
+      </div>
+      <button class="logout-btn" (click)="logout()">
+        <i class="fas fa-sign-out-alt"></i>
+        <span *ngIf="!sidebarCollapsed">{{ 'nav.logout' | translate }}</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+</div>
