@@ -6,7 +6,7 @@
         <span class="logo-text">{{ 'app.title' | translate }}</span>
         <span class="logo-sub">Admin</span>
       </div>
-      <div class="logo-icon" *ngIf="sidebarCollapsed">F</div>
+      <div class="logo-icon">F</div>
       <button class="toggle-btn" (click)="toggleSidebar()">
         <i class="fas" [class.fa-chevron-left]="!sidebarCollapsed" [class.fa-chevron-right]="sidebarCollapsed"></i>
       </button>
@@ -25,6 +25,10 @@
         <i class="fas fa-users"></i>
         <span *ngIf="!sidebarCollapsed">{{ 'adminNav.agents' | translate }}</span>
       </a>
+      <a routerLink="/admin/transactions" class="nav-item" [class.active]="isActive('/admin/transactions')">
+        <i class="fas fa-exchange-alt"></i>
+        <span *ngIf="!sidebarCollapsed">{{ 'adminNav.transactions' | translate }}</span>
+      </a>
     </nav>
 
     <div class="sidebar-footer">
@@ -41,6 +45,13 @@
 
   <!-- Main Content -->
   <main class="main-content">
-    <router-outlet></router-outlet>
+    <div class="nav-actions">
+    <button (click)="switchLanguage('en')" [class.active]="currentLang === 'en'">EN</button>
+    <button (click)="switchLanguage('fr')" [class.active]="currentLang === 'fr'">FR</button>
+  </div>
+  <div class="container" >
+   <router-outlet></router-outlet>
+  </div>
+
   </main>
 </div>

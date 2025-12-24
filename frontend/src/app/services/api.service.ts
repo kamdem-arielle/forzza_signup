@@ -100,4 +100,31 @@ export class ApiService {
   updateAgent(id: number, data: { status?: string; name?: string; phone?: string }): Observable<ApiResponse> {
     return this.http.put<ApiResponse>(`${this.baseUrl}/api/agents/${id}`, data);
   }
+
+  // Transaction endpoints
+  importTransactions(pdfFile: File, transactionDate: string): Observable<ApiResponse> {
+    const formData = new FormData();
+    formData.append('pdfFile', pdfFile);
+    formData.append('transactionDate', transactionDate);
+    return this.http.post<ApiResponse>(`${this.baseUrl}/api/transactions/import`, formData);
+  }
+
+  getTransactions(filters: { startDate?: string; endDate?: string; promoCode?: string }): Observable<ApiResponse> {
+    let params: any = {};
+    if (filters.startDate) params.startDate = filters.startDate;
+    if (filters.endDate) params.endDate = filters.endDate;
+    if (filters.promoCode) params.promoCode = filters.promoCode;
+    return this.http.get<ApiResponse>(`${this.baseUrl}/api/transactions`, { params });
+  }
+
+  getTransactionStats(filters: { startDate?: string; endDate?: string }): Observable<ApiResponse> {
+    let params: any = {};
+    if (filters.startDate) params.startDate = filters.startDate;
+    if (filters.endDate) params.endDate = filters.endDate;
+    return this.http.get<ApiResponse>(`${this.baseUrl}/api/transactions/stats`, { params });
+  }
+
+  deleteTransactionsByDate(date: string): Observable<ApiResponse> {
+    return this.http.delete<ApiResponse>(`${this.baseUrl}/api/transactions/${date}`);
+  }
 }

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import { filter } from 'rxjs/operators';
 
 @Component({
@@ -11,8 +12,13 @@ export class AdminLayoutComponent implements OnInit {
   currentRoute: string = '';
   sidebarCollapsed: boolean = false;
   adminName: string = '';
+  currentLang = 'en';
 
-  constructor(private router: Router) {}
+  constructor(private router: Router,private translate: TranslateService) {
+   const saved = localStorage.getItem('lang');
+    this.currentLang = saved || 'en';
+    this.translate.use(this.currentLang);
+  }
 
   ngOnInit(): void {
     const admin = localStorage.getItem('admin');
@@ -32,6 +38,12 @@ export class AdminLayoutComponent implements OnInit {
     });
 
     this.currentRoute = this.router.url;
+  }
+
+  switchLanguage(lang: 'en' | 'fr') {
+    this.currentLang = lang;
+    this.translate.use(lang);
+    localStorage.setItem('lang', lang);
   }
 
   toggleSidebar(): void {

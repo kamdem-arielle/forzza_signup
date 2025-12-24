@@ -6,8 +6,10 @@ import { AdminLayoutComponent } from './admin/admin-layout/admin-layout.componen
 import { AdminStatisticsComponent } from './admin/admin-statistics/admin-statistics.component';
 import { AdminSignupsComponent } from './admin/admin-signups/admin-signups.component';
 import { AdminAgentsComponent } from './admin/admin-agents/admin-agents.component';
+import { AdminTransactionsComponent } from './admin/admin-transactions/admin-transactions.component';
 import { AgentLoginComponent } from './agent-login/agent-login.component';
 import { AgentDashboardComponent } from './agent-dashboard/agent-dashboard.component';
+import { AgentLayoutComponent } from './agent-layout/agent-layout.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/register', pathMatch: 'full' },
@@ -22,14 +24,21 @@ const routes: Routes = [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: AdminStatisticsComponent },
       { path: 'signups', component: AdminSignupsComponent },
-      { path: 'agents', component: AdminAgentsComponent }
+      { path: 'agents', component: AdminAgentsComponent },
+      { path: 'transactions', component: AdminTransactionsComponent }
+    ]
+  },
+    { path: 'agent/login', component: AgentLoginComponent },
+    { 
+    path: 'agent', 
+    component: AgentLayoutComponent,
+    children: [
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'dashboard', component: AgentDashboardComponent },
     ]
   },
   
-  // Agent routes
-  { path: 'agent/login', component: AgentLoginComponent },
-  { path: 'agent/dashboard', component: AgentDashboardComponent },
-  { path: 'agent', redirectTo: '/agent/dashboard', pathMatch: 'full' },
+
 
   // Fallback
   { path: '**', redirectTo: '/register' }

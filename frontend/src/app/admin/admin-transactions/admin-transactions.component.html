@@ -1,0 +1,151 @@
+<div class="transactions-container">
+  <div class="page-header">
+    <h2>{{ 'transactions.title' | translate }}</h2>
+    <p class="page-subtitle">{{ 'transactions.subtitle' | translate }}</p>
+  </div>
+
+  <div *ngIf="message" class="message" [class.success]="isSuccess" [class.error]="!isSuccess">
+    {{ message }}
+  </div>
+
+  <!-- Import Section -->
+  <div class="import-section card">
+    <h3>{{ 'transactions.importTitle' | translate }}</h3>
+    <div class="import-form">
+      <div class="form-group">
+        <label for="importDate">{{ 'transactions.transactionDate' | translate }}</label>
+        <input type="date" id="importDate" [(ngModel)]="importDate" class="form-control">
+      </div>
+      <div class="form-group">
+        <label for="pdfFile">{{ 'transactions.pdfFile' | translate }}</label>
+        <input type="file" id="pdfFile" accept=".pdf" (change)="onFileSelected($event)" class="form-control">
+      </div>
+      <div class="form-group">
+        <button class="btn-primary" (click)="importPDF()" [disabled]="isImporting || !selectedFile || !importDate">
+          <span *ngIf="isImporting">{{ 'transactions.importing' | translate }}</span>
+          <span *ngIf="!isImporting">{{ 'transactions.importButton' | translate }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters Section -->
+  <div class="filter-section card">
+    <h3>{{ 'transactions.filtersTitle' | translate }}</h3>
+    <div class="filter-bar">
+      <div class="filter-group">
+        <label>{{ 'transactions.startDate' | translate }}</label>
+        <input type="date" [(ngModel)]="startDate" (ngModelChange)="onFilterChange()" class="form-control">
+      </div>
+      <div class="filter-group">
+        <label>{{ 'transactions.endDate' | translate }}</label>
+        <input type="date" [(ngModel)]="endDate" (ngModelChange)="onFilterChange()" class="form-control">
+      </div>
+      <div class="filter-group">
+        <label>{{ 'transactions.agent' | translate }}</label>
+        <select [(ngModel)]="filterPromoCode" (ngModelChange)="onFilterChange()" class="form-control">
+          <option value="">{{ 'transactions.allAgents' | translate }}</option>
+          <option *ngFor="let agent of agents" [value]="agent.promo_code">
+            {{ agent.name || agent.promo_code }} ({{ agent.promo_code }})
+          </option>
+        </select>
+      </div>
+      <div class="filter-actions">
+        <button class="btn-secondary" (click)="resetFilters()">{{ 'transactions.resetFilters' | translate }}</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary Section -->
+  <div class="summary-section">
+    <div class="summary-card">
+      <span class="summary-label">{{ 'transactions.totalTransactions' | translate }}</span>
+      <span class="summary-value">{{ totalTransactions }}</span>
+    </div>
+    <div class="summary-card">
+      <span class="summary-label">{{ 'transactions.totalAmount' | translate }}</span>
+      <span class="summary-value">{{ formatCurrency(totalAmount) }} XAF</span>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-spinner" *ngIf="isLoading">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Transactions Table -->
+  <div class="table-card" *ngIf="!isLoading">
+    <dx-data-grid
+      [dataSource]="transactions"
+      [showBorders]="false"
+      [showRowLines]="false"
+      [showColumnLines]="false"
+      [rowAlternationEnabled]="true"
+      [allowColumnReordering]="true"
+      [allowColumnResizing]="true"
+      [columnAutoWidth]="true"
+      [wordWrapEnabled]="true"
+    >
+      <dxo-grouping [autoExpandAll]="false"></dxo-grouping>
+      <dxo-group-panel [visible]="true"></dxo-group-panel>
+      <dxo-search-panel [visible]="true" [highlightCaseSensitive]="false"></dxo-search-panel>
+      <dxo-paging [pageSize]="20"></dxo-paging>
+      <dxo-pager
+        [showPageSizeSelector]="true"
+        [allowedPageSizes]="[10, 20, 50, 100]"
+        [showInfo]="true"
+      ></dxo-pager>
+      <dxo-export [enabled]="true" [allowExportSelectedData]="false"></dxo-export>
+
+      <dxi-column 
+        dataField="promo_code" 
+        [caption]="'transactions.table.promoCode' | translate"
+        [groupIndex]="0"
+        groupCellTemplate="groupCellTemplate"
+      ></dxi-column>
+
+      <dxi-column 
+        dataField="bettor_name" 
+        [caption]="'transactions.table.bettorName' | translate"
+      ></dxi-column>
+      <dxi-column 
+        dataField="amount" 
+        [caption]="'transactions.table.amount' | translate"
+        alignment="left"
+        dataType="number"
+        format="#,##0.00"
+      ></dxi-column>
+      <dxi-column 
+        dataField="agent_name" 
+        [caption]="'transactions.table.agentName' | translate"   
+      ></dxi-column>
+        <dxi-column 
+        dataField="transaction_date" 
+        [caption]="'transactions.table.transactionDate' | translate"
+        dataType="date"
+        format="dd/MM/yyyy"
+      ></dxi-column>
+
+
+      <dxo-summary>
+        <dxi-group-item
+          column="amount"
+          summaryType="sum"
+          [displayFormat]="'Total: {0} XAF'"
+          [valueFormat]="{ type: 'fixedPoint', precision: 2 }"
+        ></dxi-group-item>
+        <dxi-group-item
+          column="bettor_name"
+          summaryType="count"
+          [displayFormat]="'{0} transactions'"
+        ></dxi-group-item>
+      </dxo-summary>
+
+      <div *dxTemplate="let data of 'groupCellTemplate'">
+        <!-- <strong>{{ data.data.items && data.data.items[0] ? (data.data.items[0].agent_name || 'Unknown Agent') : 'Unknown Agent' }}</strong>
+        - {{ data.key }} -->
+        <span style="font-weight: bold;">{{ getGroupTitle(data) }}</span>
+      </div>
+    </dx-data-grid>
+  </div>
+</div>

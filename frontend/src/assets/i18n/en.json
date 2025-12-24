@@ -140,6 +140,7 @@
     "dashboard": "Dashboard",
     "signups": "Signups",
     "agents": "Agents",
+    "transactions": "Transactions",
     "admin": "Admin"
   },
   "adminStats": {
@@ -184,5 +185,35 @@
     "pending": "PENDING",
     "approved": "APPROVED",
     "archived": "ARCHIVED"
+  },
+  "transactions": {
+    "title": "Transactions",
+    "subtitle": "Import and manage betting transactions",
+    "importTitle": "Import Transactions",
+    "selectAgent": "Select Agent",
+    "selectAgentPlaceholder": "Choose an agent...",
+    "transactionDate": "Transaction Date",
+    "pdfFile": "PDF File",
+    "importing": "Importing...",
+    "importButton": "Import PDF",
+    "importSuccess": "Successfully imported {{count}} transactions",
+    "invalidFileType": "Only PDF files are allowed",
+    "selectFile": "Please select a PDF file",
+    "selectDate": "Please select a transaction date",
+    "filtersTitle": "Filters",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "agent": "Agent",
+    "allAgents": "All Agents",
+    "resetFilters": "Reset Filters",
+    "totalTransactions": "Total Transactions",
+    "totalAmount": "Total Amount",
+    "table": {
+      "bettorName": "Bettor Name",
+      "amount": "Amount",
+      "promoCode": "Promo Code",
+      "agentName": "Agent Name",
+      "transactionDate": "Transaction Date"
+    }
   }
 }

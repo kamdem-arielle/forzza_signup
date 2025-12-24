@@ -6,6 +6,9 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 
+// DevExtreme
+import { DxDataGridModule } from 'devextreme-angular';
+
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { RegisterComponent } from './register/register.component';
@@ -15,9 +18,11 @@ import { AdminLayoutComponent } from './admin/admin-layout/admin-layout.componen
 import { AdminStatisticsComponent } from './admin/admin-statistics/admin-statistics.component';
 import { AdminSignupsComponent } from './admin/admin-signups/admin-signups.component';
 import { AdminAgentsComponent } from './admin/admin-agents/admin-agents.component';
+import { AdminTransactionsComponent } from './admin/admin-transactions/admin-transactions.component';
 import { AgentLoginComponent } from './agent-login/agent-login.component';
 import { AgentDashboardComponent } from './agent-dashboard/agent-dashboard.component';
 import { ApiService } from './services/api.service';
+import { AgentLayoutComponent } from './agent-layout/agent-layout.component';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -34,8 +39,10 @@ export function HttpLoaderFactory(http: HttpClient) {
     AdminStatisticsComponent,
     AdminSignupsComponent,
     AdminAgentsComponent,
+    AdminTransactionsComponent,
     AgentLoginComponent,
-    AgentDashboardComponent
+    AgentDashboardComponent,
+    AgentLayoutComponent
   ],
   imports: [
     BrowserModule,
@@ -44,6 +51,7 @@ export function HttpLoaderFactory(http: HttpClient) {
     FormsModule,
     ReactiveFormsModule,
     AppRoutingModule,
+    DxDataGridModule,
     TranslateModule.forRoot({
       defaultLanguage: 'en',
       loader: {

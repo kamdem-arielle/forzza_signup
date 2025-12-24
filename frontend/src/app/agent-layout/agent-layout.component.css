@@ -4,8 +4,8 @@
   align-items: center;
   padding: 10px 16px;
   /* background: linear-gradient(135deg, #004E92, #00B4DB); */
-  background-image: url(../assets/page-bg.jpg);
-background-position-x: -1px;
+  background-image: url(../../assets/page-bg.jpg);
+  background-position-x: -1px;
   position: fixed;
   width: 100%;
   top: 0;

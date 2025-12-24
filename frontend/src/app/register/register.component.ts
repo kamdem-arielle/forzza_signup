@@ -26,6 +26,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
   pollingMessage: string = '';
   registeredSignupId: number | null = null;
   private destroy$ = new Subject<void>();
+  currentLang = 'en';
 
   constructor(
     private fb: FormBuilder,
@@ -40,6 +41,10 @@ export class RegisterComponent implements OnInit, OnDestroy {
       password: ['', [Validators.required, this.strongPasswordValidator(), this.noSpecialCharsValidator()]],
       confirmPassword: ['', [Validators.required]]
     }, { validators: this.passwordMatchValidator() });
+
+    const saved = localStorage.getItem('lang');
+    this.currentLang = saved || 'en';
+    this.translate.use(this.currentLang);
   }
 
   ngOnInit(): void {
@@ -226,5 +231,11 @@ export class RegisterComponent implements OnInit, OnDestroy {
           this.isPolling = false;
         }
       });
+  }
+
+    switchLanguage(lang: 'en' | 'fr') {
+    this.currentLang = lang;
+    this.translate.use(lang);
+    localStorage.setItem('lang', lang);
   }
 }

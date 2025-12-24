@@ -1,4 +1,4 @@
-/* Global Styles - Forzza Brand */
+
 * {
   margin: 0;
   padding: 0;
@@ -9,10 +9,12 @@ html, body {
   margin: 0;
   padding: 0;
   height: 100%;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-
+  font-family: "Avenir Next", sans-serif;
 }
 
+button,input,select,textarea {
+  font-family: "Avenir Next", sans-serif;
+}
 
 /* Brand Colors Reference:
    Primary Blue: #004E92

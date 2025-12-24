@@ -138,6 +138,7 @@
     "dashboard": "Tableau de bord",
     "signups": "Inscriptions",
     "agents": "Agents",
+    "transactions": "Transactions",
     "admin": "Admin"
   },
   "adminStats": {
@@ -181,5 +182,35 @@
     "pending": "EN ATTENTE",
     "approved": "APPROUVÉ",
     "archived": "ARCHIVÉ"
+  },
+  "transactions": {
+    "title": "Transactions",
+    "subtitle": "Importer et gérer les transactions de paris",
+    "importTitle": "Importer des Transactions",
+    "selectAgent": "Sélectionner un Agent",
+    "selectAgentPlaceholder": "Choisir un agent...",
+    "transactionDate": "Date de Transaction",
+    "pdfFile": "Fichier PDF",
+    "importing": "Importation...",
+    "importButton": "Importer le PDF",
+    "importSuccess": "{{count}} transactions importées avec succès",
+    "invalidFileType": "Seuls les fichiers PDF sont autorisés",
+    "selectFile": "Veuillez sélectionner un fichier PDF",
+    "selectDate": "Veuillez sélectionner une date de transaction",
+    "filtersTitle": "Filtres",
+    "startDate": "Date de début",
+    "endDate": "Date de fin",
+    "agent": "Agent",
+    "allAgents": "Tous les Agents",
+    "resetFilters": "Réinitialiser",
+    "totalTransactions": "Total Transactions",
+    "totalAmount": "Montant Total",
+    "table": {
+      "bettorName": "Nom du Parieur",
+      "amount": "Montant",
+      "promoCode": "Code Promo",
+      "agentName": "Nom de l'Agent",
+      "transactionDate": "Date de Transaction"
+    }
   }
 }

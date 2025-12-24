@@ -1,3 +1,17 @@
+<div class="navbar">
+  <div class="nav-brand">
+    <img src="assets/forzza-logo.png" alt="Forzza" class="brand-logo" />
+  </div>
+  <!-- <div class="nav-links">
+    <a routerLink="/register" routerLinkActive="active">{{ 'nav.register' | translate }}</a>
+    <a routerLink="/admin/login" routerLinkActive="active">{{ 'nav.admin' | translate }}</a>
+  </div> -->
+  <div class="nav-actions">
+    <button (click)="switchLanguage('en')" [class.active]="currentLang === 'en'">EN</button>
+    <button (click)="switchLanguage('fr')" [class.active]="currentLang === 'fr'">FR</button>
+  </div>
+</div>
+
 <div class="cont">
     <div class="register-container">
   <h2>{{ 'register.title' | translate }}</h2>

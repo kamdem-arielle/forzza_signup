@@ -1,0 +1,171 @@
+
+
+
+::ng-deep {
+  .dx-texteditor.dx-editor-outlined {
+    border-radius: 8px !important;
+    background: var(--grey-grey-5, #f9fafb);
+    border: 1px solid var(--grey-grey-20, #e5e7eb);
+  }
+  .dx-texteditor.dx-state-focused.dx-editor-outlined {
+    border: 1px solid var(--grey-grey-20, #e5e7eb);
+  }
+  .dx-searchbox .dx-icon-search {
+    right: 0;
+    top: 52%;
+  }
+  .dx-searchbox .dx-icon-search::before {
+    color: #004a87;
+  }
+  .dx-toolbar-item .dx-button .dx-button-content {
+    background-color: #004a87;
+    border-radius: 8px;
+    i {
+      color: white;
+    }
+  }
+  .dx-toolbar-menu-section.dx-toolbar-menu-last-section {
+    .dx-button .dx-button-content {
+      background-color: white;
+    }
+  }
+  .dx-button-normal.dx-state-hover .dx-button-content {
+    background-color: #004a87;
+  }
+  .dx-widget .dx-button {
+    border: none;
+  }
+  .dx-datagrid-group-panel .dx-group-panel-item {
+    border-radius: 8px;
+  }
+  .dx-datagrid-group-panel .dx-group-panel-item {
+    border-radius: 8px;
+    color: var(--grey-grey-50, #6b7280);
+    background: #e9e8e8;
+  }
+  .dx-gridbase-container,
+  .dx-widget {
+    font-family: "Avenir Next", sans-serif;
+    input {
+      font-family: "Avenir Next", sans-serif;
+    }
+  }
+  .dx-datagrid-rowsview .dx-row.dx-group-row {
+    background: #def7ff !important;
+    color: #6b7280 !important;
+    font-size: 13px;
+  }
+  .dx-datagrid-borders .dx-datagrid-headers .dx-datagrid-table {
+    height: 48px;
+    background: var(--grey-200, #f9f9fb);
+    color: var(--grey-grey-50, #6b7280);
+  }
+  .dx-datagrid .dx-data-row > td.productNameBold {
+    color: #000 !important;
+    font-weight: bold;
+  }
+  .dx-pager .dx-pages .dx-info {
+    color: var(--grey-grey-50, #6b7280);
+    opacity: 1;
+  }
+  .dx-pager .dx-pages .dx-page {
+    padding: 6px 13px 8px;
+  }
+  .dx-pager .dx-pages .dx-selection,
+  .dx-pager .dx-page-sizes .dx-selection {
+    color: white;
+    background-color: #004a87;
+    border-radius: 8px;
+  }
+  .dx-datagrid-header-panel .dx-toolbar {
+    margin-bottom: 31px;
+  }
+  .dx-datagrid {
+    margin-top: 20px;
+    padding: 10px;
+    a {
+      span {
+        color: black;
+      }
+    }
+  }
+  .mat-step-icon {
+    color: #004a87 !important;
+    background-color: #eff0f6 !important;
+  }
+  .mat-step-icon-state-edit,
+  .mat-step-icon-selected {
+    background-color: #4ac0e4 !important;
+    color: white !important;
+  }
+  .mat-step-icon-selected {
+    background-color: #4ac0e4 !important;
+    color: white !important;
+  }
+  // .mat-stepper-horizontal-line{
+  //   background: #4AC0E4 !important;
+  //   border-radius: 5px !important;
+  //   border: none !important;
+  //   height: 7px !important;
+  // }
+  .mat-stepper-horizontal-line {
+    border-radius: 5px !important;
+    border: none !important;
+    height: 7px !important;
+    background-color: #eff0f6;
+  }
+  .mat-horizontal-stepper-header:not([aria-disabled])
+    + .mat-stepper-horizontal-line {
+    background: #4ac0e4 !important;
+  }
+  .multiselect-dropdown .dropdown-btn .selected-item-container .selected-item {
+    border-radius: 6px !important;
+    border: 1px solid #004a87 !important;
+    background: #004a87 !important;
+    max-width: 200px !important;
+  }
+  .multiselect-dropdown .dropdown-btn {
+    background-color: white;
+  }
+  .first-stepper-heading {
+    ::ng-deep {
+      .mat-horizontal-stepper-header:nth-child(1) {
+        padding-left: 0px !important;
+      }
+      .mat-horizontal-stepper-header-container {
+        margin-bottom: 50px !important;
+      }
+    }
+  }
+  .mat-step-header {
+    position: initial !important;
+  }
+  .mat-step-label {
+    display: none !important;
+  }
+  .mat-stepper-horizontal {
+    position: relative !important;
+  }
+  .mat-step-label.mat-step-label-selected {
+    display: inline-block !important;
+    position: absolute;
+    top: 69px;
+    width: auto;
+    font-size: 20px !important;
+    font-weight: bold !important;
+    left: 0px;
+    color: #004a87 !important;
+  }
+
+  .dx-datagrid-pager {
+    margin-top: 31px;
+    padding-top: 27px;
+  }
+  .dx-datagrid .dx-row > td {
+    padding: 15px 7px !important;
+  }
+
+  body dx-license {
+    display: none !important;
+  }
+}

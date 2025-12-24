@@ -2,14 +2,13 @@ import { Component } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  selector: 'app-agent-layout',
+  templateUrl: './agent-layout.component.html',
+  styleUrls: ['./agent-layout.component.css']
 })
-export class AppComponent {
-  title = 'frontend';
+export class AgentLayoutComponent {
   currentLang = 'en';
-
+  
   constructor(private translate: TranslateService) {
     const saved = localStorage.getItem('lang');
     this.currentLang = saved || 'en';

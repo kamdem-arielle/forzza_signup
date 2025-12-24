@@ -5,11 +5,13 @@ const router = express.Router();
 const adminRoutes = require('./adminRoutes');
 const signupRoutes = require('./signupRoutes');
 const agentRoutes = require('./agentRoutes');
+const transactionRoutes = require('./transactionRoutes');
 
 // Mount routes
 router.use('/admin', adminRoutes);
 router.use('/signups', signupRoutes);
 router.use('/agents', agentRoutes);
+router.use('/transactions', transactionRoutes);
 
 // Test route
 router.get('/test', (req, res) => {
