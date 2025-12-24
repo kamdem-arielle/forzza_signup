@@ -71,7 +71,7 @@ exports.importPDF = [
           transactions.push({
             bettorName,
             amount,
-            promoCode: null,
+            // promoCode: null,
             transactionDate
           });
         }

@@ -38,12 +38,12 @@ class Transaction {
       const values = transactions.map(t => [
         t.bettorName,
         t.amount,
-        t.promoCode,
+        // t.promoCode,
         t.transactionDate
       ]);
       
       const [result] = await pool.query(
-        'INSERT INTO transactions (bettor_name, amount, promo_code, transaction_date) VALUES ?',
+        'INSERT INTO transactions (bettor_name, amount, transaction_date) VALUES ?',
         [values]
       );
       return result;
