@@ -8,96 +8,127 @@
     {{ message }}
   </div>
 
-  <!-- Filters -->
-  <div class="filter-bar">
-    <div class="filter-group search-group">
-      <label>{{ 'adminAgents.search' | translate }}</label>
-      <div class="search-input-wrapper">
-        <input type="text" [(ngModel)]="searchTerm" (ngModelChange)="onFilterChange()" [placeholder]="'adminAgents.searchPlaceholder' | translate">
-      </div>
-    </div>
-    <div class="filter-group">
-      <label>{{ 'adminAgents.status' | translate }}</label>
-      <select [(ngModel)]="statusFilter" (ngModelChange)="onFilterChange()">
-        <option value="all">{{ 'adminAgents.allStatus' | translate }}</option>
-        <option value="active">{{ 'adminAgents.active' | translate }}</option>
-        <option value="inactive">{{ 'adminAgents.inactive' | translate }}</option>
-      </select>
-    </div>
-    <div class="filter-actions">
-      <button class="btn-secondary" (click)="resetFilters()">{{ 'dashboard.filters.reset' | translate }}</button>
-    </div>
-  </div>
-
   <!-- Loading -->
   <div class="loading-spinner" *ngIf="isLoading">
     <div class="spinner"></div>
   </div>
 
-  <!-- Agents Table -->
+  <!-- Agents DataGrid -->
   <div class="table-card" *ngIf="!isLoading">
-    <div *ngIf="filteredAgents.length === 0" class="empty-state">
-      <i class="fas fa-user-tie"></i>
-      <p>{{ 'adminAgents.noAgents' | translate }}</p>
-    </div>
+    <dx-data-grid
+      [dataSource]="agents"
+      [showBorders]="false"
+      [rowAlternationEnabled]="true"
+      [hoverStateEnabled]="true"
+      [allowColumnResizing]="true"
+      [columnAutoWidth]="true"
+      [showColumnLines]="false"
+      [showRowLines]="false"
+      (onToolbarPreparing)="onToolbarPreparing($event)">
+      
+      <!-- Search and Filter -->
+      <dxo-search-panel [visible]="true" [placeholder]="'adminAgents.searchPlaceholder' | translate"></dxo-search-panel>
+      
+      <!-- Paging -->
+      <dxo-paging [pageSize]="10"></dxo-paging>
+      <dxo-pager
+            [showPageSizeSelector]="true"
+        [allowedPageSizes]="[10, 20, 50, 100]"
+        [showInfo]="true">
+      </dxo-pager>
 
-    <div class="table-responsive" *ngIf="filteredAgents.length > 0">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>{{ 'adminAgents.table.name' | translate }}</th>
-            <th>{{ 'adminAgents.table.username' | translate }}</th>
-            <th>{{ 'adminAgents.table.promoCode' | translate }}</th>
-            <th>{{ 'adminAgents.table.phone' | translate }}</th>
-            <th>{{ 'adminAgents.table.registrations' | translate }}</th>
-            <th>{{ 'adminAgents.table.status' | translate }}</th>
-            <th>{{ 'adminAgents.table.lastLogin' | translate }}</th>
-            <th>{{ 'adminAgents.table.actions' | translate }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let agent of getPaginatedList()">
-            <td class="agent-name">
-              <div class="agent-avatar">{{ (agent.name ? agent.name.charAt(0).toUpperCase() : '?') }}</div>
-              <span>{{ agent.name || '(No Name)' }}</span>
-            </td>
-            <td>{{ agent.username }}</td>
-            <td>
-              <span class="promo-code">{{ agent.promo_code }}</span>
-            </td>
-            <td>{{ agent.phone || '-' }}</td>
-            <td>{{ agent.registration_count ?? 0 }}</td>
-            <td>
-              <span class="status-badge" [class.active]="agent.status === 'active'" [class.inactive]="agent.status === 'inactive'">
-                {{ ('adminAgents.' + agent.status) | translate }}
-              </span>
-            </td>
-            <td>{{ agent.last_login ? (agent.last_login | date:'short') : '-' }}</td>
-            <td>
-              <button 
-                class="btn-toggle" 
-                [class.deactivate]="agent.status === 'active'"
-                [class.activate]="agent.status === 'inactive'"
-                (click)="toggleAgentStatus(agent)">
-                {{ (agent.status === 'active' ? 'adminAgents.deactivate' : 'adminAgents.activate') | translate }}
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+      <!-- Columns -->
+      <dxi-column 
+        dataField="name" 
+        [caption]="'adminAgents.table.name' | translate"
+        cellTemplate="nameTemplate"
+        >
+      </dxi-column>
+      
+      <dxi-column 
+        dataField="username" 
+        [caption]="'adminAgents.table.username' | translate"
+      >
+      </dxi-column>
+      
+      <dxi-column 
+        dataField="promo_code" 
+        [caption]="'adminAgents.table.promoCode' | translate"
+        cellTemplate="promoCodeTemplate"
+  >
+      </dxi-column>
+      
+      <dxi-column 
+        dataField="phone" 
+        [caption]="'adminAgents.table.phone' | translate"
+        cellTemplate="phoneTemplate"
+       >
+      </dxi-column>
+      
+      <dxi-column 
+        dataField="registration_count" 
+        [caption]="'adminAgents.table.registrations' | translate"
+        dataType="number"
+        sortOrder="desc">
+      </dxi-column>
+      
+      <dxi-column 
+        dataField="status" 
+        [caption]="'adminAgents.table.status' | translate"
+        cellTemplate="statusTemplate"
+        >
+        <dxo-header-filter [dataSource]="statusFilterData"></dxo-header-filter>
+      </dxi-column>
+      
+      <dxi-column 
+        dataField="last_login" 
+        [caption]="'adminAgents.table.lastLogin' | translate"
+        dataType="datetime"
+        cellTemplate="lastLoginTemplate"
+   >
+      </dxi-column>
+      
+      <dxi-column 
+        [caption]="'adminAgents.table.actions' | translate"
+        cellTemplate="actionsTemplate"
+        [width]="120">
+      </dxi-column>
 
-    <!-- Pagination -->
-    <div class="pagination" *ngIf="getTotalPages() > 1">
-      <button class="page-btn" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">
-        &laquo; {{ 'dashboard.pagination.prev' | translate }}
-      </button>
-      <span class="page-info">
-        {{ 'dashboard.pagination.page' | translate }} {{ currentPage }} {{ 'dashboard.pagination.of' | translate }} {{ getTotalPages() }}
-      </span>
-      <button class="page-btn" (click)="goToPage(currentPage + 1)" [disabled]="currentPage >= getTotalPages()">
-        {{ 'dashboard.pagination.next' | translate }} &raquo;
-      </button>
-    </div>
+      <!-- Cell Templates -->
+      <div *dxTemplate="let data of 'nameTemplate'">
+        <div class="agent-name">
+          <div class="agent-avatar">{{ getInitial(data.value) }}</div>
+          <span>{{ data.value || '(No Name)' }}</span>
+        </div>
+      </div>
+
+      <div *dxTemplate="let data of 'promoCodeTemplate'">
+        <span class="promo-code">{{ data.value }}</span>
+      </div>
+
+      <div *dxTemplate="let data of 'phoneTemplate'">
+        {{ data.value || '-' }}
+      </div>
+
+      <div *dxTemplate="let data of 'statusTemplate'">
+        <span class="status-badge" [class.active]="data.value === 'active'" [class.inactive]="data.value === 'inactive'">
+          {{ ('adminAgents.' + data.value) | translate }}
+        </span>
+      </div>
+
+      <div *dxTemplate="let data of 'lastLoginTemplate'">
+        {{ data.value ? (data.value | date:'short') : '-' }}
+      </div>
+
+      <div *dxTemplate="let data of 'actionsTemplate'">
+        <button 
+          class="btn-toggle" 
+          [class.deactivate]="data.data.status === 'active'"
+          [class.activate]="data.data.status === 'inactive'"
+          (click)="toggleAgentStatus(data.data)">
+          {{ (data.data.status === 'active' ? 'adminAgents.deactivate' : 'adminAgents.activate') | translate }}
+        </button>
+      </div>
+    </dx-data-grid>
   </div>
 </div>

@@ -39,93 +39,6 @@
   border: 1px solid #f5c6cb;
 }
 
-/* Filter Bar */
-.filter-bar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  align-items: flex-end;
-  margin: 0 0 20px;
-  padding: 16px;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-}
-
-.filter-group {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 180px;
-}
-
-.search-group {
-  flex: 1;
-  min-width: 250px;
-}
-
-.filter-group label {
-  font-size: 13px;
-  font-weight: 600;
-  color: #1A1A1A;
-}
-
-.search-input-wrapper {
-  position: relative;
-}
-
-.search-input-wrapper i {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #999;
-}
-
-.search-input-wrapper input {
-  width: 100%;
-  padding: 8px 12px 8px 36px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 14px;
-  transition: border-color 0.2s;
-}
-
-.filter-group input,
-.filter-group select {
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 14px;
-  transition: border-color 0.2s;
-}
-
-.filter-group input:focus,
-.filter-group select:focus {
-  outline: none;
-  border-color: #004E92;
-}
-
-.filter-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.btn-secondary {
-  padding: 9px 14px;
-  border-radius: 6px;
-  font-size: 14px;
-  cursor: pointer;
-  border: 1px solid #ddd;
-  background: #f8f9fa;
-  color: #1A1A1A;
-  transition: all 0.2s;
-}
-
-.btn-secondary:hover {
-  background: #e9ecef;
-}
-
 /* Loading */
 .loading-spinner {
   display: flex;
@@ -154,60 +67,7 @@
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   overflow: hidden;
-}
-
-.empty-state {
-  padding: 60px 40px;
-  text-align: center;
-  color: #888;
-}
-
-.empty-state i {
-  font-size: 48px;
-  margin-bottom: 16px;
-  opacity: 0.3;
-}
-
-.empty-state p {
-  margin: 0;
-  font-size: 15px;
-}
-
-/* Data Table */
-.table-responsive {
-  overflow-x: auto;
-}
-
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 800px;
-}
-
-.data-table th,
-.data-table td {
-  padding: 8px 16px;
-  text-align: left;
-  border-bottom: 1px solid #eee;
-  white-space: nowrap;
-}
-
-.data-table th {
-  background: #f8f9fa;
-  font-weight: 600;
-  color: #1A1A1A;
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.data-table td {
-  font-size: 14px;
-  color: #333;
-}
-
-.data-table tbody tr:hover {
-  background: #f8f9fa;
+  padding: 16px;
 }
 
 /* Agent Name Cell */
@@ -228,6 +88,7 @@
   justify-content: center;
   font-weight: 600;
   font-size: 14px;
+  flex-shrink: 0;
 }
 
 /* Promo Code */
@@ -289,56 +150,64 @@
   background: #c82333;
 }
 
-/* Pagination */
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 16px;
-  padding: 16px;
-  border-top: 1px solid #eee;
+/* DevExtreme DataGrid Customizations */
+::ng-deep .dx-datagrid {
+  font-family: inherit;
 }
 
-.page-btn {
-  padding: 8px 16px;
-  background: #004E92;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background 0.2s, opacity 0.2s;
+::ng-deep .dx-datagrid-headers {
+  background: #f8f9fa;
 }
 
-.page-btn:hover:not(:disabled) {
-  background: #003a70;
+::ng-deep .dx-datagrid-headers .dx-header-row {
+  font-weight: 600;
+  color: #1A1A1A;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.page-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.page-info {
+::ng-deep .dx-datagrid-rowsview .dx-row {
   font-size: 14px;
   color: #333;
-  font-weight: 500;
+}
+
+::ng-deep .dx-datagrid-rowsview .dx-row:hover {
+  background: #f8f9fa !important;
+}
+
+::ng-deep .dx-datagrid-rowsview .dx-row-alt {
+  background: #fafbfc;
+}
+
+::ng-deep .dx-datagrid-search-panel {
+  margin-left: 0;
+}
+
+::ng-deep .dx-toolbar .dx-toolbar-items-container {
+  height: 50px;
+}
+
+::ng-deep .dx-pager .dx-page-sizes .dx-selection,
+::ng-deep .dx-pager .dx-pages .dx-selection {
+  background-color: #004E92;
+  color: #fff;
+}
+
+::ng-deep .dx-datagrid-filter-row .dx-editor-cell .dx-texteditor-input {
+  font-size: 13px;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-  .filter-bar {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .filter-group,
-  .search-group {
-    min-width: 100%;
-  }
-
   .btn-toggle {
     padding: 5px 10px;
+    font-size: 12px;
+  }
+
+  .agent-avatar {
+    width: 30px;
+    height: 30px;
     font-size: 12px;
   }
 }

@@ -23,16 +23,15 @@ interface Agent {
 })
 export class AdminAgentsComponent implements OnInit {
   agents: Agent[] = [];
-  filteredAgents: Agent[] = [];
   isLoading = true;
-  searchTerm = '';
-  statusFilter = 'all';
   message = '';
   isSuccess = false;
 
-  // Pagination
-  pageSize = 10;
-  currentPage = 1;
+  // Status filter data for header filter
+  statusFilterData = [
+    { text: 'Active', value: 'active' },
+    { text: 'Inactive', value: 'inactive' }
+  ];
 
   constructor(
     private apiService: ApiService,
@@ -47,6 +46,14 @@ export class AdminAgentsComponent implements OnInit {
       return;
     }
     this.loadAgents();
+    this.updateStatusFilterTranslations();
+  }
+
+  updateStatusFilterTranslations(): void {
+    this.statusFilterData = [
+      { text: this.translate.instant('adminAgents.active'), value: 'active' },
+      { text: this.translate.instant('adminAgents.inactive'), value: 'inactive' }
+    ];
   }
 
   loadAgents(): void {
@@ -56,7 +63,6 @@ export class AdminAgentsComponent implements OnInit {
         this.isLoading = false;
         if (response.success && response.data) {
           this.agents = response.data;
-          this.applyFilters();
         }
       },
       error: (error) => {
@@ -66,40 +72,8 @@ export class AdminAgentsComponent implements OnInit {
     });
   }
 
-  applyFilters(): void {
-    let filtered = [...this.agents];
-
-    // Search filter
-    if (this.searchTerm) {
-      const term = this.searchTerm.toLowerCase();
-      filtered = filtered.filter(a =>
-        a.name.toLowerCase().includes(term) ||
-        a.username.toLowerCase().includes(term) ||
-        a.promo_code.toLowerCase().includes(term) ||
-        (a.phone && a.phone.toLowerCase().includes(term))
-      );
-    }
-
-    // Status filter
-    if (this.statusFilter !== 'all') {
-      filtered = filtered.filter(a => a.status === this.statusFilter);
-    }
-
-    // Sort by registration_count descending
-    filtered.sort((a, b) => (b.registration_count ?? 0) - (a.registration_count ?? 0));
-
-    this.filteredAgents = filtered;
-    this.currentPage = 1;
-  }
-
-  onFilterChange(): void {
-    this.applyFilters();
-  }
-
-  resetFilters(): void {
-    this.searchTerm = '';
-    this.statusFilter = 'all';
-    this.applyFilters();
+  getInitial(name: string): string {
+    return name ? name.charAt(0).toUpperCase() : '?';
   }
 
   toggleAgentStatus(agent: Agent): void {
@@ -120,19 +94,8 @@ export class AdminAgentsComponent implements OnInit {
     });
   }
 
-  // Pagination
-  getPaginatedList(): Agent[] {
-    const start = (this.currentPage - 1) * this.pageSize;
-    return this.filteredAgents.slice(start, start + this.pageSize);
-  }
-
-  getTotalPages(): number {
-    return Math.ceil(this.filteredAgents.length / this.pageSize) || 1;
-  }
-
-  goToPage(page: number): void {
-    if (page < 1 || page > this.getTotalPages()) return;
-    this.currentPage = page;
+  onToolbarPreparing(e: any): void {
+    // Optional: customize toolbar if needed
   }
 
   private showMessage(msg: string, success: boolean): void {
