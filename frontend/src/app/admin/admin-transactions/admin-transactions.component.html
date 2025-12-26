@@ -85,6 +85,7 @@
       [allowColumnResizing]="true"
       [columnAutoWidth]="true"
       [wordWrapEnabled]="true"
+      (onExporting)="onExporting($event)"
     >
       <dxo-grouping [autoExpandAll]="false"></dxo-grouping>
       <dxo-group-panel [visible]="true"></dxo-group-panel>
@@ -95,7 +96,7 @@
         [allowedPageSizes]="[10, 20, 50, 100]"
         [showInfo]="true"
       ></dxo-pager>
-      <dxo-export [enabled]="true" [allowExportSelectedData]="false"></dxo-export>
+      <dxo-export [enabled]="true"  [allowExportSelectedData]="false"></dxo-export>
 
       <dxi-column 
         dataField="promo_code" 

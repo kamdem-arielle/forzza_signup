@@ -3,6 +3,9 @@ import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { ApiService } from '../../services/api.service';
 import { DxDataGridComponent } from 'devextreme-angular';
+import { Workbook } from 'devextreme-exceljs-fork';
+import { saveAs } from 'file-saver';
+import { exportDataGrid } from 'devextreme/excel_exporter';
 
 interface Transaction {
   id: number;
@@ -82,6 +85,13 @@ export class AdminTransactionsComponent implements OnInit {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+  }
+
+  formatDateForFileExport(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${day}_${month}_${year}`;
   }
 
   loadAgents(): void {
@@ -221,6 +231,31 @@ export class AdminTransactionsComponent implements OnInit {
     }
     return '';
   }
+
+    todo(event:any){
+    return event
+  }
+
+  onExporting(e:any) {
+        e.component.beginUpdate();
+        e.component.columnOption('ID', 'visible', true);
+        const workbook = new Workbook();
+        const worksheet = workbook.addWorksheet('Transactions');
+        let startdate=this.formatDateForFileExport(new Date(this.startDate));
+        let enddate=this.formatDateForFileExport(new Date(this.endDate));
+ 
+        exportDataGrid({
+            component: e.component,
+            worksheet: worksheet
+        }).then(function() {
+            workbook.xlsx.writeBuffer().then(function(buffer: BlobPart) {
+                saveAs(new Blob([buffer], { type: 'application/octet-stream' }), `Transactions_${startdate}_${enddate}.xlsx`);
+            });
+        }).then(function() {
+            e.component.columnOption('ID', 'visible', false);
+            e.component.endUpdate();
+        });
+    }
 
 
 }
