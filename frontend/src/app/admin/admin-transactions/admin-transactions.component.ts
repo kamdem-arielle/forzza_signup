@@ -72,11 +72,11 @@ export class AdminTransactionsComponent implements OnInit {
 
   initializeDates(): void {
     const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
+    const lastMonthFromToday = new Date(today);
+    lastMonthFromToday.setMonth(today.getMonth() - 1);
 
     this.endDate = this.formatDate(today);
-    this.startDate = this.formatDate(yesterday);
+    this.startDate = this.formatDate(lastMonthFromToday);
     this.importDate = this.formatDate(today);
   }
 
