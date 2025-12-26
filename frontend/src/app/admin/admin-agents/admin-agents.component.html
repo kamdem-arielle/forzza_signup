@@ -24,11 +24,13 @@
       [columnAutoWidth]="true"
       [showColumnLines]="false"
       [showRowLines]="false"
-      (onToolbarPreparing)="onToolbarPreparing($event)">
+      (onToolbarPreparing)="onToolbarPreparing($event)"
+      (onExporting)="coreService.onExporting($event,'Agents.xlsx')"
+      >
       
       <!-- Search and Filter -->
       <dxo-search-panel [visible]="true" [placeholder]="'adminAgents.searchPlaceholder' | translate"></dxo-search-panel>
-      
+      <dxo-export [enabled]="true"  [allowExportSelectedData]="false"></dxo-export>
       <!-- Paging -->
       <dxo-paging [pageSize]="10"></dxo-paging>
       <dxo-pager

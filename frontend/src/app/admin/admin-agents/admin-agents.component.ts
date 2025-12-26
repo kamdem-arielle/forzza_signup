@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { ApiService } from '../../services/api.service';
-
+import { CoreService } from '../../services/core.service';
 interface Agent {
   id: number;
   name: string;
@@ -36,7 +36,8 @@ export class AdminAgentsComponent implements OnInit {
   constructor(
     private apiService: ApiService,
     private router: Router,
-    private translate: TranslateService
+    private translate: TranslateService,
+    public coreService: CoreService 
   ) {}
 
   ngOnInit(): void {
