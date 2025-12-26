@@ -85,7 +85,7 @@
       [allowColumnResizing]="true"
       [columnAutoWidth]="true"
       [wordWrapEnabled]="true"
-      (onExporting)="onExporting($event)"
+      (onExporting)="coreService.onExporting($event,getFileName())"
     >
       <dxo-grouping [autoExpandAll]="false"></dxo-grouping>
       <dxo-group-panel [visible]="true"></dxo-group-panel>

@@ -2,10 +2,8 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { ApiService } from '../../services/api.service';
-import { DxDataGridComponent } from 'devextreme-angular';
-import { Workbook } from 'devextreme-exceljs-fork';
-import { saveAs } from 'file-saver';
-import { exportDataGrid } from 'devextreme/excel_exporter';
+import { CoreService } from '../../services/core.service';
+
 
 interface Transaction {
   id: number;
@@ -29,7 +27,6 @@ interface Agent {
   styleUrls: ['./admin-transactions.component.css']
 })
 export class AdminTransactionsComponent implements OnInit {
-  @ViewChild(DxDataGridComponent, { static: false }) dataGrid!: DxDataGridComponent;
 
   transactions: Transaction[] = [];
   agents: Agent[] = [];
@@ -55,7 +52,8 @@ export class AdminTransactionsComponent implements OnInit {
   constructor(
     private apiService: ApiService,
     private router: Router,
-    private translate: TranslateService
+    private translate: TranslateService,
+    public coreService: CoreService
   ) {}
 
   ngOnInit(): void {
@@ -232,30 +230,12 @@ export class AdminTransactionsComponent implements OnInit {
     return '';
   }
 
-    todo(event:any){
-    return event
+  getFileName(){
+    let startdate=this.formatDateForFileExport(new Date(this.startDate));
+    let enddate=this.formatDateForFileExport(new Date(this.endDate));
+    return `Transactions_${startdate}_${enddate}.xlsx`;
   }
 
-  onExporting(e:any) {
-        e.component.beginUpdate();
-        e.component.columnOption('ID', 'visible', true);
-        const workbook = new Workbook();
-        const worksheet = workbook.addWorksheet('Transactions');
-        let startdate=this.formatDateForFileExport(new Date(this.startDate));
-        let enddate=this.formatDateForFileExport(new Date(this.endDate));
- 
-        exportDataGrid({
-            component: e.component,
-            worksheet: worksheet
-        }).then(function() {
-            workbook.xlsx.writeBuffer().then(function(buffer: BlobPart) {
-                saveAs(new Blob([buffer], { type: 'application/octet-stream' }), `Transactions_${startdate}_${enddate}.xlsx`);
-            });
-        }).then(function() {
-            e.component.columnOption('ID', 'visible', false);
-            e.component.endUpdate();
-        });
-    }
 
 
 }
