@@ -28,189 +28,257 @@
       <div class="stat-value">{{ stats.approval_rate }}%</div>
       <div class="stat-label">{{ 'agentDashboard.stats.approvalRate' | translate }}</div>
     </div>
+    <div class="stat-card transactions">
+      <div class="stat-value">{{ transactionStats?.total_transactions || 0 }}</div>
+      <div class="stat-label">{{ 'agentDashboard.stats.totalTransactions' | translate }}</div>
+    </div>
+    <div class="stat-card amount">
+      <div class="stat-value">{{ (transactionStats?.total_amount || 0) | number:'1.0-0' }} <span class="currency">XAF</span></div>
+      <div class="stat-label">{{ 'agentDashboard.stats.totalAmount' | translate }}</div>
+    </div>
   </div>
 
   <div *ngIf="message" class="message" [class.success]="isSuccess" [class.error]="!isSuccess">
     {{ message }}
   </div>
 
-  <!-- Filters (No promo code filter for agents) -->
-  <div class="filter-bar">
-    <div class="filter-group">
-      <label>{{ 'dashboard.filters.name' | translate }}</label>
-      <input type="text" [(ngModel)]="nameFilter" (ngModelChange)="onFilterChange()" [placeholder]="'dashboard.filters.namePlaceholder' | translate">
-    </div>
-    <div class="filter-group">
-      <label>{{ 'dashboard.filters.phone' | translate }}</label>
-      <input type="text" [(ngModel)]="phoneFilter" (ngModelChange)="onFilterChange()" [placeholder]="'dashboard.filters.phonePlaceholder' | translate">
-    </div>
-    <div class="filter-actions">
-      <button class="btn-secondary" (click)="resetFilters()">{{ 'dashboard.filters.reset' | translate }}</button>
-    </div>
-  </div>
-
-  <!-- Tabs -->
-  <div class="tabs">
+  <!-- Main Tabs: Signups vs Transactions -->
+  <div class="main-tabs">
     <button 
-      class="tab" 
-      [class.active]="activeTab === 'pending'" 
-      (click)="setTab('pending')">
-      {{ 'dashboard.pending' | translate }} ({{ ((pending$ | async) || []).length }})
+      class="main-tab" 
+      [class.active]="mainTab === 'signups'" 
+      (click)="setMainTab('signups')">
+      <i class="fas fa-users"></i>
+      {{ 'agentDashboard.tabs.signups' | translate }}
     </button>
     <button 
-      class="tab" 
-      [class.active]="activeTab === 'approved'" 
-      (click)="setTab('approved')">
-      {{ 'dashboard.approved' | translate }} ({{ ((approved$ | async) || []).length }})
-    </button>
-    <button 
-      class="tab" 
-      [class.active]="activeTab === 'archived'" 
-      (click)="setTab('archived')">
-      {{ 'dashboard.archived' | translate }} ({{ ((archived$ | async) || []).length }})
+      class="main-tab" 
+      [class.active]="mainTab === 'transactions'" 
+      (click)="setMainTab('transactions')">
+      <i class="fas fa-exchange-alt"></i>
+      {{ 'agentDashboard.tabs.transactions' | translate }}
     </button>
   </div>
 
-  <!-- Pending Tab Content -->
-  <div class="tab-content" *ngIf="activeTab === 'pending'">
-    <ng-container *ngIf="pending$ | async as pendingList">
-      <div *ngIf="pendingList.length === 0" class="empty-state">
-        {{ 'agentDashboard.noPending' | translate }}
+  <!-- SIGNUPS TAB CONTENT -->
+  <div *ngIf="mainTab === 'signups'">
+    <!-- Filters (No promo code filter for agents) -->
+    <div class="filter-bar">
+      <div class="filter-group">
+        <label>{{ 'dashboard.filters.name' | translate }}</label>
+        <input type="text" [(ngModel)]="nameFilter" (ngModelChange)="onFilterChange()" [placeholder]="'dashboard.filters.namePlaceholder' | translate">
       </div>
-      <div class="table-responsive" *ngIf="pendingList.length > 0">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>{{ 'dashboard.table.username' | translate }}</th>
-              <th>{{ 'dashboard.table.phone' | translate }}</th>
-              <th>{{ 'dashboard.table.password' | translate }}</th>
-              <th>{{ 'dashboard.table.status' | translate }}</th>
-              <th>{{ 'dashboard.table.createdAt' | translate }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let signup of getPaginatedList(pendingList, pendingPage)" [class.new-row]="isPendingNew(signup.id)">
-              <td>{{ signup.username }}</td>
-              <td>{{ signup.phone }}</td>
-              <td>
-                <div class="password-cell">
-                  <span>{{ getPasswordDisplay(signup.password, signup.id) }}</span>
-                  <button type="button" class="toggle-password-btn" (click)="togglePasswordVisibility(signup.id)">
-                    <i [class]="isPasswordVisible(signup.id) ? 'fas fa-eye' : 'fas fa-eye-slash'"></i>
-                  </button>
-                </div>
-              </td>
-              <td><span class="status pending">{{ ('status.' + (signup.status || '').toLowerCase()) | translate }}</span></td>
-              <td>{{ signup.created_at | date:'short' }}</td>
-            </tr>
-          </tbody>
-        </table>
-        <div class="pagination" *ngIf="getTotalPages(pendingList) > 1">
-          <button class="page-btn" (click)="goToPage('pending', pendingPage - 1)" [disabled]="pendingPage === 1">
-            &laquo; {{ 'dashboard.pagination.prev' | translate }}
-          </button>
-          <span class="page-info">{{ 'dashboard.pagination.page' | translate }} {{ pendingPage }} {{ 'dashboard.pagination.of' | translate }} {{ getTotalPages(pendingList) }}</span>
-          <button class="page-btn" (click)="goToPage('pending', pendingPage + 1)" [disabled]="pendingPage >= getTotalPages(pendingList)">
-            {{ 'dashboard.pagination.next' | translate }} &raquo;
-          </button>
+      <div class="filter-group">
+        <label>{{ 'dashboard.filters.phone' | translate }}</label>
+        <input type="text" [(ngModel)]="phoneFilter" (ngModelChange)="onFilterChange()" [placeholder]="'dashboard.filters.phonePlaceholder' | translate">
+      </div>
+      <div class="filter-actions">
+        <button class="btn-secondary" (click)="resetFilters()">{{ 'dashboard.filters.reset' | translate }}</button>
+      </div>
+    </div>
+
+    <!-- Signup Sub-Tabs -->
+    <div class="tabs">
+      <button 
+        class="tab" 
+        [class.active]="activeTab === 'pending'" 
+        (click)="setTab('pending')">
+        {{ 'dashboard.pending' | translate }} ({{ ((pending$ | async) || []).length }})
+      </button>
+      <button 
+        class="tab" 
+        [class.active]="activeTab === 'approved'" 
+        (click)="setTab('approved')">
+        {{ 'dashboard.approved' | translate }} ({{ ((approved$ | async) || []).length }})
+      </button>
+      <button 
+        class="tab" 
+        [class.active]="activeTab === 'archived'" 
+        (click)="setTab('archived')">
+        {{ 'dashboard.archived' | translate }} ({{ ((archived$ | async) || []).length }})
+      </button>
+    </div>
+
+    <!-- Pending Tab Content -->
+    <div class="tab-content" *ngIf="activeTab === 'pending' && !isLoading">
+      <ng-container *ngIf="pending$ | async as pendingList">
+        <div *ngIf="pendingList.length === 0" class="empty-state">
+          {{ 'agentDashboard.noPending' | translate }}
         </div>
-      </div>
-    </ng-container>
+        <div class="table-responsive" *ngIf="pendingList.length > 0">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>{{ 'dashboard.table.username' | translate }}</th>
+                <th>{{ 'dashboard.table.phone' | translate }}</th>
+                <th>{{ 'dashboard.table.password' | translate }}</th>
+                <th>{{ 'dashboard.table.status' | translate }}</th>
+                <th>{{ 'dashboard.table.createdAt' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let signup of getPaginatedList(pendingList, pendingPage)" [class.new-row]="isPendingNew(signup.id)">
+                <td>{{ signup.username }}</td>
+                <td>{{ signup.phone }}</td>
+                <td>
+                  <div class="password-cell">
+                    <span>{{ getPasswordDisplay(signup.password, signup.id) }}</span>
+                    <button type="button" class="toggle-password-btn" (click)="togglePasswordVisibility(signup.id)">
+                      <i [class]="isPasswordVisible(signup.id) ? 'fas fa-eye' : 'fas fa-eye-slash'"></i>
+                    </button>
+                  </div>
+                </td>
+                <td><span class="status pending">{{ ('status.' + (signup.status || '').toLowerCase()) | translate }}</span></td>
+                <td>{{ signup.created_at | date:'short' }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="pagination" *ngIf="getTotalPages(pendingList) > 1">
+            <button class="page-btn" (click)="goToPage('pending', pendingPage - 1)" [disabled]="pendingPage === 1">
+              &laquo; {{ 'dashboard.pagination.prev' | translate }}
+            </button>
+            <span class="page-info">{{ 'dashboard.pagination.page' | translate }} {{ pendingPage }} {{ 'dashboard.pagination.of' | translate }} {{ getTotalPages(pendingList) }}</span>
+            <button class="page-btn" (click)="goToPage('pending', pendingPage + 1)" [disabled]="pendingPage >= getTotalPages(pendingList)">
+              {{ 'dashboard.pagination.next' | translate }} &raquo;
+            </button>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+
+    <!-- Approved Tab Content -->
+    <div class="tab-content" *ngIf="activeTab === 'approved' && !isLoading">
+      <ng-container *ngIf="approved$ | async as approvedList">
+        <div *ngIf="approvedList.length === 0" class="empty-state">
+          {{ 'agentDashboard.noApproved' | translate }}
+        </div>
+        <div class="table-responsive" *ngIf="approvedList.length > 0">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>{{ 'dashboard.table.username' | translate }}</th>
+                <th>{{ 'dashboard.table.phone' | translate }}</th>
+                <th>{{ 'dashboard.table.password' | translate }}</th>
+                <th>{{ 'dashboard.table.status' | translate }}</th>
+                <th>{{ 'dashboard.table.createdAt' | translate }}</th>
+                <th>{{ 'dashboard.table.approvedAt' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let signup of getPaginatedList(approvedList, approvedPage)" [class.new-row]="isApprovedNew(signup.id)">
+                <td>{{ signup.username }}</td>
+                <td>{{ signup.phone }}</td>
+                <td>
+                  <div class="password-cell">
+                    <span>{{ getPasswordDisplay(signup.password, signup.id) }}</span>
+                    <button type="button" class="toggle-password-btn" (click)="togglePasswordVisibility(signup.id)">
+                      <i [class]="isPasswordVisible(signup.id) ? 'fas fa-eye' : 'fas fa-eye-slash'"></i>
+                    </button>
+                  </div>
+                </td>
+                <td><span class="status approved">{{ ('status.' + (signup.status || '').toLowerCase()) | translate }}</span></td>
+                <td>{{ signup.created_at | date:'short' }}</td>
+                <td>{{ signup.approved_at | date:'short' }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="pagination" *ngIf="getTotalPages(approvedList) > 1">
+            <button class="page-btn" (click)="goToPage('approved', approvedPage - 1)" [disabled]="approvedPage === 1">
+              &laquo; {{ 'dashboard.pagination.prev' | translate }}
+            </button>
+            <span class="page-info">{{ 'dashboard.pagination.page' | translate }} {{ approvedPage }} {{ 'dashboard.pagination.of' | translate }} {{ getTotalPages(approvedList) }}</span>
+            <button class="page-btn" (click)="goToPage('approved', approvedPage + 1)" [disabled]="approvedPage >= getTotalPages(approvedList)">
+              {{ 'dashboard.pagination.next' | translate }} &raquo;
+            </button>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+
+    <!-- Archived Tab Content -->
+    <div class="tab-content" *ngIf="activeTab === 'archived' && !isLoading">
+      <ng-container *ngIf="archived$ | async as archivedList">
+        <div *ngIf="archivedList.length === 0" class="empty-state">
+          {{ 'agentDashboard.noArchived' | translate }}
+        </div>
+        <div class="table-responsive" *ngIf="archivedList.length > 0">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>{{ 'dashboard.table.username' | translate }}</th>
+                <th>{{ 'dashboard.table.phone' | translate }}</th>
+                <th>{{ 'dashboard.table.password' | translate }}</th>
+                <th>{{ 'dashboard.table.status' | translate }}</th>
+                <th>{{ 'dashboard.table.createdAt' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let signup of getPaginatedList(archivedList, archivedPage)" [class.new-row]="isArchivedNew(signup.id)">
+                <td>{{ signup.username }}</td>
+                <td>{{ signup.phone }}</td>
+                <td>
+                  <div class="password-cell">
+                    <span>{{ getPasswordDisplay(signup.password, signup.id) }}</span>
+                    <button type="button" class="toggle-password-btn" (click)="togglePasswordVisibility(signup.id)">
+                      <i [class]="isPasswordVisible(signup.id) ? 'fas fa-eye' : 'fas fa-eye-slash'"></i>
+                    </button>
+                  </div>
+                </td>
+                <td><span class="status archived">{{ ('status.' + (signup.status || '').toLowerCase()) | translate }}</span></td>
+                <td>{{ signup.created_at | date:'short' }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="pagination" *ngIf="getTotalPages(archivedList) > 1">
+            <button class="page-btn" (click)="goToPage('archived', archivedPage - 1)" [disabled]="archivedPage === 1">
+              &laquo; {{ 'dashboard.pagination.prev' | translate }}
+            </button>
+            <span class="page-info">{{ 'dashboard.pagination.page' | translate }} {{ archivedPage }} {{ 'dashboard.pagination.of' | translate }} {{ getTotalPages(archivedList) }}</span>
+            <button class="page-btn" (click)="goToPage('archived', archivedPage + 1)" [disabled]="archivedPage >= getTotalPages(archivedList)">
+              {{ 'dashboard.pagination.next' | translate }} &raquo;
+            </button>
+          </div>
+        </div>
+      </ng-container>
+    </div>
   </div>
 
-  <!-- Approved Tab Content -->
-  <div class="tab-content" *ngIf="activeTab === 'approved'">
-    <ng-container *ngIf="approved$ | async as approvedList">
-      <div *ngIf="approvedList.length === 0" class="empty-state">
-        {{ 'agentDashboard.noApproved' | translate }}
-      </div>
-      <div class="table-responsive" *ngIf="approvedList.length > 0">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>{{ 'dashboard.table.username' | translate }}</th>
-              <th>{{ 'dashboard.table.phone' | translate }}</th>
-              <th>{{ 'dashboard.table.password' | translate }}</th>
-              <th>{{ 'dashboard.table.status' | translate }}</th>
-              <th>{{ 'dashboard.table.createdAt' | translate }}</th>
-              <th>{{ 'dashboard.table.approvedAt' | translate }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let signup of getPaginatedList(approvedList, approvedPage)" [class.new-row]="isApprovedNew(signup.id)">
-              <td>{{ signup.username }}</td>
-              <td>{{ signup.phone }}</td>
-              <td>
-                <div class="password-cell">
-                  <span>{{ getPasswordDisplay(signup.password, signup.id) }}</span>
-                  <button type="button" class="toggle-password-btn" (click)="togglePasswordVisibility(signup.id)">
-                    <i [class]="isPasswordVisible(signup.id) ? 'fas fa-eye' : 'fas fa-eye-slash'"></i>
-                  </button>
-                </div>
-              </td>
-              <td><span class="status approved">{{ ('status.' + (signup.status || '').toLowerCase()) | translate }}</span></td>
-              <td>{{ signup.created_at | date:'short' }}</td>
-              <td>{{ signup.approved_at | date:'short' }}</td>
-            </tr>
-          </tbody>
-        </table>
-        <div class="pagination" *ngIf="getTotalPages(approvedList) > 1">
-          <button class="page-btn" (click)="goToPage('approved', approvedPage - 1)" [disabled]="approvedPage === 1">
-            &laquo; {{ 'dashboard.pagination.prev' | translate }}
-          </button>
-          <span class="page-info">{{ 'dashboard.pagination.page' | translate }} {{ approvedPage }} {{ 'dashboard.pagination.of' | translate }} {{ getTotalPages(approvedList) }}</span>
-          <button class="page-btn" (click)="goToPage('approved', approvedPage + 1)" [disabled]="approvedPage >= getTotalPages(approvedList)">
-            {{ 'dashboard.pagination.next' | translate }} &raquo;
-          </button>
+  <!-- TRANSACTIONS TAB CONTENT -->
+  <div *ngIf="mainTab === 'transactions'">
+    <div class="tab-content">
+      <ng-container *ngIf="transactions$ | async as transactionList">
+        <div *ngIf="transactionList.length === 0" class="empty-state">
+          <i class="fas fa-exchange-alt"></i>
+          <p>{{ 'agentDashboard.noTransactions' | translate }}</p>
         </div>
-      </div>
-    </ng-container>
-  </div>
-
-  <!-- Archived Tab Content -->
-  <div class="tab-content" *ngIf="activeTab === 'archived'">
-    <ng-container *ngIf="archived$ | async as archivedList">
-      <div *ngIf="archivedList.length === 0" class="empty-state">
-        {{ 'agentDashboard.noArchived' | translate }}
-      </div>
-      <div class="table-responsive" *ngIf="archivedList.length > 0">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>{{ 'dashboard.table.username' | translate }}</th>
-              <th>{{ 'dashboard.table.phone' | translate }}</th>
-              <th>{{ 'dashboard.table.password' | translate }}</th>
-              <th>{{ 'dashboard.table.status' | translate }}</th>
-              <th>{{ 'dashboard.table.createdAt' | translate }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let signup of getPaginatedList(archivedList, archivedPage)" [class.new-row]="isArchivedNew(signup.id)">
-              <td>{{ signup.username }}</td>
-              <td>{{ signup.phone }}</td>
-              <td>
-                <div class="password-cell">
-                  <span>{{ getPasswordDisplay(signup.password, signup.id) }}</span>
-                  <button type="button" class="toggle-password-btn" (click)="togglePasswordVisibility(signup.id)">
-                    <i [class]="isPasswordVisible(signup.id) ? 'fas fa-eye' : 'fas fa-eye-slash'"></i>
-                  </button>
-                </div>
-              </td>
-              <td><span class="status archived">{{ ('status.' + (signup.status || '').toLowerCase()) | translate }}</span></td>
-              <td>{{ signup.created_at | date:'short' }}</td>
-            </tr>
-          </tbody>
-        </table>
-        <div class="pagination" *ngIf="getTotalPages(archivedList) > 1">
-          <button class="page-btn" (click)="goToPage('archived', archivedPage - 1)" [disabled]="archivedPage === 1">
-            &laquo; {{ 'dashboard.pagination.prev' | translate }}
-          </button>
-          <span class="page-info">{{ 'dashboard.pagination.page' | translate }} {{ archivedPage }} {{ 'dashboard.pagination.of' | translate }} {{ getTotalPages(archivedList) }}</span>
-          <button class="page-btn" (click)="goToPage('archived', archivedPage + 1)" [disabled]="archivedPage >= getTotalPages(archivedList)">
-            {{ 'dashboard.pagination.next' | translate }} &raquo;
-          </button>
+        <div class="table-responsive" *ngIf="transactionList.length > 0">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>{{ 'agentDashboard.transactionsTable.bettorName' | translate }}</th>
+                <th>{{ 'agentDashboard.transactionsTable.amount' | translate }}</th>
+                <th>{{ 'agentDashboard.transactionsTable.transactionDate' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let transaction of getPaginatedTransactions(transactionList, transactionPage)">
+                <td>{{ transaction.bettor_name }}</td>
+                <td class="amount-cell">{{ transaction.amount | number:'1.0-0' }} XAF</td>
+                <td>{{ transaction.transaction_date | date:'shortDate' }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="pagination" *ngIf="getTotalTransactionPages(transactionList) > 1">
+            <button class="page-btn" (click)="goToTransactionPage(transactionPage - 1)" [disabled]="transactionPage === 1">
+              &laquo; {{ 'dashboard.pagination.prev' | translate }}
+            </button>
+            <span class="page-info">{{ 'dashboard.pagination.page' | translate }} {{ transactionPage }} {{ 'dashboard.pagination.of' | translate }} {{ getTotalTransactionPages(transactionList) }}</span>
+            <button class="page-btn" (click)="goToTransactionPage(transactionPage + 1)" [disabled]="transactionPage >= getTotalTransactionPages(transactionList)">
+              {{ 'dashboard.pagination.next' | translate }} &raquo;
+            </button>
+          </div>
         </div>
-      </div>
-    </ng-container>
+      </ng-container>
+    </div>
   </div>
 </div>

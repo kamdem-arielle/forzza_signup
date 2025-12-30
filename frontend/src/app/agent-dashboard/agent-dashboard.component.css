@@ -94,6 +94,62 @@ h2 {
   color: #5cb85c;
 }
 
+.stat-card.transactions .stat-value {
+  color: #17a2b8;
+}
+
+.stat-card.amount .stat-value {
+  color: #004E92;
+  font-size: 24px;
+}
+
+.stat-card.amount .currency {
+  font-size: 16px;
+  font-weight: 400;
+}
+
+/* Main Tabs */
+.main-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 20px;
+  background: #fff;
+  border-radius: 8px;
+  padding: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.main-tab {
+  flex: 1;
+  padding: 14px 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+  color: #666;
+  border-radius: 6px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.main-tab:hover {
+  color: #004E92;
+  background: #f8f9fa;
+}
+
+.main-tab.active {
+  color: #fff;
+  background: #004E92;
+}
+
+.main-tab i {
+  font-size: 16px;
+}
+
 .tabs {
   display: flex;
   gap: 0;
@@ -241,6 +297,44 @@ h2 {
   padding: 40px;
   text-align: center;
   color: #888;
+}
+
+.empty-state i {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.3;
+  display: block;
+}
+
+.empty-state p {
+  margin: 0;
+}
+
+.amount-cell {
+  font-weight: 600;
+  color: #004E92;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #004E92;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .status {

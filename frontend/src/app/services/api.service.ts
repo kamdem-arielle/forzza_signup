@@ -26,6 +26,21 @@ export interface AgentStats {
   last_signup_at?: string;
 }
 
+export interface AgentTransactionStats {
+  total_transactions: number;
+  total_amount: number;
+}
+
+export interface AgentTransaction {
+  id: number;
+  bettor_name: string;
+  amount: number;
+  transaction_date: string;
+  created_at: string;
+  signup_username: string;
+  signup_phone: string;
+}
+
 export interface ApiResponse<T = any> {
   success: boolean;
   message?: string;
@@ -84,6 +99,17 @@ export class ApiService {
 
   getAgentStats(promo_code: string): Observable<ApiResponse<AgentStats>> {
     return this.http.get<ApiResponse<AgentStats>>(`${this.baseUrl}/api/agents/${promo_code}/stats`);
+  }
+
+  getAgentTransactions(promo_code: string, filters: { startDate?: string; endDate?: string } = {}): Observable<ApiResponse<AgentTransaction[]>> {
+    let params: any = {};
+    if (filters.startDate) params.startDate = filters.startDate;
+    if (filters.endDate) params.endDate = filters.endDate;
+    return this.http.get<ApiResponse<AgentTransaction[]>>(`${this.baseUrl}/api/agents/${promo_code}/transactions`, { params });
+  }
+
+  getAgentTransactionStats(promo_code: string): Observable<ApiResponse<AgentTransactionStats>> {
+    return this.http.get<ApiResponse<AgentTransactionStats>>(`${this.baseUrl}/api/agents/${promo_code}/transactions/stats`);
   }
 
   // Admin - Get all signups

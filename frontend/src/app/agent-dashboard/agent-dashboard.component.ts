@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { ApiService, Signup } from '../services/api.service';
+import { ApiService, Signup, AgentTransaction, AgentTransactionStats } from '../services/api.service';
 import { BehaviorSubject, Subject, interval, takeUntil, startWith } from 'rxjs';
 
 interface AgentData {
@@ -32,13 +32,17 @@ interface AgentStats {
 export class AgentDashboardComponent implements OnInit, OnDestroy {
   agent: AgentData | null = null;
   stats: AgentStats | null = null;
+  transactionStats: AgentTransactionStats | null = null;
   
   pendingSignups: Signup[] = [];
   approvedSignups: Signup[] = [];
   archivedSignups: Signup[] = [];
+  transactions: AgentTransaction[] = [];
+  
   pending$ = new BehaviorSubject<Signup[]>([]);
   approved$ = new BehaviorSubject<Signup[]>([]);
   archived$ = new BehaviorSubject<Signup[]>([]);
+  transactions$ = new BehaviorSubject<AgentTransaction[]>([]);
   
   nameFilter = '';
   phoneFilter = '';
@@ -53,6 +57,10 @@ export class AgentDashboardComponent implements OnInit, OnDestroy {
   message: string = '';
   isSuccess: boolean = false;
   isLoading: boolean = false;
+  
+  // Main tab: 'signups' or 'transactions'
+  mainTab: 'signups' | 'transactions' = 'signups';
+  // Signup sub-tab: 'pending', 'approved', 'archived'
   activeTab: 'pending' | 'approved' | 'archived' = 'pending';
 
   // Pagination
@@ -60,6 +68,7 @@ export class AgentDashboardComponent implements OnInit, OnDestroy {
   pendingPage = 1;
   approvedPage = 1;
   archivedPage = 1;
+  transactionPage = 1;
 
   constructor(
     private apiService: ApiService, 
@@ -76,6 +85,8 @@ export class AgentDashboardComponent implements OnInit, OnDestroy {
     
     this.agent = JSON.parse(agentData);
     this.loadStats();
+    this.loadTransactionStats();
+    this.loadTransactions();
     this.startPolling();
   }
 
@@ -90,6 +101,37 @@ export class AgentDashboardComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Failed to load stats:', error);
+      }
+    });
+  }
+
+  loadTransactionStats(): void {
+    if (!this.agent?.promo_code) return;
+    
+    this.apiService.getAgentTransactionStats(this.agent.promo_code).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.transactionStats = response.data;
+        }
+      },
+      error: (error) => {
+        console.error('Failed to load transaction stats:', error);
+      }
+    });
+  }
+
+  loadTransactions(): void {
+    if (!this.agent?.promo_code) return;
+    
+    this.apiService.getAgentTransactions(this.agent.promo_code).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.transactions = response.data;
+          this.transactions$.next(this.transactions);
+        }
+      },
+      error: (error) => {
+        console.error('Failed to load transactions:', error);
       }
     });
   }
@@ -157,8 +199,10 @@ export class AgentDashboardComponent implements OnInit, OnDestroy {
           }
         });
 
-        // Refresh stats
+        // Refresh stats and transactions
         this.loadStats();
+        this.loadTransactionStats();
+        this.loadTransactions();
       });
   }
 
@@ -184,6 +228,10 @@ export class AgentDashboardComponent implements OnInit, OnDestroy {
     this.router.navigate(['/agent/login']);
   }
 
+  setMainTab(tab: 'signups' | 'transactions'): void {
+    this.mainTab = tab;
+  }
+
   setTab(tab: 'pending' | 'approved' | 'archived'): void {
     this.activeTab = tab;
   }
@@ -194,7 +242,16 @@ export class AgentDashboardComponent implements OnInit, OnDestroy {
     return list.slice(start, start + this.pageSize);
   }
 
+  getPaginatedTransactions(list: AgentTransaction[], page: number): AgentTransaction[] {
+    const start = (page - 1) * this.pageSize;
+    return list.slice(start, start + this.pageSize);
+  }
+
   getTotalPages(list: Signup[]): number {
+    return Math.ceil(list.length / this.pageSize) || 1;
+  }
+
+  getTotalTransactionPages(list: AgentTransaction[]): number {
     return Math.ceil(list.length / this.pageSize) || 1;
   }
 
@@ -206,6 +263,12 @@ export class AgentDashboardComponent implements OnInit, OnDestroy {
     if (tab === 'pending') this.pendingPage = page;
     else if (tab === 'approved') this.approvedPage = page;
     else this.archivedPage = page;
+  }
+
+  goToTransactionPage(page: number): void {
+    const totalPages = this.getTotalTransactionPages(this.transactions$.value);
+    if (page < 1 || page > totalPages) return;
+    this.transactionPage = page;
   }
 
   getCurrentPage(tab: 'pending' | 'approved' | 'archived'): number {

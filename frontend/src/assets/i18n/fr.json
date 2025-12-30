@@ -125,13 +125,25 @@
     "noPending": "Aucune inscription en attente",
     "noApproved": "Aucune inscription approuvée",
     "noArchived": "Aucune inscription archivée",
+    "noTransactions": "Aucune transaction trouvée",
     "loadError": "Échec du chargement des inscriptions",
     "newSignup": "Nouvelle inscription reçue !",
+    "tabs": {
+      "signups": "Inscriptions",
+      "transactions": "Transactions"
+    },
     "stats": {
       "totalSignups": "Total inscriptions",
       "pending": "En attente",
       "approved": "Approuvées",
-      "approvalRate": "Taux d'approbation"
+      "approvalRate": "Taux d'approbation",
+      "totalTransactions": "Transactions",
+      "totalAmount": "Montant Total"
+    },
+    "transactionsTable": {
+      "bettorName": "Nom du Parieur",
+      "amount": "Montant",
+      "transactionDate": "Date de Transaction"
     }
   },
   "adminNav": {

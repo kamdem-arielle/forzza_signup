@@ -127,13 +127,25 @@
     "noPending": "No pending signups",
     "noApproved": "No approved signups",
     "noArchived": "No archived signups",
+    "noTransactions": "No transactions found",
     "loadError": "Failed to load signups",
     "newSignup": "New signup received!",
+    "tabs": {
+      "signups": "Signups",
+      "transactions": "Transactions"
+    },
     "stats": {
       "totalSignups": "Total Signups",
       "pending": "Pending",
       "approved": "Approved",
-      "approvalRate": "Approval Rate"
+      "approvalRate": "Approval Rate",
+      "totalTransactions": "Transactions",
+      "totalAmount": "Total Amount"
+    },
+    "transactionsTable": {
+      "bettorName": "Bettor Name",
+      "amount": "Amount",
+      "transactionDate": "Transaction Date"
     }
   },
   "adminNav": {
