@@ -198,6 +198,72 @@ class Transaction {
       throw error;
     }
   }
+
+  /**
+   * Get transactions by agent's promo code
+   * @param {string} promoCode - Agent's promo code
+   * @param {object} filters - Optional filters (startDate, endDate)
+   * @returns {Promise} Array of transaction records
+   */
+  static async getByPromoCode(promoCode, filters = {}) {
+    try {
+      let query = `
+        SELECT 
+          t.id,
+          t.bettor_name,
+          t.amount,
+          t.transaction_date,
+          t.created_at,
+          s.username AS signup_username,
+          s.phone AS signup_phone
+        FROM transactions t
+        INNER JOIN signups s ON t.bettor_name = s.username
+        WHERE s.promo_code = ?
+      `;
+      
+      const params = [promoCode];
+      
+      if (filters.startDate) {
+        query += ' AND t.transaction_date >= ?';
+        params.push(filters.startDate);
+      }
+      
+      if (filters.endDate) {
+        query += ' AND t.transaction_date <= ?';
+        params.push(filters.endDate);
+      }
+      
+      query += ' ORDER BY t.transaction_date DESC, t.id DESC';
+      
+      const [rows] = await pool.query(query, params);
+      return rows;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Get transaction summary for an agent by promo code
+   * @param {string} promoCode - Agent's promo code
+   * @returns {Promise} Summary object with count and total amount
+   */
+  static async getSummaryByPromoCode(promoCode) {
+    try {
+      const query = `
+        SELECT 
+          COUNT(*) AS total_transactions,
+          COALESCE(SUM(t.amount), 0) AS total_amount
+        FROM transactions t
+        INNER JOIN signups s ON t.bettor_name = s.username
+        WHERE s.promo_code = ?
+      `;
+      
+      const [rows] = await pool.query(query, [promoCode]);
+      return rows[0];
+    } catch (error) {
+      throw error;
+    }
+  }
 }
 
 module.exports = Transaction;

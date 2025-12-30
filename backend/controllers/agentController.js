@@ -1,5 +1,6 @@
 const Agent = require('../models/Agent');
 const Signup = require('../models/Signup');
+const Transaction = require('../models/Transaction');
 
 /**
  * Agent Controller
@@ -329,6 +330,98 @@ exports.updateAgent = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error updating agent',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * Get Agent's Transactions
+ * Returns all transactions made by signups associated with the agent's promo code
+ */
+exports.getMyTransactions = async (req, res) => {
+  try {
+    const { promo_code } = req.params;
+    const { startDate, endDate } = req.query;
+
+    if (!promo_code) {
+      return res.status(400).json({
+        success: false,
+        message: 'Promo code is required'
+      });
+    }
+
+    // Verify the agent exists with this promo code
+    const agent = await Agent.findByPromoCode(promo_code);
+    if (!agent) {
+      return res.status(404).json({
+        success: false,
+        message: 'Agent not found'
+      });
+    }
+
+    const filters = {};
+    if (startDate) filters.startDate = startDate;
+    if (endDate) filters.endDate = endDate;
+
+    // Get all transactions for this promo code
+    const transactions = await Transaction.getByPromoCode(promo_code, filters);
+
+    res.json({
+      success: true,
+      data: transactions
+    });
+
+  } catch (error) {
+    console.error('Get agent transactions error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching transactions',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * Get Agent's Transaction Stats
+ * Returns transaction summary for the agent
+ */
+exports.getMyTransactionStats = async (req, res) => {
+  try {
+    const { promo_code } = req.params;
+
+    if (!promo_code) {
+      return res.status(400).json({
+        success: false,
+        message: 'Promo code is required'
+      });
+    }
+
+    // Verify the agent exists with this promo code
+    const agent = await Agent.findByPromoCode(promo_code);
+    if (!agent) {
+      return res.status(404).json({
+        success: false,
+        message: 'Agent not found'
+      });
+    }
+
+    // Get transaction summary
+    const summary = await Transaction.getSummaryByPromoCode(promo_code);
+
+    res.json({
+      success: true,
+      data: {
+        total_transactions: parseInt(summary.total_transactions) || 0,
+        total_amount: parseFloat(summary.total_amount) || 0
+      }
+    });
+
+  } catch (error) {
+    console.error('Get agent transaction stats error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching transaction stats',
       error: error.message
     });
   }

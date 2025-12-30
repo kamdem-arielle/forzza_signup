@@ -23,6 +23,14 @@ router.get('/:promo_code/signups/status/:status', agentController.getMySignupsBy
 // GET /api/agents/:promo_code/stats
 router.get('/:promo_code/stats', agentController.getMyStats);
 
+// Get agent's transactions
+// GET /api/agents/:promo_code/transactions
+router.get('/:promo_code/transactions', agentController.getMyTransactions);
+
+// Get agent's transaction stats
+// GET /api/agents/:promo_code/transactions/stats
+router.get('/:promo_code/transactions/stats', agentController.getMyTransactionStats);
+
 // Admin routes for managing agents
 // Create new agent (Admin only)
 // POST /api/agents
