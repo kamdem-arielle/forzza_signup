@@ -57,6 +57,7 @@
         <label>{{ 'transactions.booking' | translate }}</label>
         <select [(ngModel)]="filterBooking" (ngModelChange)="onFilterChange()" class="form-control">
           <option value="">{{ 'transactions.allBookings' | translate }}</option>
+          <option value="Deposit">Deposit</option>
           <option *ngFor="let booking of bookingTypes" [value]="booking">{{ booking }}</option>
         </select>
       </div>
