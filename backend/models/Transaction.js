@@ -85,7 +85,7 @@ class Transaction {
         FROM transactions t
         LEFT JOIN signups s ON t.username = s.username
         LEFT JOIN agents a ON s.promo_code = a.promo_code
-        WHERE 1=1
+        WHERE s.promo_code IS NOT NULL
       `;
       
       const params = [];

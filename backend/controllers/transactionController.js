@@ -74,7 +74,7 @@ function parseChannelUser(channelUserStr) {
 
 /**
  * Parse amount string to number
- * Format: "-229,00 XAF" or "1 000,50 XAF"
+ * Format: "-229,00 XAF" or "1.000,50 XAF" (dot is thousand separator, comma is decimal)
  * @param {string|number} amountStr - The amount string
  * @returns {number} Parsed amount
  */
@@ -90,8 +90,11 @@ function parseAmount(amountStr) {
   // Remove XAF and trim
   let cleaned = amountStr.replace(/XAF/gi, '').trim();
   
-  // Remove spaces (thousand separators)
+  // Remove spaces (some formats use space as thousand separator)
   cleaned = cleaned.replace(/\s/g, '');
+  
+  // Remove dots (thousand separators)
+  cleaned = cleaned.replace(/\./g, '');
   
   // Replace comma with dot for decimal
   cleaned = cleaned.replace(',', '.');
