@@ -267,7 +267,7 @@ export class AdminTransactionsComponent implements OnInit {
     if (groupItems.length > 0) {
       const agentName = groupItems[0].agent_name || 'No Agent';
       const promoCode = groupItems[0].promo_code || 'No Promo Code';
-      return `${agentName} | ${promoCode}`;
+      return `${this.translate.instant('transactions.table.agentName')}: ${agentName} | ${promoCode}`;
     }
     return cellInfo.key || '';
   }
@@ -282,7 +282,7 @@ export class AdminTransactionsComponent implements OnInit {
       // Find the latest balance (most recent transaction by datetime)
       let latestBalance = items[0].balance;
       
-      return `${username} | ${promoCode} | Balance: ${this.formatCurrency(latestBalance)} XAF`;
+      return `${this.translate.instant('transactions.table.username')}: ${username} | ${promoCode} |  ${this.formatCurrency(latestBalance)} XAF`;
     }
     return cellInfo.key || '';
   }
