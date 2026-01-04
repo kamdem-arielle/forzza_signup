@@ -3,22 +3,30 @@ const pool = require('../config/db');
 /**
  * Transaction Model
  * Handles all database operations for the transactions table
+ * 
+ * Table structure:
+ * - id: INT PRIMARY KEY AUTO_INCREMENT
+ * - transaction_datetime: DATETIME - Date and time of transaction
+ * - channel: VARCHAR(255) - Channel/shop name
+ * - username: VARCHAR(255) - Bettor's username
+ * - booking: VARCHAR(255) - Transaction type (e.g., "Betting slip payment")
+ * - amount: DECIMAL(15,2) - Transaction amount
+ * - balance: DECIMAL(15,2) - User balance after transaction
+ * - created_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
  */
 class Transaction {
   
   /**
    * Create a new transaction
-   * @param {string} bettorName - Bettor's name
-   * @param {number} amount - Transaction amount
-   * @param {string} promoCode - Agent's promo code
-   * @param {string} transactionDate - Date of the transaction
+   * @param {object} data - Transaction data
    * @returns {Promise} Result of the insert operation
    */
-  static async create(bettorName, amount, promoCode, transactionDate) {
+  static async create(data) {
     try {
       const [result] = await pool.query(
-        'INSERT INTO transactions (bettor_name, amount, promo_code, transaction_date) VALUES (?, ?, ?, ?)',
-        [bettorName, amount, promoCode, transactionDate]
+        `INSERT INTO transactions (transaction_datetime, channel, username, booking, amount, balance) 
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [data.transactionDatetime, data.channel, data.username, data.booking, data.amount, data.balance]
       );
       return result;
     } catch (error) {
@@ -36,14 +44,16 @@ class Transaction {
       if (transactions.length === 0) return { affectedRows: 0 };
       
       const values = transactions.map(t => [
-        t.bettorName,
+        t.transactionDatetime,
+        t.channel,
+        t.username,
+        t.booking,
         t.amount,
-        // t.promoCode,
-        t.transactionDate
+        t.balance
       ]);
       
       const [result] = await pool.query(
-        'INSERT INTO transactions (bettor_name, amount, transaction_date) VALUES ?',
+        'INSERT INTO transactions (transaction_datetime, channel, username, booking, amount, balance) VALUES ?',
         [values]
       );
       return result;
@@ -54,7 +64,7 @@ class Transaction {
 
   /**
    * Get all transactions with filters and agent info
-   * @param {object} filters - Filter options (startDate, endDate, promoCode)
+   * @param {object} filters - Filter options (startDate, endDate, promoCode, channel, username)
    * @returns {Promise} Array of transaction records with agent info
    */
   static async getAll(filters = {}) {
@@ -62,28 +72,31 @@ class Transaction {
       let query = `
         SELECT 
           t.id,
-          t.bettor_name,
+          t.transaction_datetime,
+          t.channel,
+          t.username,
+          t.booking,
           t.amount,
-          s.promo_code,
-          t.transaction_date,
+          t.balance,
           t.created_at,
+          s.promo_code,
           a.name AS agent_name,
           a.username AS agent_username
         FROM transactions t
-        LEFT JOIN signups s ON t.bettor_name = s.username
+        LEFT JOIN signups s ON t.username = s.username
         LEFT JOIN agents a ON s.promo_code = a.promo_code
-        WHERE s.promo_code IS NOT NULL
+        WHERE 1=1
       `;
       
       const params = [];
       
       if (filters.startDate) {
-        query += ' AND t.transaction_date >= ?';
+        query += ' AND DATE(t.transaction_datetime) >= ?';
         params.push(filters.startDate);
       }
       
       if (filters.endDate) {
-        query += ' AND t.transaction_date <= ?';
+        query += ' AND DATE(t.transaction_datetime) <= ?';
         params.push(filters.endDate);
       }
       
@@ -91,8 +104,23 @@ class Transaction {
         query += ' AND s.promo_code = ?';
         params.push(filters.promoCode);
       }
+
+      if (filters.channel) {
+        query += ' AND t.channel LIKE ?';
+        params.push(`%${filters.channel}%`);
+      }
+
+      if (filters.username) {
+        query += ' AND t.username LIKE ?';
+        params.push(`%${filters.username}%`);
+      }
+
+      if (filters.booking) {
+        query += ' AND t.booking LIKE ?';
+        params.push(`%${filters.booking}%`);
+      }
       
-      query += ' ORDER BY t.transaction_date DESC, t.id DESC';
+      query += ' ORDER BY t.transaction_datetime DESC, t.id DESC';
       
       const [rows] = await pool.query(query, params);
       return rows;
@@ -115,21 +143,20 @@ class Transaction {
           COUNT(*) AS transaction_count,
           SUM(t.amount) AS total_amount
         FROM transactions t
-        LEFT JOIN signups s ON t.bettor_name = s.username
+        LEFT JOIN signups s ON t.username = s.username
         LEFT JOIN agents a ON s.promo_code = a.promo_code
-        WHERE s.promo_code IS NOT NULL;
-
+        WHERE 1=1
       `;
       
       const params = [];
       
       if (filters.startDate) {
-        query += ' AND t.transaction_date >= ?';
+        query += ' AND DATE(t.transaction_datetime) >= ?';
         params.push(filters.startDate);
       }
       
       if (filters.endDate) {
-        query += ' AND t.transaction_date <= ?';
+        query += ' AND DATE(t.transaction_datetime) <= ?';
         params.push(filters.endDate);
       }
       
@@ -144,7 +171,7 @@ class Transaction {
 
   /**
    * Get total transactions summary
-   * @param {object} filters - Filter options (startDate, endDate, promoCode)
+   * @param {object} filters - Filter options (startDate, endDate, promoCode, channel, username)
    * @returns {Promise} Summary object
    */
   static async getSummary(filters = {}) {
@@ -154,25 +181,35 @@ class Transaction {
           COUNT(*) AS total_transactions,
           COALESCE(SUM(t.amount), 0) AS total_amount
         FROM transactions t
-        LEFT JOIN signups s ON t.bettor_name = s.username
+        LEFT JOIN signups s ON t.username = s.username
         WHERE 1=1
       `;
       
       const params = [];
       
       if (filters.startDate) {
-        query += ' AND t.transaction_date >= ?';
+        query += ' AND DATE(t.transaction_datetime) >= ?';
         params.push(filters.startDate);
       }
       
       if (filters.endDate) {
-        query += ' AND t.transaction_date <= ?';
+        query += ' AND DATE(t.transaction_datetime) <= ?';
         params.push(filters.endDate);
       }
       
       if (filters.promoCode) {
         query += ' AND s.promo_code = ?';
         params.push(filters.promoCode);
+      }
+
+      if (filters.channel) {
+        query += ' AND t.channel LIKE ?';
+        params.push(`%${filters.channel}%`);
+      }
+
+      if (filters.username) {
+        query += ' AND t.username LIKE ?';
+        params.push(`%${filters.username}%`);
       }
       
       const [rows] = await pool.query(query, params);
@@ -184,15 +221,28 @@ class Transaction {
 
   /**
    * Delete transactions by date
-   * @param {string} transactionDate - Date to delete transactions for
+   * @param {string} transactionDate - Date to delete transactions for (YYYY-MM-DD format)
    * @returns {Promise} Result of the delete operation
    */
   static async deleteByDate(transactionDate) {
     try {
       const [result] = await pool.query(
-        'DELETE FROM transactions WHERE transaction_date = ?',
+        'DELETE FROM transactions WHERE DATE(transaction_datetime) = ?',
         [transactionDate]
       );
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Delete all transactions
+   * @returns {Promise} Result of the delete operation
+   */
+  static async deleteAll() {
+    try {
+      const [result] = await pool.query('DELETE FROM transactions');
       return result;
     } catch (error) {
       throw error;
@@ -210,30 +260,33 @@ class Transaction {
       let query = `
         SELECT 
           t.id,
-          t.bettor_name,
+          t.transaction_datetime,
+          t.channel,
+          t.username,
+          t.booking,
           t.amount,
-          t.transaction_date,
+          t.balance,
           t.created_at,
           s.username AS signup_username,
           s.phone AS signup_phone
         FROM transactions t
-        INNER JOIN signups s ON t.bettor_name = s.username
+        INNER JOIN signups s ON t.username = s.username
         WHERE s.promo_code = ?
       `;
       
       const params = [promoCode];
       
       if (filters.startDate) {
-        query += ' AND t.transaction_date >= ?';
+        query += ' AND DATE(t.transaction_datetime) >= ?';
         params.push(filters.startDate);
       }
       
       if (filters.endDate) {
-        query += ' AND t.transaction_date <= ?';
+        query += ' AND DATE(t.transaction_datetime) <= ?';
         params.push(filters.endDate);
       }
       
-      query += ' ORDER BY t.transaction_date DESC, t.id DESC';
+      query += ' ORDER BY t.transaction_datetime DESC, t.id DESC';
       
       const [rows] = await pool.query(query, params);
       return rows;
@@ -254,12 +307,38 @@ class Transaction {
           COUNT(*) AS total_transactions,
           COALESCE(SUM(t.amount), 0) AS total_amount
         FROM transactions t
-        INNER JOIN signups s ON t.bettor_name = s.username
+        INNER JOIN signups s ON t.username = s.username
         WHERE s.promo_code = ?
       `;
       
       const [rows] = await pool.query(query, [promoCode]);
       return rows[0];
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Get unique channels from transactions
+   * @returns {Promise} Array of unique channel names
+   */
+  static async getUniqueChannels() {
+    try {
+      const [rows] = await pool.query('SELECT DISTINCT channel FROM transactions WHERE channel IS NOT NULL ORDER BY channel');
+      return rows.map(row => row.channel);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Get unique booking types from transactions
+   * @returns {Promise} Array of unique booking types
+   */
+  static async getUniqueBookingTypes() {
+    try {
+      const [rows] = await pool.query('SELECT DISTINCT booking FROM transactions WHERE booking IS NOT NULL ORDER BY booking');
+      return rows.map(row => row.booking);
     } catch (error) {
       throw error;
     }
