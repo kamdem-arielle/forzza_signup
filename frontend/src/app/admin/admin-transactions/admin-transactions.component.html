@@ -116,7 +116,14 @@
         dataField="promo_code" 
         [caption]="'transactions.table.promoCode' | translate"
         [groupIndex]="0"
-        groupCellTemplate="groupCellTemplate"
+        groupCellTemplate="agentGroupTemplate"
+      ></dxi-column>
+
+      <dxi-column 
+        dataField="username" 
+        [caption]="'transactions.table.username' | translate"
+        [groupIndex]="1"
+        groupCellTemplate="usernameGroupTemplate"
       ></dxi-column>
 
       <dxi-column 
@@ -129,10 +136,6 @@
       <dxi-column 
         dataField="channel" 
         [caption]="'transactions.table.channel' | translate"
-      ></dxi-column>
-      <dxi-column 
-        dataField="username" 
-        [caption]="'transactions.table.username' | translate"
       ></dxi-column>
       <dxi-column 
         dataField="booking" 
@@ -166,16 +169,20 @@
           [valueFormat]="{ type: 'fixedPoint', precision: 2 }"
         ></dxi-group-item>
         <dxi-group-item
-          column="username"
+          column="id"
           summaryType="count"
           [displayFormat]="'{0} transactions'"
         ></dxi-group-item>
       </dxo-summary>
 
-      <div *dxTemplate="let data of 'groupCellTemplate'">
-        <!-- <strong>{{ data.data.items && data.data.items[0] ? (data.data.items[0].agent_name || 'Unknown Agent') : 'Unknown Agent' }}</strong>
-        - {{ data.key }} -->
-        <span style="font-weight: bold;">{{ getGroupTitle(data) }}</span>
+      <!-- Agent Group Template -->
+      <div *dxTemplate="let data of 'agentGroupTemplate'">
+        <span style="font-weight: bold;">{{ getAgentGroupTitle(data) }}</span>
+      </div>
+
+      <!-- Username Group Template -->
+      <div *dxTemplate="let data of 'usernameGroupTemplate'">
+        <span style="font-weight: bold;">{{ getUsernameGroupTitle(data) }}</span>
       </div>
     </dx-data-grid>
   </div>

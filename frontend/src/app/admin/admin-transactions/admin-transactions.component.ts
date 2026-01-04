@@ -246,21 +246,45 @@ export class AdminTransactionsComponent implements OnInit {
     }, 5000);
   }
 
-  getGroupTitle(cellInfo: any) {
-    if (
-      cellInfo.rowType == "group" &&
-      cellInfo.data.collapsedItems &&
-      cellInfo.data.collapsedItems.length != 0
-    ) {
-      return `${cellInfo.data.collapsedItems[0].agent_name || 'No Agent'} |  ${cellInfo.data.collapsedItems[0].promo_code || 'No Promo Code'} | ${cellInfo.data.aggregates[0]} XAF`;
-    } else if (
-      cellInfo.rowType == "group" &&
-      cellInfo.data.items &&
-      cellInfo.data.items.length != 0
-    ) {
-      return `${cellInfo.data.items[0].agent_name || 'No Agent'} |  ${cellInfo.data.items[0].promo_code || 'No Promo Code'} | ${cellInfo.data.aggregates[0]} XAF`;
+  getAgentGroupTitle(cellInfo: any) {
+    let groupItems;
+    if (cellInfo.data.items) {
+      if (cellInfo.data.items[0].items) {
+        groupItems = cellInfo.data.items[0].items;
+      } else {
+        groupItems = cellInfo.data.items[0].collapsedItems;
+      } 
+    }else if(cellInfo.data.collapsedItems){
+      if (cellInfo.data.collapsedItems[0].items) {  
+        groupItems = cellInfo.data.collapsedItems[0].items;
+      } else {
+        groupItems = cellInfo.data.collapsedItems[0].collapsedItems;
+      }
     }
-    return '';
+
+    console.log('Group items1:', groupItems);
+    console.log('Group items2:', groupItems);
+    if (groupItems.length > 0) {
+      const agentName = groupItems[0].agent_name || 'No Agent';
+      const promoCode = groupItems[0].promo_code || 'No Promo Code';
+      return `${agentName} | ${promoCode}`;
+    }
+    return cellInfo.key || '';
+  }
+
+  getUsernameGroupTitle(cellInfo: any) {
+    const items = cellInfo.data.collapsedItems || cellInfo.data.items || [];
+    console.log('user items:', items);
+    if (items.length > 0) {
+      const username = items[0].username || 'Unknown User';
+      const promoCode = items[0].promo_code || 'No Promo Code';
+      
+      // Find the latest balance (most recent transaction by datetime)
+      let latestBalance = items[0].balance;
+      
+      return `${username} | ${promoCode} | Balance: ${this.formatCurrency(latestBalance)} XAF`;
+    }
+    return cellInfo.key || '';
   }
 
   getFileName(){
