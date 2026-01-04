@@ -33,9 +33,12 @@ export interface AgentTransactionStats {
 
 export interface AgentTransaction {
   id: number;
-  bettor_name: string;
+  transaction_datetime: string;
+  channel: string;
+  username: string;
+  booking: string;
   amount: number;
-  transaction_date: string;
+  balance: number;
   created_at: string;
   signup_username: string;
   signup_phone: string;
@@ -128,19 +131,25 @@ export class ApiService {
   }
 
   // Transaction endpoints
-  importTransactions(pdfFile: File, transactionDate: string): Observable<ApiResponse> {
+  importTransactions(excelFile: File): Observable<ApiResponse> {
     const formData = new FormData();
-    formData.append('pdfFile', pdfFile);
-    formData.append('transactionDate', transactionDate);
+    formData.append('excelFile', excelFile);
     return this.http.post<ApiResponse>(`${this.baseUrl}/api/transactions/import`, formData);
   }
 
-  getTransactions(filters: { startDate?: string; endDate?: string; promoCode?: string }): Observable<ApiResponse> {
+  getTransactions(filters: { startDate?: string; endDate?: string; promoCode?: string; channel?: string; username?: string; booking?: string }): Observable<ApiResponse> {
     let params: any = {};
     if (filters.startDate) params.startDate = filters.startDate;
     if (filters.endDate) params.endDate = filters.endDate;
     if (filters.promoCode) params.promoCode = filters.promoCode;
+    if (filters.channel) params.channel = filters.channel;
+    if (filters.username) params.username = filters.username;
+    if (filters.booking) params.booking = filters.booking;
     return this.http.get<ApiResponse>(`${this.baseUrl}/api/transactions`, { params });
+  }
+
+  getTransactionFilterOptions(): Observable<ApiResponse> {
+    return this.http.get<ApiResponse>(`${this.baseUrl}/api/transactions/filter-options`);
   }
 
   getTransactionStats(filters: { startDate?: string; endDate?: string }): Observable<ApiResponse> {

@@ -13,15 +13,11 @@
     <h3>{{ 'transactions.importTitle' | translate }}</h3>
     <div class="import-form">
       <div class="form-group">
-        <label for="importDate">{{ 'transactions.transactionDate' | translate }}</label>
-        <input type="date" id="importDate" [(ngModel)]="importDate" class="form-control">
+        <label for="excelFile">{{ 'transactions.excelFile' | translate }}</label>
+        <input type="file" id="excelFile" accept=".xlsx,.xls" (change)="onFileSelected($event)" class="form-control">
       </div>
       <div class="form-group">
-        <label for="pdfFile">{{ 'transactions.pdfFile' | translate }}</label>
-        <input type="file" id="pdfFile" accept=".pdf" (change)="onFileSelected($event)" class="form-control">
-      </div>
-      <div class="form-group">
-        <button class="btn-primary" (click)="importPDF()" [disabled]="isImporting || !selectedFile || !importDate">
+        <button class="btn-primary" (click)="importExcel()" [disabled]="isImporting || !selectedFile">
           <span *ngIf="isImporting">{{ 'transactions.importing' | translate }}</span>
           <span *ngIf="!isImporting">{{ 'transactions.importButton' | translate }}</span>
         </button>
@@ -49,6 +45,24 @@
             {{ agent.name || agent.promo_code }} ({{ agent.promo_code }})
           </option>
         </select>
+      </div>
+      <div class="filter-group">
+        <label>{{ 'transactions.channel' | translate }}</label>
+        <select [(ngModel)]="filterChannel" (ngModelChange)="onFilterChange()" class="form-control">
+          <option value="">{{ 'transactions.allChannels' | translate }}</option>
+          <option *ngFor="let channel of channels" [value]="channel">{{ channel }}</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>{{ 'transactions.booking' | translate }}</label>
+        <select [(ngModel)]="filterBooking" (ngModelChange)="onFilterChange()" class="form-control">
+          <option value="">{{ 'transactions.allBookings' | translate }}</option>
+          <option *ngFor="let booking of bookingTypes" [value]="booking">{{ booking }}</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>{{ 'transactions.username' | translate }}</label>
+        <input type="text" [(ngModel)]="filterUsername" (ngModelChange)="onFilterChange()" class="form-control" placeholder="{{ 'transactions.searchUsername' | translate }}">
       </div>
       <div class="filter-actions">
         <button class="btn-secondary" (click)="resetFilters()">{{ 'transactions.resetFilters' | translate }}</button>
@@ -106,8 +120,23 @@
       ></dxi-column>
 
       <dxi-column 
-        dataField="bettor_name" 
-        [caption]="'transactions.table.bettorName' | translate"
+        dataField="transaction_datetime" 
+        [caption]="'transactions.table.datetime' | translate"
+        dataType="datetime"
+        format="dd/MM/yyyy HH:mm:ss"
+        sortOrder="desc"
+      ></dxi-column>
+      <dxi-column 
+        dataField="channel" 
+        [caption]="'transactions.table.channel' | translate"
+      ></dxi-column>
+      <dxi-column 
+        dataField="username" 
+        [caption]="'transactions.table.username' | translate"
+      ></dxi-column>
+      <dxi-column 
+        dataField="booking" 
+        [caption]="'transactions.table.booking' | translate"
       ></dxi-column>
       <dxi-column 
         dataField="amount" 
@@ -117,14 +146,15 @@
         format="#,##0.00"
       ></dxi-column>
       <dxi-column 
+        dataField="balance" 
+        [caption]="'transactions.table.balance' | translate"
+        alignment="left"
+        dataType="number"
+        format="#,##0.00"
+      ></dxi-column>
+      <dxi-column 
         dataField="agent_name" 
         [caption]="'transactions.table.agentName' | translate"   
-      ></dxi-column>
-        <dxi-column 
-        dataField="transaction_date" 
-        [caption]="'transactions.table.transactionDate' | translate"
-        dataType="date"
-        format="dd/MM/yyyy"
       ></dxi-column>
 
 
@@ -136,7 +166,7 @@
           [valueFormat]="{ type: 'fixedPoint', precision: 2 }"
         ></dxi-group-item>
         <dxi-group-item
-          column="bettor_name"
+          column="username"
           summaryType="count"
           [displayFormat]="'{0} transactions'"
         ></dxi-group-item>

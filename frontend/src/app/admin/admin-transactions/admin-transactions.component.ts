@@ -7,11 +7,14 @@ import { CoreService } from '../../services/core.service';
 
 interface Transaction {
   id: number;
-  bettor_name: string;
+  transaction_datetime: string;
+  channel: string;
+  username: string;
+  booking: string;
   amount: number;
+  balance: number;
   promo_code: string;
   agent_name: string;
-  transaction_date: string;
   created_at: string;
 }
 
@@ -37,8 +40,14 @@ export class AdminTransactionsComponent implements OnInit {
 
   // Import fields
   selectedFile: File | null = null;
-  importDate: string = '';
   selectedPromoCode: string = '';
+
+  // Filter options
+  channels: string[] = [];
+  bookingTypes: string[] = [];
+  filterChannel: string = '';
+  filterUsername: string = '';
+  filterBooking: string = '';
 
   // Filters
   startDate: string = '';
@@ -65,6 +74,7 @@ export class AdminTransactionsComponent implements OnInit {
 
     this.initializeDates();
     this.loadAgents();
+    this.loadFilterOptions();
     this.loadTransactions();
   }
 
@@ -75,7 +85,6 @@ export class AdminTransactionsComponent implements OnInit {
 
     this.endDate = this.formatDate(today);
     this.startDate = this.formatDate(lastMonthFromToday);
-    this.importDate = this.formatDate(today);
   }
 
   formatDate(date: Date): string {
@@ -105,6 +114,20 @@ export class AdminTransactionsComponent implements OnInit {
     });
   }
 
+  loadFilterOptions(): void {
+    this.apiService.getTransactionFilterOptions().subscribe({
+      next: (response: any) => {
+        if (response.success && response.data) {
+          this.channels = response.data.channels || [];
+          this.bookingTypes = response.data.bookingTypes || [];
+        }
+      },
+      error: (error) => {
+        console.error('Error loading filter options:', error);
+      }
+    });
+  }
+
   loadTransactions(): void {
     this.isLoading = true;
     const filters: any = {};
@@ -112,6 +135,9 @@ export class AdminTransactionsComponent implements OnInit {
     if (this.startDate) filters.startDate = this.startDate;
     if (this.endDate) filters.endDate = this.endDate;
     if (this.filterPromoCode) filters.promoCode = this.filterPromoCode;
+    if (this.filterChannel) filters.channel = this.filterChannel;
+    if (this.filterUsername) filters.username = this.filterUsername;
+    if (this.filterBooking) filters.booking = this.filterBooking;
 
     this.apiService.getTransactions(filters).subscribe({
       next: (response: any) => {
@@ -131,7 +157,14 @@ export class AdminTransactionsComponent implements OnInit {
 
   onFileSelected(event: any): void {
     const file = event.target.files[0];
-    if (file && file.type === 'application/pdf') {
+    const validTypes = [
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.ms-excel'
+    ];
+    const validExtensions = ['.xlsx', '.xls'];
+    const ext = file?.name?.toLowerCase().slice(file.name.lastIndexOf('.'));
+    
+    if (file && (validTypes.includes(file.type) || validExtensions.includes(ext))) {
       this.selectedFile = file;
     } else {
       this.selectedFile = null;
@@ -139,19 +172,15 @@ export class AdminTransactionsComponent implements OnInit {
     }
   }
 
-  importPDF(): void {
+  importExcel(): void {
     if (!this.selectedFile) {
       this.showMessage(this.translate.instant('transactions.selectFile'), false);
-      return;
-    }
-    if (!this.importDate) {
-      this.showMessage(this.translate.instant('transactions.selectDate'), false);
       return;
     }
 
     this.isImporting = true;
 
-    this.apiService.importTransactions(this.selectedFile, this.importDate).subscribe({
+    this.apiService.importTransactions(this.selectedFile).subscribe({
       next: (response: any) => {
         this.isImporting = false;
         if (response.success) {
@@ -161,15 +190,16 @@ export class AdminTransactionsComponent implements OnInit {
           );
           this.selectedFile = null;
           // Reset file input
-          const fileInput = document.getElementById('pdfFile') as HTMLInputElement;
+          const fileInput = document.getElementById('excelFile') as HTMLInputElement;
           if (fileInput) fileInput.value = '';
-          // Reload transactions
+          // Reload transactions and filter options
           this.loadTransactions();
+          this.loadFilterOptions();
         }
       },
       error: (error) => {
         this.isImporting = false;
-        this.showMessage(error.error?.message || 'Failed to import PDF', false);
+        this.showMessage(error.error?.message || 'Failed to import Excel file', false);
       }
     });
   }
@@ -181,6 +211,9 @@ export class AdminTransactionsComponent implements OnInit {
   resetFilters(): void {
     this.initializeDates();
     this.filterPromoCode = '';
+    this.filterChannel = '';
+    this.filterUsername = '';
+    this.filterBooking = '';
     this.loadTransactions();
   }
 
@@ -219,13 +252,13 @@ export class AdminTransactionsComponent implements OnInit {
       cellInfo.data.collapsedItems &&
       cellInfo.data.collapsedItems.length != 0
     ) {
-      return `${cellInfo.data.collapsedItems[0].agent_name} |  ${cellInfo.data.collapsedItems[0].promo_code} | ${cellInfo.data.aggregates[0]} XAF`;
+      return `${cellInfo.data.collapsedItems[0].agent_name || 'No Agent'} |  ${cellInfo.data.collapsedItems[0].promo_code || 'No Promo Code'} | ${cellInfo.data.aggregates[0]} XAF`;
     } else if (
       cellInfo.rowType == "group" &&
       cellInfo.data.items &&
       cellInfo.data.items.length != 0
     ) {
-      return `${cellInfo.data.items[0].agent_name} |  ${cellInfo.data.items[0].promo_code} | ${cellInfo.data.aggregates[0]} XAF`;
+      return `${cellInfo.data.items[0].agent_name || 'No Agent'} |  ${cellInfo.data.items[0].promo_code || 'No Promo Code'} | ${cellInfo.data.aggregates[0]} XAF`;
     }
     return '';
   }

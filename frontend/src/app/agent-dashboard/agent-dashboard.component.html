@@ -262,9 +262,9 @@
             </thead>
             <tbody>
               <tr *ngFor="let transaction of getPaginatedTransactions(transactionList, transactionPage)">
-                <td>{{ transaction.bettor_name }}</td>
+                <td>{{ transaction.username }}</td>
                 <td class="amount-cell">{{ transaction.amount | number:'1.0-0' }} XAF</td>
-                <td>{{ transaction.transaction_date | date:'shortDate' }}</td>
+                <td>{{ transaction.transaction_datetime | date:'shortDate' }}</td>
               </tr>
             </tbody>
           </table>
