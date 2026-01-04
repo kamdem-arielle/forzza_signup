@@ -116,7 +116,7 @@ class Transaction {
       }
 
       if (filters.booking) {
-        query += ' AND t.booking LIKE ?';
+        query += ' AND LOWER(t.booking) LIKE CONCAT(\'%\', LOWER(?), \'%\')';
         params.push(`%${filters.booking}%`);
       }
       
@@ -337,12 +337,14 @@ class Transaction {
    */
   static async getUniqueBookingTypes() {
     try {
-      const [rows] = await pool.query('SELECT DISTINCT booking FROM transactions WHERE booking IS NOT NULL ORDER BY booking');
+      const [rows] = await pool.query('SELECT DISTINCT booking FROM transactions WHERE booking IS NOT NULL AND LOWER(booking) NOT LIKE \'%deposit%\' ORDER BY booking');
       return rows.map(row => row.booking);
     } catch (error) {
       throw error;
     }
   }
 }
+
+
 
 module.exports = Transaction;
