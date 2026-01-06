@@ -248,29 +248,85 @@ export class AdminTransactionsComponent implements OnInit {
 
   getAgentGroupTitle(cellInfo: any) {
     let groupItems;
+
+
     if (cellInfo.data.items) {
+    let lessthanFiveHundredDepositCount = 0;
+    let morethanFiveHundredDepositCount = 0;
+    let morethanOneThousandDepositCount = 0;
+      for (const client of cellInfo.data.items) {
+        let clientTransactions;
+        if (client.items) {
+          clientTransactions = client.items;
+        } else if (client.collapsedItems) {
+          clientTransactions = client.collapsedItems;
+        } 
+        for (const transaction of clientTransactions) {
+          if (transaction.amount < 500) {
+            lessthanFiveHundredDepositCount += 1;
+          }
+          else if (transaction.amount >= 500 && transaction.amount < 1000) {
+            morethanFiveHundredDepositCount += 1;
+          } else if (transaction.amount >= 1000) {
+            morethanOneThousandDepositCount += 1;
+          }
+        }
+      }
       if (cellInfo.data.items[0].items) {
         groupItems = cellInfo.data.items[0].items;
+        console.log('Group items0:', cellInfo.data.items);
       } else {
         groupItems = cellInfo.data.items[0].collapsedItems;
-      } 
-    }else if(cellInfo.data.collapsedItems){
-      if (cellInfo.data.collapsedItems[0].items) {  
-        groupItems = cellInfo.data.collapsedItems[0].items;
-      } else {
-        groupItems = cellInfo.data.collapsedItems[0].collapsedItems;
+        console.log('Group items0:', cellInfo.data.items);
       }
+      if (groupItems.length > 0) {
+      const agentName = groupItems[0].agent_name || 'No Agent';
+      const promoCode = groupItems[0].promo_code || 'No Promo Code';
+      return `${this.translate.instant('transactions.table.agentName')}: ${agentName} | ${promoCode} | ${this.translate.instant('transactions.table.lessThan500Deposits')}: ${lessthanFiveHundredDepositCount} | ${this.translate.instant('transactions.table.between500And1000Deposits')}: ${morethanFiveHundredDepositCount} | ${this.translate.instant('transactions.table.moreThan1000Deposits')}: ${morethanOneThousandDepositCount}`;
+    }
+    } else if (cellInfo.data.collapsedItems) {
+    let lessthanFiveHundredDepositCount = 0;
+    let morethanFiveHundredDepositCount = 0;
+    let morethanOneThousandDepositCount = 0;
+      console.log('Group items0collapsed:', cellInfo.data.collapsedItems);
+      for (const client of cellInfo.data.collapsedItems) {
+        let clientTransactions;
+        if (client.items) {
+          clientTransactions = client.items;
+        } else if (client.collapsedItems) {
+          clientTransactions = client.collapsedItems;
+        } 
+        for (const transaction of clientTransactions) {
+          if (transaction.amount < 500) {
+            lessthanFiveHundredDepositCount += 1;
+          }
+          else if (transaction.amount >= 500 && transaction.amount < 1000) {
+            morethanFiveHundredDepositCount += 1;
+          } else if (transaction.amount >= 1000) {
+            morethanOneThousandDepositCount += 1;
+          }
+        }
+      }
+        if (cellInfo.data.collapsedItems[0].items) {
+          groupItems = cellInfo.data.collapsedItems[0].items;
+          console.log('Group itemscollapsed:', cellInfo.data.collapsedItems);
+        } else {
+          groupItems = cellInfo.data.collapsedItems[0].collapsedItems;
+          console.log('Group itemscollapsed:', cellInfo.data.collapsedItems);
+       }
+      if (groupItems.length > 0) {
+      const agentName = groupItems[0].agent_name || 'No Agent';
+      const promoCode = groupItems[0].promo_code || 'No Promo Code';
+      return `${this.translate.instant('transactions.table.agentName')}: ${agentName} | ${promoCode} | ${this.translate.instant('transactions.table.lessThan500Deposits')}: ${lessthanFiveHundredDepositCount} | ${this.translate.instant('transactions.table.between500And1000Deposits')}: ${morethanFiveHundredDepositCount} | ${this.translate.instant('transactions.table.moreThan1000Deposits')}: ${morethanOneThousandDepositCount}`;
+    }
     }
 
     console.log('Group items1:', groupItems);
     console.log('Group items2:', groupItems);
-    if (groupItems.length > 0) {
-      const agentName = groupItems[0].agent_name || 'No Agent';
-      const promoCode = groupItems[0].promo_code || 'No Promo Code';
-      return `${this.translate.instant('transactions.table.agentName')}: ${agentName} | ${promoCode}`;
-    }
+  
     return cellInfo.key || '';
   }
+
 
   getUsernameGroupTitle(cellInfo: any) {
     const items = cellInfo.data.collapsedItems || cellInfo.data.items || [];
