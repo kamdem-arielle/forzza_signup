@@ -116,7 +116,7 @@ class Transaction {
       }
 
       if (filters.booking) {
-        query += ' AND LOWER(t.booking) LIKE CONCAT(\'%\', LOWER(?), \'%\')';
+        query += ' AND LOWER(t.booking) LIKE CONCAT(\'%\', LOWER(?), \'%\') AND LOWER(t.booking) NOT LIKE \'%casino games - deposit%\'';
         params.push(`%${filters.booking}%`);
       }
       
