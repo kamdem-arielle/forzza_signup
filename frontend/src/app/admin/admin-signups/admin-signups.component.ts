@@ -108,7 +108,7 @@ export class AdminSignupsComponent implements OnInit, OnDestroy {
           next: (response) => {
             this.isLoading = false;
             const data = (response.success && response.data) ? response.data : [];
-            const sorted = [...data].sort((a, b) => (new Date(a.created_at || '').getTime()) - (new Date(b.created_at || '').getTime()));
+            const sorted = [...data].sort((a, b) => (new Date(b.created_at || '').getTime()) - (new Date(a.created_at || '').getTime()) );
             this.approvedSignups = sorted;
             this.applyFiltersForAll();
           },
