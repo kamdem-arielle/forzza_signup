@@ -234,8 +234,8 @@
       "promoCode": "Promo Code",
       "agentName": "Agent Name",
       "lessThan500Deposits":"Transactions of less than 500",
-      "between500And1000Deposits":"Transactions between 500 and 1000",
-      "moreThan1000Deposits":"Transactions of more than 1000"
+      "between500And1000Deposits":"Transactions between 500 and 999",
+      "moreThan1000Deposits":"Transactions of 1000 or more"
     }
   }
 }
