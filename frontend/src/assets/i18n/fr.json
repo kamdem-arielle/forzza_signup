@@ -229,7 +229,10 @@
       "amount": "Montant",
       "balance": "Solde",
       "promoCode": "Code Promo",
-      "agentName": "Nom de l'Agent"
+      "agentName": "Nom de l'Agent",
+      "lessThan500Deposits":"Transaction de moins de 500",
+      "between500And1000Deposits":"Transaction entre 500 et 1000",
+      "moreThan1000Deposits":"Transaction de plus de 1000"
     }
   }
 }
