@@ -27,10 +27,9 @@ interface Agent {
 @Component({
   selector: 'app-admin-transactions',
   templateUrl: './admin-transactions.component.html',
-  styleUrls: ['./admin-transactions.component.css']
+  styleUrls: ['./admin-transactions.component.css'],
 })
 export class AdminTransactionsComponent implements OnInit {
-
   transactions: Transaction[] = [];
   agents: Agent[] = [];
   isLoading = false;
@@ -63,7 +62,7 @@ export class AdminTransactionsComponent implements OnInit {
     private router: Router,
     private translate: TranslateService,
     public coreService: CoreService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     const admin = localStorage.getItem('admin');
@@ -110,7 +109,7 @@ export class AdminTransactionsComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading agents:', error);
-      }
+      },
     });
   }
 
@@ -124,14 +123,14 @@ export class AdminTransactionsComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading filter options:', error);
-      }
+      },
     });
   }
 
   loadTransactions(): void {
     this.isLoading = true;
     const filters: any = {};
-    
+
     if (this.startDate) filters.startDate = this.startDate;
     if (this.endDate) filters.endDate = this.endDate;
     if (this.filterPromoCode) filters.promoCode = this.filterPromoCode;
@@ -150,8 +149,11 @@ export class AdminTransactionsComponent implements OnInit {
       },
       error: (error) => {
         this.isLoading = false;
-        this.showMessage(error.error?.message || 'Failed to load transactions', false);
-      }
+        this.showMessage(
+          error.error?.message || 'Failed to load transactions',
+          false
+        );
+      },
     });
   }
 
@@ -159,22 +161,31 @@ export class AdminTransactionsComponent implements OnInit {
     const file = event.target.files[0];
     const validTypes = [
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'application/vnd.ms-excel'
+      'application/vnd.ms-excel',
     ];
     const validExtensions = ['.xlsx', '.xls'];
     const ext = file?.name?.toLowerCase().slice(file.name.lastIndexOf('.'));
-    
-    if (file && (validTypes.includes(file.type) || validExtensions.includes(ext))) {
+
+    if (
+      file &&
+      (validTypes.includes(file.type) || validExtensions.includes(ext))
+    ) {
       this.selectedFile = file;
     } else {
       this.selectedFile = null;
-      this.showMessage(this.translate.instant('transactions.invalidFileType'), false);
+      this.showMessage(
+        this.translate.instant('transactions.invalidFileType'),
+        false
+      );
     }
   }
 
   importExcel(): void {
     if (!this.selectedFile) {
-      this.showMessage(this.translate.instant('transactions.selectFile'), false);
+      this.showMessage(
+        this.translate.instant('transactions.selectFile'),
+        false
+      );
       return;
     }
 
@@ -185,12 +196,16 @@ export class AdminTransactionsComponent implements OnInit {
         this.isImporting = false;
         if (response.success) {
           this.showMessage(
-            this.translate.instant('transactions.importSuccess', { count: response.data?.importedCount || 0 }),
+            this.translate.instant('transactions.importSuccess', {
+              count: response.data?.importedCount || 0,
+            }),
             true
           );
           this.selectedFile = null;
           // Reset file input
-          const fileInput = document.getElementById('excelFile') as HTMLInputElement;
+          const fileInput = document.getElementById(
+            'excelFile'
+          ) as HTMLInputElement;
           if (fileInput) fileInput.value = '';
           // Reload transactions and filter options
           this.loadTransactions();
@@ -199,8 +214,11 @@ export class AdminTransactionsComponent implements OnInit {
       },
       error: (error) => {
         this.isImporting = false;
-        this.showMessage(error.error?.message || 'Failed to import Excel file', false);
-      }
+        this.showMessage(
+          error.error?.message || 'Failed to import Excel file',
+          false
+        );
+      },
     });
   }
 
@@ -228,14 +246,23 @@ export class AdminTransactionsComponent implements OnInit {
   }
 
   customizeGroupHeader = (data: any) => {
-    const agentName = data.items && data.items[0] ? data.items[0].agent_name || 'Unknown' : 'Unknown';
+    const agentName =
+      data.items && data.items[0]
+        ? data.items[0].agent_name || 'Unknown'
+        : 'Unknown';
     const promoCode = data.key;
-    const total = data.aggregates && data.aggregates[0] ? data.aggregates[0] : 0;
-    return `${agentName} - ${promoCode} - Total: ${this.formatCurrency(total)} XAF`;
-  }
+    const total =
+      data.aggregates && data.aggregates[0] ? data.aggregates[0] : 0;
+    return `${agentName} - ${promoCode} - Total: ${this.formatCurrency(
+      total
+    )} XAF`;
+  };
 
   formatCurrency(value: number): string {
-    return value.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return value.toLocaleString('fr-FR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
   }
 
   private showMessage(msg: string, success: boolean): void {
@@ -248,24 +275,21 @@ export class AdminTransactionsComponent implements OnInit {
 
   getAgentGroupTitle(cellInfo: any) {
     let groupItems;
-
-
     if (cellInfo.data.items) {
-    let lessthanFiveHundredDepositCount = 0;
-    let morethanFiveHundredDepositCount = 0;
-    let morethanOneThousandDepositCount = 0;
+      let lessthanFiveHundredDepositCount = 0;
+      let morethanFiveHundredDepositCount = 0;
+      let morethanOneThousandDepositCount = 0;
       for (const client of cellInfo.data.items) {
         let clientTransactions;
         if (client.items) {
           clientTransactions = client.items;
         } else if (client.collapsedItems) {
           clientTransactions = client.collapsedItems;
-        } 
+        }
         for (const transaction of clientTransactions) {
           if (transaction.amount < 500) {
             lessthanFiveHundredDepositCount += 1;
-          }
-          else if (transaction.amount >= 500 && transaction.amount < 1000) {
+          } else if (transaction.amount >= 500 && transaction.amount < 1000) {
             morethanFiveHundredDepositCount += 1;
           } else if (transaction.amount >= 1000) {
             morethanOneThousandDepositCount += 1;
@@ -280,14 +304,22 @@ export class AdminTransactionsComponent implements OnInit {
         console.log('Group items0:', cellInfo.data.items);
       }
       if (groupItems.length > 0) {
-      const agentName = groupItems[0].agent_name || 'No Agent';
-      const promoCode = groupItems[0].promo_code || 'No Promo Code';
-      return `${this.translate.instant('transactions.table.agentName')}: ${agentName} | ${promoCode} | ${this.translate.instant('transactions.table.lessThan500Deposits')}: ${lessthanFiveHundredDepositCount} | ${this.translate.instant('transactions.table.between500And1000Deposits')}: ${morethanFiveHundredDepositCount} | ${this.translate.instant('transactions.table.moreThan1000Deposits')}: ${morethanOneThousandDepositCount}`;
-    }
+        const agentName = groupItems[0].agent_name || 'No Agent';
+        const promoCode = groupItems[0].promo_code || 'No Promo Code';
+        return `${this.translate.instant(
+          'transactions.table.agentName'
+        )}: ${agentName} | ${promoCode} | ${this.translate.instant(
+          'transactions.table.lessThan500Deposits'
+        )}: ${lessthanFiveHundredDepositCount} | ${this.translate.instant(
+          'transactions.table.between500And1000Deposits'
+        )}: ${morethanFiveHundredDepositCount} | ${this.translate.instant(
+          'transactions.table.moreThan1000Deposits'
+        )}: ${morethanOneThousandDepositCount}`;
+      }
     } else if (cellInfo.data.collapsedItems) {
-    let lessthanFiveHundredDepositCount = 0;
-    let morethanFiveHundredDepositCount = 0;
-    let morethanOneThousandDepositCount = 0;
+      let lessthanFiveHundredDepositCount = 0;
+      let morethanFiveHundredDepositCount = 0;
+      let morethanOneThousandDepositCount = 0;
       console.log('Group items0collapsed:', cellInfo.data.collapsedItems);
       for (const client of cellInfo.data.collapsedItems) {
         let clientTransactions;
@@ -295,38 +327,125 @@ export class AdminTransactionsComponent implements OnInit {
           clientTransactions = client.items;
         } else if (client.collapsedItems) {
           clientTransactions = client.collapsedItems;
-        } 
+        }
         for (const transaction of clientTransactions) {
           if (transaction.amount < 500) {
             lessthanFiveHundredDepositCount += 1;
-          }
-          else if (transaction.amount >= 500 && transaction.amount < 1000) {
+          } else if (transaction.amount >= 500 && transaction.amount < 1000) {
             morethanFiveHundredDepositCount += 1;
           } else if (transaction.amount >= 1000) {
             morethanOneThousandDepositCount += 1;
           }
         }
       }
-        if (cellInfo.data.collapsedItems[0].items) {
-          groupItems = cellInfo.data.collapsedItems[0].items;
-          console.log('Group itemscollapsed:', cellInfo.data.collapsedItems);
-        } else {
-          groupItems = cellInfo.data.collapsedItems[0].collapsedItems;
-          console.log('Group itemscollapsed:', cellInfo.data.collapsedItems);
-       }
+      if (cellInfo.data.collapsedItems[0].items) {
+        groupItems = cellInfo.data.collapsedItems[0].items;
+        console.log('Group itemscollapsed:', cellInfo.data.collapsedItems);
+      } else {
+        groupItems = cellInfo.data.collapsedItems[0].collapsedItems;
+        console.log('Group itemscollapsed:', cellInfo.data.collapsedItems);
+      }
       if (groupItems.length > 0) {
-      const agentName = groupItems[0].agent_name || 'No Agent';
-      const promoCode = groupItems[0].promo_code || 'No Promo Code';
-      return `${this.translate.instant('transactions.table.agentName')}: ${agentName} | ${promoCode} | ${this.translate.instant('transactions.table.lessThan500Deposits')}: ${lessthanFiveHundredDepositCount} | ${this.translate.instant('transactions.table.between500And1000Deposits')}: ${morethanFiveHundredDepositCount} | ${this.translate.instant('transactions.table.moreThan1000Deposits')}: ${morethanOneThousandDepositCount}`;
-    }
+        const agentName = groupItems[0].agent_name || 'No Agent';
+        const promoCode = groupItems[0].promo_code || 'No Promo Code';
+        return `${this.translate.instant(
+          'transactions.table.agentName'
+        )}: ${agentName} | ${promoCode} | ${this.translate.instant(
+          'transactions.table.lessThan500Deposits'
+        )}: ${lessthanFiveHundredDepositCount} | ${this.translate.instant(
+          'transactions.table.between500And1000Deposits'
+        )}: ${morethanFiveHundredDepositCount} | ${this.translate.instant(
+          'transactions.table.moreThan1000Deposits'
+        )}: ${morethanOneThousandDepositCount}`;
+      }
     }
 
     console.log('Group items1:', groupItems);
     console.log('Group items2:', groupItems);
-  
+
     return cellInfo.key || '';
   }
 
+  // getAgentGroupTitle(cellInfo: any) {
+  //   let groupItems;
+
+  //   if (cellInfo.data.items) {
+  //     let lessthanFiveHundredDepositCount = 0;
+  //     let morethanFiveHundredDepositCount = 0;
+  //     let morethanOneThousandDepositCount = 0;
+  //     for (const client of cellInfo.data.items) {
+  //       let clientTransactions;
+  //       if (client.items) {
+  //         clientTransactions = client.items;
+  //       } else if (client.collapsedItems) {
+  //         clientTransactions = client.collapsedItems;
+  //       }
+  //       if (clientTransactions) {
+  //         for (const transaction of clientTransactions) {
+  //           const amount = Number(transaction.amount); // Convert to number
+  //           if (amount < 500) {
+  //             lessthanFiveHundredDepositCount += 1;
+  //           } else if (amount >= 500 && amount < 1000) {
+  //             morethanFiveHundredDepositCount += 1;
+  //           } else if (amount >= 1000) {
+  //             morethanOneThousandDepositCount += 1;
+  //           }
+  //         }
+  //       }
+  //     }
+  //     if (cellInfo.data.items[0].items) {
+  //       groupItems = cellInfo.data.items[0].items;
+  //       console.log('Group items0:', cellInfo.data.items);
+  //     } else {
+  //       groupItems = cellInfo.data.items[0].collapsedItems;
+  //       console.log('Group items0:', cellInfo.data.items);
+  //     }
+  //     if (groupItems && groupItems.length > 0) {
+  //       const agentName = groupItems[0].agent_name || 'No Agent';
+  //       const promoCode = groupItems[0].promo_code || 'No Promo Code';
+  //       return `${this.translate.instant('transactions.table.agentName')}: ${agentName} | ${promoCode} | ${this.translate.instant('transactions.table.lessThan500Deposits')}: ${lessthanFiveHundredDepositCount} | ${this.translate.instant('transactions.table.between500And1000Deposits')}: ${morethanFiveHundredDepositCount} | ${this.translate.instant('transactions.table.moreThan1000Deposits')}: ${morethanOneThousandDepositCount}`;
+  //     }
+  //   } else if (cellInfo.data.collapsedItems) {
+  //     let lessthanFiveHundredDepositCount = 0;
+  //     let morethanFiveHundredDepositCount = 0;
+  //     let morethanOneThousandDepositCount = 0;
+  //     console.log('Group items0collapsed:', cellInfo.data.collapsedItems);
+  //     for (const client of cellInfo.data.collapsedItems) {
+  //       let clientTransactions;
+  //       if (client.items) {
+  //         clientTransactions = client.items;
+  //       } else if (client.collapsedItems) {
+  //         clientTransactions = client.collapsedItems;
+  //       }
+  //       if (clientTransactions) {
+  //         for (const transaction of clientTransactions) {
+  //           const amount = Number(transaction.amount); // Convert to number
+  //           if (amount < 500) {
+  //             lessthanFiveHundredDepositCount += 1;
+  //           } else if (amount >= 500 && amount < 1000) {
+  //             morethanFiveHundredDepositCount += 1;
+  //           } else if (amount >= 1000) {
+  //             morethanOneThousandDepositCount += 1;
+  //           }
+  //         }
+  //       }
+  //     }
+  //     if (cellInfo.data.collapsedItems[0].items) {
+  //       groupItems = cellInfo.data.collapsedItems[0].items;
+  //       console.log('Group itemscollapsed:', cellInfo.data.collapsedItems);
+  //     } else {
+  //       groupItems = cellInfo.data.collapsedItems[0].collapsedItems;
+  //       console.log('Group itemscollapsed:', cellInfo.data.collapsedItems);
+  //     }
+  //     if (groupItems && groupItems.length > 0) {
+  //       const agentName = groupItems[0].agent_name || 'No Agent';
+  //       const promoCode = groupItems[0].promo_code || 'No Promo Code';
+  //       return `${this.translate.instant('transactions.table.agentName')}: ${agentName} | ${promoCode} | ${this.translate.instant('transactions.table.lessThan500Deposits')}: ${lessthanFiveHundredDepositCount} | ${this.translate.instant('transactions.table.between500And1000Deposits')}: ${morethanFiveHundredDepositCount} | ${this.translate.instant('transactions.table.moreThan1000Deposits')}: ${morethanOneThousandDepositCount}`;
+  //     }
+  //   }
+
+  //   return cellInfo.key || '';
+  // }
 
   getUsernameGroupTitle(cellInfo: any) {
     const items = cellInfo.data.collapsedItems || cellInfo.data.items || [];
@@ -334,21 +453,22 @@ export class AdminTransactionsComponent implements OnInit {
     if (items.length > 0) {
       const username = items[0].username || 'Unknown User';
       const promoCode = items[0].promo_code || 'No Promo Code';
-      
+
       // Find the latest balance (most recent transaction by datetime)
       let latestBalance = items[0].balance;
-      
-      return `${this.translate.instant('transactions.table.username')}: ${username} | ${promoCode} |  ${this.formatCurrency(latestBalance)} XAF`;
+
+      return `${this.translate.instant(
+        'transactions.table.username'
+      )}: ${username} | ${promoCode} |  ${this.formatCurrency(
+        latestBalance
+      )} XAF`;
     }
     return cellInfo.key || '';
   }
 
-  getFileName(){
-    let startdate=this.formatDateForFileExport(new Date(this.startDate));
-    let enddate=this.formatDateForFileExport(new Date(this.endDate));
+  getFileName() {
+    let startdate = this.formatDateForFileExport(new Date(this.startDate));
+    let enddate = this.formatDateForFileExport(new Date(this.endDate));
     return `Transactions_${startdate}_${enddate}.xlsx`;
   }
-
-
-
 }
