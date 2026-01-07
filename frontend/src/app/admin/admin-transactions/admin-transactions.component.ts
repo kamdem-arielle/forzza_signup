@@ -298,10 +298,10 @@ export class AdminTransactionsComponent implements OnInit {
       }
       if (cellInfo.data.items[0].items) {
         groupItems = cellInfo.data.items[0].items;
-        console.log('Group items0:', cellInfo.data.items);
+
       } else {
         groupItems = cellInfo.data.items[0].collapsedItems;
-        console.log('Group items0:', cellInfo.data.items);
+
       }
       if (groupItems.length > 0) {
         const agentName = groupItems[0].agent_name || 'No Agent';
@@ -320,7 +320,7 @@ export class AdminTransactionsComponent implements OnInit {
       let lessthanFiveHundredDepositCount = 0;
       let morethanFiveHundredDepositCount = 0;
       let morethanOneThousandDepositCount = 0;
-      console.log('Group items0collapsed:', cellInfo.data.collapsedItems);
+
       for (const client of cellInfo.data.collapsedItems) {
         let clientTransactions;
         if (client.items) {
@@ -340,10 +340,8 @@ export class AdminTransactionsComponent implements OnInit {
       }
       if (cellInfo.data.collapsedItems[0].items) {
         groupItems = cellInfo.data.collapsedItems[0].items;
-        console.log('Group itemscollapsed:', cellInfo.data.collapsedItems);
       } else {
         groupItems = cellInfo.data.collapsedItems[0].collapsedItems;
-        console.log('Group itemscollapsed:', cellInfo.data.collapsedItems);
       }
       if (groupItems.length > 0) {
         const agentName = groupItems[0].agent_name || 'No Agent';
@@ -359,9 +357,6 @@ export class AdminTransactionsComponent implements OnInit {
         )}: ${morethanOneThousandDepositCount}`;
       }
     }
-
-    console.log('Group items1:', groupItems);
-    console.log('Group items2:', groupItems);
 
     return cellInfo.key || '';
   }
@@ -449,12 +444,10 @@ export class AdminTransactionsComponent implements OnInit {
 
   getUsernameGroupTitle(cellInfo: any) {
     const items = cellInfo.data.collapsedItems || cellInfo.data.items || [];
-    console.log('user items:', items);
     if (items.length > 0) {
       const username = items[0].username || 'Unknown User';
       const promoCode = items[0].promo_code || 'No Promo Code';
 
-      // Find the latest balance (most recent transaction by datetime)
       let latestBalance = items[0].balance;
 
       return `${this.translate.instant(
