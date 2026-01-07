@@ -37,23 +37,23 @@ export class AdminTransactionsComponent implements OnInit {
   message = '';
   isSuccess = false;
 
-  // Import fields
+
   selectedFile: File | null = null;
   selectedPromoCode: string = '';
 
-  // Filter options
+
   channels: string[] = [];
   bookingTypes: string[] = [];
   filterChannel: string = '';
   filterUsername: string = '';
   filterBooking: string = '';
 
-  // Filters
+
   startDate: string = '';
   endDate: string = '';
   filterPromoCode: string = '';
 
-  // Summary
+
   totalTransactions = 0;
   totalAmount = 0;
 
@@ -202,12 +202,10 @@ export class AdminTransactionsComponent implements OnInit {
             true
           );
           this.selectedFile = null;
-          // Reset file input
           const fileInput = document.getElementById(
             'excelFile'
           ) as HTMLInputElement;
           if (fileInput) fileInput.value = '';
-          // Reload transactions and filter options
           this.loadTransactions();
           this.loadFilterOptions();
         }
