@@ -116,7 +116,11 @@ class Transaction {
       }
 
       if (filters.booking) {
-        query += ' AND LOWER(t.booking) LIKE CONCAT(\'%\', LOWER(?), \'%\') AND LOWER(t.booking) NOT LIKE \'%casino games - deposit%\'';
+        if (filters.booking.toLowerCase() === 'deposit') {
+          query += ' AND LOWER(t.booking) LIKE CONCAT(\'%\', LOWER(?), \'%\') AND LOWER(t.booking) NOT LIKE \'%casino games - deposit%\'';
+        }else{
+          query += ' AND LOWER(t.booking) LIKE CONCAT(\'%\', LOWER(?), \'%\')';
+        }
         params.push(`%${filters.booking}%`);
       }
       
