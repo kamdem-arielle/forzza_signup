@@ -12,6 +12,7 @@ export class AdminLayoutComponent implements OnInit {
   currentRoute: string = '';
   sidebarCollapsed: boolean = false;
   adminName: string = '';
+  adminRole: string = 'admin';
   currentLang = 'en';
 
   constructor(private router: Router,private translate: TranslateService) {
@@ -29,6 +30,7 @@ export class AdminLayoutComponent implements OnInit {
 
     const adminData = JSON.parse(admin);
     this.adminName = adminData.username || 'Admin';
+    this.adminRole = adminData.role || 'admin';
 
     // Track current route for active state
     this.router.events.pipe(

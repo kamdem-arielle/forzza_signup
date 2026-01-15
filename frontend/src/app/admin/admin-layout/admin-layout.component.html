@@ -4,7 +4,7 @@
     <div class="sidebar-header">
       <div class="logo" *ngIf="!sidebarCollapsed">
         <span class="logo-text">{{ 'app.title' | translate }}</span>
-        <span class="logo-sub">Admin</span>
+        <span class="logo-sub">{{ adminRole === 'superadmin' ? 'Super Admin' : 'Admin' }}</span>
       </div>
       <div class="logo-icon">F</div>
       <button class="toggle-btn" (click)="toggleSidebar()">
