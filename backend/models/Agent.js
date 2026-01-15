@@ -14,14 +14,15 @@ class Agent {
    * @param {string} name - Agent's full name
    * @param {string} phone - Agent's phone number
    * @param {string} email - Agent's email
+   * @param {number} admin_id - ID of the admin this agent belongs to
    * @returns {Promise} Result of the insert operation
    */
-  static async create(username, password, promo_code, name = null, phone = null, email = null) {
+  static async create(username, password, promo_code, name = null, phone = null, email = null, admin_id = null) {
     try {
       const [result] = await pool.query(
-        `INSERT INTO agents (username, password, promo_code, name, phone, email, status, created_at) 
-         VALUES (?, ?, ?, ?, ?, ?, 'active', NOW())`,
-        [username, password, promo_code, name, phone, email]
+        `INSERT INTO agents (admin_id, username, password, promo_code, name, phone, email, status, created_at) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, 'active', NOW())`,
+        [admin_id, username, password, promo_code, name, phone, email]
       );
       return result;
     } catch (error) {
@@ -71,7 +72,7 @@ class Agent {
   static async findById(id) {
     try {
       const [rows] = await pool.query(
-        'SELECT id, username, promo_code, name, phone, email, status, created_at, last_login_at FROM agents WHERE id = ?',
+        'SELECT id, admin_id, username, promo_code, name, phone, email, status, created_at, last_login_at FROM agents WHERE id = ?',
         [id]
       );
       return rows[0] || null;
@@ -88,11 +89,48 @@ class Agent {
     try {
       // Get all agents with registration_count
       const [rows] = await pool.query(
-        `SELECT a.id, a.username, a.promo_code, a.name, a.phone, a.email, a.status, a.created_at, a.last_login_at, a.registration_count
+        `SELECT a.id, a.admin_id, a.username, a.promo_code, a.name, a.phone, a.email, a.status, a.created_at, a.last_login_at, a.registration_count
          FROM agents a
          ORDER BY a.created_at DESC`
       );
       return rows;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Get all agents for a specific admin
+   * @param {number} adminId - Admin ID
+   * @returns {Promise} Array of agents belonging to the admin
+   */
+  static async getAllByAdminId(adminId) {
+    try {
+      const [rows] = await pool.query(
+        `SELECT a.id, a.admin_id, a.username, a.promo_code, a.name, a.phone, a.email, a.status, a.created_at, a.last_login_at, a.registration_count
+         FROM agents a
+         WHERE a.admin_id = ?
+         ORDER BY a.created_at DESC`,
+        [adminId]
+      );
+      return rows;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Get promo codes for agents belonging to a specific admin
+   * @param {number} adminId - Admin ID
+   * @returns {Promise} Array of promo codes
+   */
+  static async getPromoCodesByAdminId(adminId) {
+    try {
+      const [rows] = await pool.query(
+        'SELECT promo_code FROM agents WHERE admin_id = ? AND promo_code IS NOT NULL',
+        [adminId]
+      );
+      return rows.map(r => r.promo_code);
     } catch (error) {
       throw error;
     }

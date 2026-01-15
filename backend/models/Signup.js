@@ -213,6 +213,55 @@ class Signup {
       throw error;
     }
   }
+
+  /**
+   * Get all signups for a specific admin (via their agents' promo codes)
+   * @param {Array} promoCodes - Array of promo codes belonging to admin's agents
+   * @returns {Promise} Array of all signup records for those promo codes
+   */
+  static async getAllByPromoCodes(promoCodes) {
+    try {
+      if (!promoCodes || promoCodes.length === 0) {
+        return [];
+      }
+      const placeholders = promoCodes.map(() => '?').join(',');
+      const [rows] = await pool.query(
+        `SELECT id, username, first_name, last_name, phone, promo_code, password, status, notes, created_at, approved_at 
+         FROM signups 
+         WHERE promo_code IN (${placeholders}) 
+         ORDER BY created_at DESC`,
+        promoCodes
+      );
+      return rows;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Get signups by status for a specific admin (via their agents' promo codes)
+   * @param {string} status - Status to filter by
+   * @param {Array} promoCodes - Array of promo codes belonging to admin's agents
+   * @returns {Promise} Array of signup records
+   */
+  static async getByStatusAndPromoCodes(status, promoCodes) {
+    try {
+      if (!promoCodes || promoCodes.length === 0) {
+        return [];
+      }
+      const placeholders = promoCodes.map(() => '?').join(',');
+      const [rows] = await pool.query(
+        `SELECT id, username, first_name, last_name, phone, promo_code, password, status, notes, created_at, approved_at 
+         FROM signups 
+         WHERE status = ? AND promo_code IN (${placeholders}) 
+         ORDER BY created_at DESC`,
+        [status, ...promoCodes]
+      );
+      return rows;
+    } catch (error) {
+      throw error;
+    }
+  }
 }
 
 module.exports = Signup;
