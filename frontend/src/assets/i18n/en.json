@@ -46,6 +46,8 @@
   "adminLogin": {
     "title": "Admin Login",
     "subtitle": "Sign in to access the dashboard",
+    "adminLogin": "Admin",
+    "superAdminLogin": "Super Admin",
     "username": "Username",
     "usernamePlaceholder": "Enter username",
     "usernameRequired": "Username is required",

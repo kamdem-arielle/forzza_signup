@@ -46,6 +46,8 @@
   "adminLogin": {
     "title": "Connexion Admin",
     "subtitle": "Connectez-vous pour accéder au tableau de bord",
+    "adminLogin": "Admin",
+    "superAdminLogin": "Super Admin",
     "username": "Nom d'utilisateur",
     "usernamePlaceholder": "Entrez le nom d'utilisateur",
     "usernameRequired": "Le nom d'utilisateur est requis",
