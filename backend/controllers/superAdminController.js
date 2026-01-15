@@ -1,17 +1,18 @@
-const Admin = require('../models/Admin');
+const SuperAdmin = require('../models/SuperAdmin');
 
 /**
- * Admin Controller
- * Handles authentication logic for admin users
+ * SuperAdmin Controller
+ * Handles authentication and data retrieval for superadmin users
+ * SuperAdmin has access to ALL data across all admins
  */
 
 /**
- * Admin Signup (Registration)
- * Creates a new admin account
+ * SuperAdmin Signup (Registration)
+ * Creates a new superadmin account
  */
 exports.signup = async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { username, password, name, email } = req.body;
 
     // Validate input
     if (!username || !password) {
@@ -22,21 +23,21 @@ exports.signup = async (req, res) => {
     }
 
     // Check if username already exists
-    const existingAdmin = await Admin.findByUsername(username);
-    if (existingAdmin) {
+    const existingSuperAdmin = await SuperAdmin.findByUsername(username);
+    if (existingSuperAdmin) {
       return res.status(409).json({
         success: false,
         message: 'Username already exists'
       });
     }
 
-    // Create new admin
+    // Create new superadmin
     // NOTE: In production, you should hash the password using bcrypt
-    const result = await Admin.create(username, password);
+    const result = await SuperAdmin.create(username, password, name, email);
 
     res.status(201).json({
       success: true,
-      message: 'Admin account created successfully',
+      message: 'SuperAdmin account created successfully',
       data: {
         id: result.insertId,
         username: username
@@ -44,18 +45,18 @@ exports.signup = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Signup error:', error);
+    console.error('SuperAdmin signup error:', error);
     res.status(500).json({
       success: false,
-      message: 'Error creating admin account',
+      message: 'Error creating superadmin account',
       error: error.message
     });
   }
 };
 
 /**
- * Admin Login
- * Authenticates admin user with username and password
+ * SuperAdmin Login
+ * Authenticates superadmin user with username and password
  */
 exports.login = async (req, res) => {
   try {
@@ -69,10 +70,10 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Find admin by username
-    const admin = await Admin.findByUsername(username);
+    // Find superadmin by username
+    const superadmin = await SuperAdmin.findByUsername(username);
     
-    if (!admin) {
+    if (!superadmin) {
       return res.status(401).json({
         success: false,
         message: 'Invalid username or password'
@@ -81,27 +82,32 @@ exports.login = async (req, res) => {
 
     // Verify password (simple comparison for now)
     // NOTE: In production, use bcrypt.compare() for hashed passwords
-    if (admin.password !== password) {
+    if (superadmin.password !== password) {
       return res.status(401).json({
         success: false,
         message: 'Invalid username or password'
       });
     }
 
-    // Login successful - include role for frontend to distinguish
+    // Update last login time
+    await SuperAdmin.updateLastLogin(superadmin.id);
+
+    // Login successful
     res.json({
       success: true,
       message: 'Login successful',
       data: {
-        id: admin.id,
-        username: admin.username,
-        role: 'admin',
-        created_at: admin.created_at
+        id: superadmin.id,
+        username: superadmin.username,
+        name: superadmin.name,
+        email: superadmin.email,
+        role: 'superadmin',
+        created_at: superadmin.created_at
       }
     });
 
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('SuperAdmin login error:', error);
     res.status(500).json({
       success: false,
       message: 'Error during login',

@@ -218,7 +218,7 @@ exports.getMyStats = async (req, res) => {
  */
 exports.createAgent = async (req, res) => {
   try {
-    const { username, password, promo_code, name, phone, email } = req.body;
+    const { username, password, promo_code, name, phone, email, admin_id } = req.body;
 
     // Validate required fields
     if (!username || !password || !promo_code) {
@@ -246,8 +246,8 @@ exports.createAgent = async (req, res) => {
       });
     }
 
-    // Create new agent
-    const result = await Agent.create(username, password, promo_code, name, phone, email);
+    // Create new agent with admin_id
+    const result = await Agent.create(username, password, promo_code, name, phone, email, admin_id);
 
     res.status(201).json({
       success: true,
@@ -258,7 +258,8 @@ exports.createAgent = async (req, res) => {
         promo_code,
         name,
         phone,
-        email
+        email,
+        admin_id
       }
     });
 
@@ -273,7 +274,7 @@ exports.createAgent = async (req, res) => {
 };
 
 /**
- * Get all agents (Admin only)
+ * Get all agents (SuperAdmin only - returns ALL agents)
  */
 exports.getAllAgents = async (req, res) => {
   try {
@@ -288,6 +289,39 @@ exports.getAllAgents = async (req, res) => {
 
   } catch (error) {
     console.error('Get all agents error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching agents',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * Get agents by admin ID (Admin only - returns only their agents)
+ */
+exports.getAgentsByAdminId = async (req, res) => {
+  try {
+    const { admin_id } = req.params;
+
+    if (!admin_id) {
+      return res.status(400).json({
+        success: false,
+        message: 'Admin ID is required'
+      });
+    }
+
+    // Update registration_count for all agents before fetching
+    await Agent.updateAllRegistrationCounts();
+    const agents = await Agent.getAllByAdminId(admin_id);
+
+    res.json({
+      success: true,
+      data: agents
+    });
+
+  } catch (error) {
+    console.error('Get agents by admin ID error:', error);
     res.status(500).json({
       success: false,
       message: 'Error fetching agents',

@@ -1,4 +1,5 @@
 const Signup = require('../models/Signup');
+const Agent = require('../models/Agent');
 
 /**
  * Signup Controller
@@ -257,6 +258,106 @@ exports.updateNotes = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error updating notes',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * Get all signups for a specific admin (via their agents' promo codes)
+ */
+exports.getSignupsByAdminId = async (req, res) => {
+  try {
+    const { admin_id } = req.params;
+
+    if (!admin_id) {
+      return res.status(400).json({
+        success: false,
+        message: 'Admin ID is required'
+      });
+    }
+
+    // Get all promo codes for this admin's agents
+    const promoCodes = await Agent.getPromoCodesByAdminId(admin_id);
+
+    if (promoCodes.length === 0) {
+      return res.json({
+        success: true,
+        message: 'No signups found for this admin',
+        count: 0,
+        data: []
+      });
+    }
+
+    // Get all signups for these promo codes
+    const signups = await Signup.getAllByPromoCodes(promoCodes);
+
+    res.json({
+      success: true,
+      message: `Retrieved ${signups.length} signups for admin`,
+      count: signups.length,
+      data: signups
+    });
+
+  } catch (error) {
+    console.error('Get signups by admin ID error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching signups',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * Get signups by status for a specific admin
+ */
+exports.getByStatusAndAdminId = async (req, res) => {
+  try {
+    const { status, admin_id } = req.params;
+
+    if (!admin_id) {
+      return res.status(400).json({
+        success: false,
+        message: 'Admin ID is required'
+      });
+    }
+
+    // Validate status
+    if (!['PENDING', 'APPROVED', 'ARCHIVED'].includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Status must be PENDING, APPROVED, or ARCHIVED'
+      });
+    }
+
+    // Get all promo codes for this admin's agents
+    const promoCodes = await Agent.getPromoCodesByAdminId(admin_id);
+
+    if (promoCodes.length === 0) {
+      return res.json({
+        success: true,
+        message: 'No signups found for this admin',
+        count: 0,
+        data: []
+      });
+    }
+
+    // Get signups by status for these promo codes
+    const signups = await Signup.getByStatusAndPromoCodes(status, promoCodes);
+
+    res.json({
+      success: true,
+      message: `Retrieved ${signups.length} ${status.toLowerCase()} signups for admin`,
+      count: signups.length,
+      data: signups
+    });
+
+  } catch (error) {
+    console.error('Get signups by status and admin ID error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching signups',
       error: error.message
     });
   }

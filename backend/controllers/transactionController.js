@@ -455,3 +455,154 @@ exports.deleteAll = async (req, res) => {
     });
   }
 };
+
+/**
+ * Get transactions for a specific admin (via their agents' promo codes)
+ * GET /api/transactions/admin/:admin_id
+ */
+exports.getTransactionsByAdminId = async (req, res) => {
+  try {
+    const { admin_id } = req.params;
+    const { startDate, endDate, promoCode, channel, username, booking } = req.query;
+
+    if (!admin_id) {
+      return res.status(400).json({
+        success: false,
+        message: 'Admin ID is required'
+      });
+    }
+
+    // Get all promo codes for this admin's agents
+    const promoCodes = await Agent.getPromoCodesByAdminId(admin_id);
+
+    if (promoCodes.length === 0) {
+      return res.json({
+        success: true,
+        data: [],
+        summary: {
+          totalTransactions: 0,
+          totalAmount: 0
+        }
+      });
+    }
+
+    const filters = {};
+    if (startDate) filters.startDate = startDate;
+    if (endDate) filters.endDate = endDate;
+    if (promoCode) filters.promoCode = promoCode;
+    if (channel) filters.channel = channel;
+    if (username) filters.username = username;
+    if (booking) filters.booking = booking;
+
+    const transactions = await Transaction.getAllByPromoCodes(filters, promoCodes);
+    const summary = await Transaction.getSummaryByPromoCodes(filters, promoCodes);
+
+    res.json({
+      success: true,
+      data: transactions,
+      summary: {
+        totalTransactions: parseInt(summary.total_transactions) || 0,
+        totalAmount: parseFloat(summary.total_amount) || 0
+      }
+    });
+
+  } catch (error) {
+    console.error('Get transactions by admin ID error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching transactions',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * Get transaction statistics for a specific admin
+ * GET /api/transactions/admin/:admin_id/stats
+ */
+exports.getTransactionStatsByAdminId = async (req, res) => {
+  try {
+    const { admin_id } = req.params;
+    const { startDate, endDate } = req.query;
+
+    if (!admin_id) {
+      return res.status(400).json({
+        success: false,
+        message: 'Admin ID is required'
+      });
+    }
+
+    // Get all promo codes for this admin's agents
+    const promoCodes = await Agent.getPromoCodesByAdminId(admin_id);
+
+    if (promoCodes.length === 0) {
+      return res.json({
+        success: true,
+        data: [],
+        summary: {
+          totalTransactions: 0,
+          totalAmount: 0
+        }
+      });
+    }
+
+    const filters = {};
+    if (startDate) filters.startDate = startDate;
+    if (endDate) filters.endDate = endDate;
+
+    const stats = await Transaction.getStatsByAgentForAdmin(filters, promoCodes);
+    const summary = await Transaction.getSummaryByPromoCodes(filters, promoCodes);
+
+    res.json({
+      success: true,
+      data: stats,
+      summary: {
+        totalTransactions: parseInt(summary.total_transactions) || 0,
+        totalAmount: parseFloat(summary.total_amount) || 0
+      }
+    });
+
+  } catch (error) {
+    console.error('Get transaction stats by admin ID error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching transaction statistics',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * Get filter options for a specific admin's transactions
+ * GET /api/transactions/admin/:admin_id/filter-options
+ */
+exports.getFilterOptionsByAdminId = async (req, res) => {
+  try {
+    const { admin_id } = req.params;
+
+    if (!admin_id) {
+      return res.status(400).json({
+        success: false,
+        message: 'Admin ID is required'
+      });
+    }
+
+    // Get all promo codes for this admin's agents
+    const promoCodes = await Agent.getPromoCodesByAdminId(admin_id);
+
+    const options = await Transaction.getFilterOptionsByPromoCodes(promoCodes);
+
+    res.json({
+      success: true,
+      data: options
+    });
+
+  } catch (error) {
+    console.error('Get filter options by admin ID error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching filter options',
+      error: error.message
+    });
+  }
+};
