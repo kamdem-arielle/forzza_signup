@@ -56,6 +56,7 @@ export class AdminTransactionsComponent implements OnInit {
 
   totalTransactions = 0;
   totalAmount = 0;
+  isSuperAdmin = false;
 
   constructor(
     private apiService: ApiService,
@@ -70,6 +71,9 @@ export class AdminTransactionsComponent implements OnInit {
       this.router.navigate(['/admin/login']);
       return;
     }
+
+    const adminData = JSON.parse(admin);
+    this.isSuperAdmin = adminData.role === 'superadmin';
 
     this.initializeDates();
     this.loadAgents();
@@ -272,6 +276,7 @@ export class AdminTransactionsComponent implements OnInit {
   }
 
   getAgentGroupTitle(cellInfo: any) {
+    console.log('Cell Info:', cellInfo);
     let groupItems;
     if (cellInfo.data.items) {
       let lessthanFiveHundredDepositCount = 0;

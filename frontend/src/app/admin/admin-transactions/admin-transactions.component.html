@@ -8,8 +8,8 @@
     {{ message }}
   </div>
 
-  <!-- Import Section -->
-  <div class="import-section card">
+  <!-- Import Section (SuperAdmin only) -->
+  <div class="import-section card" *ngIf="isSuperAdmin">
     <h3>{{ 'transactions.importTitle' | translate }}</h3>
     <div class="import-form">
       <div class="form-group">
