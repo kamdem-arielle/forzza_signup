@@ -11,17 +11,29 @@ const transactionController = require('../controllers/transactionController');
 // POST /api/transactions/import
 router.post('/import', transactionController.importExcel);
 
-// Get filter options (unique channels and booking types)
+// Get filter options (unique channels and booking types) - SuperAdmin
 // GET /api/transactions/filter-options
 router.get('/filter-options', transactionController.getFilterOptions);
 
-// Get all transactions with filters
+// Get filter options for a specific admin
+// GET /api/transactions/admin/:admin_id/filter-options
+router.get('/admin/:admin_id/filter-options', transactionController.getFilterOptionsByAdminId);
+
+// Get all transactions with filters - SuperAdmin
 // GET /api/transactions?startDate=&endDate=&promoCode=&channel=&username=&booking=
 router.get('/', transactionController.getTransactions);
 
-// Get transaction statistics by agent
+// Get transactions for a specific admin
+// GET /api/transactions/admin/:admin_id?startDate=&endDate=&promoCode=&channel=&username=&booking=
+router.get('/admin/:admin_id', transactionController.getTransactionsByAdminId);
+
+// Get transaction statistics by agent - SuperAdmin
 // GET /api/transactions/stats?startDate=&endDate=
 router.get('/stats', transactionController.getTransactionStats);
+
+// Get transaction statistics for a specific admin
+// GET /api/transactions/admin/:admin_id/stats?startDate=&endDate=
+router.get('/admin/:admin_id/stats', transactionController.getTransactionStatsByAdminId);
 
 // Delete all transactions
 // DELETE /api/transactions/all

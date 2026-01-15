@@ -36,9 +36,13 @@ router.get('/:promo_code/transactions/stats', agentController.getMyTransactionSt
 // POST /api/agents
 router.post('/', agentController.createAgent);
 
-// Get all agents (Admin only)
+// Get all agents (SuperAdmin only - returns ALL agents)
 // GET /api/agents
 router.get('/', agentController.getAllAgents);
+
+// Get agents by admin ID (Admin only - returns only their agents)
+// GET /api/agents/admin/:admin_id
+router.get('/admin/:admin_id', agentController.getAgentsByAdminId);
 
 // Update agent (Admin only)
 // PUT /api/agents/:id

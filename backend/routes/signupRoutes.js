@@ -19,15 +19,23 @@ router.put('/:id/status', signupController.updateStatus);
 // PATCH /api/signups/:id/notes
 router.patch('/:id/notes', signupController.updateNotes);
 
-// Get signups by status (PENDING or APPROVED)
+// Get signups by status (SuperAdmin - all data)
 // GET /api/signups/status/:status
 router.get('/status/:status', signupController.getByStatus);
+
+// Get signups by status for a specific admin
+// GET /api/signups/admin/:admin_id/status/:status
+router.get('/admin/:admin_id/status/:status', signupController.getByStatusAndAdminId);
+
+// Get all signups for a specific admin
+// GET /api/signups/admin/:admin_id
+router.get('/admin/:admin_id', signupController.getSignupsByAdminId);
 
 // Get signup by ID
 // GET /api/signups/:id
 router.get('/:id', signupController.getSignupById);
 
-// Get all signups
+// Get all signups (SuperAdmin - all data)
 // GET /api/signups
 router.get('/', signupController.getAllSignups);
 
