@@ -83,14 +83,16 @@ class Agent {
 
   /**
    * Get all agents
-   * @returns {Promise} Array of agents
+   * @returns {Promise} Array of agents with admin info
    */
   static async getAll() {
     try {
-      // Get all agents with registration_count
+      // Get all agents with registration_count and admin info
       const [rows] = await pool.query(
-        `SELECT a.id, a.admin_id, a.username, a.promo_code, a.name, a.phone, a.email, a.status, a.created_at, a.last_login_at, a.registration_count
+        `SELECT a.id, a.admin_id, a.username, a.promo_code, a.name, a.phone, a.email, a.status, a.created_at, a.last_login_at, a.registration_count,
+                adm.username as admin_name
          FROM agents a
+         LEFT JOIN admins adm ON a.admin_id = adm.id
          ORDER BY a.created_at DESC`
       );
       return rows;
@@ -102,13 +104,15 @@ class Agent {
   /**
    * Get all agents for a specific admin
    * @param {number} adminId - Admin ID
-   * @returns {Promise} Array of agents belonging to the admin
+   * @returns {Promise} Array of agents belonging to the admin with admin info
    */
   static async getAllByAdminId(adminId) {
     try {
       const [rows] = await pool.query(
-        `SELECT a.id, a.admin_id, a.username, a.promo_code, a.name, a.phone, a.email, a.status, a.created_at, a.last_login_at, a.registration_count
+        `SELECT a.id, a.admin_id, a.username, a.promo_code, a.name, a.phone, a.email, a.status, a.created_at, a.last_login_at, a.registration_count,
+                adm.username as admin_name
          FROM agents a
+         LEFT JOIN admins adm ON a.admin_id = adm.id
          WHERE a.admin_id = ?
          ORDER BY a.created_at DESC`,
         [adminId]
