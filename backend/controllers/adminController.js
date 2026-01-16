@@ -2,7 +2,7 @@ const Admin = require('../models/Admin');
 
 /**
  * Admin Controller
- * Handles authentication logic for admin users
+ * Handles authentication logic for admin and superadmin users
  */
 
 /**
@@ -11,7 +11,7 @@ const Admin = require('../models/Admin');
  */
 exports.signup = async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { username, password, role } = req.body;
 
     // Validate input
     if (!username || !password) {
@@ -30,16 +30,18 @@ exports.signup = async (req, res) => {
       });
     }
 
-    // Create new admin
+    // Create new admin (default role is 'admin')
     // NOTE: In production, you should hash the password using bcrypt
-    const result = await Admin.create(username, password);
+    const adminRole = role === 'superadmin' ? 'superadmin' : 'admin';
+    const result = await Admin.create(username, password, adminRole);
 
     res.status(201).json({
       success: true,
       message: 'Admin account created successfully',
       data: {
         id: result.insertId,
-        username: username
+        username: username,
+        role: adminRole
       }
     });
 
@@ -55,7 +57,7 @@ exports.signup = async (req, res) => {
 
 /**
  * Admin Login
- * Authenticates admin user with username and password
+ * Authenticates admin/superadmin user with username and password
  */
 exports.login = async (req, res) => {
   try {
@@ -88,14 +90,14 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Login successful - include role for frontend to distinguish
+    // Login successful - include role from database
     res.json({
       success: true,
       message: 'Login successful',
       data: {
         id: admin.id,
         username: admin.username,
-        role: 'admin',
+        role: admin.role || 'admin',
         created_at: admin.created_at
       }
     });
@@ -105,6 +107,29 @@ exports.login = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error during login',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * Get All Admins
+ * Returns list of all admins (for superadmin filter dropdowns)
+ */
+exports.getAllAdmins = async (req, res) => {
+  try {
+    const admins = await Admin.getAllAdmins();
+    
+    res.json({
+      success: true,
+      data: admins
+    });
+
+  } catch (error) {
+    console.error('Get admins error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching admins',
       error: error.message
     });
   }
