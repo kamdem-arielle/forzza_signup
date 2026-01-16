@@ -3,14 +3,12 @@ const router = express.Router();
 
 // Import route modules
 const adminRoutes = require('./adminRoutes');
-const superAdminRoutes = require('./superAdminRoutes');
 const signupRoutes = require('./signupRoutes');
 const agentRoutes = require('./agentRoutes');
 const transactionRoutes = require('./transactionRoutes');
 
 // Mount routes
 router.use('/admin', adminRoutes);
-router.use('/superadmin', superAdminRoutes);
 router.use('/signups', signupRoutes);
 router.use('/agents', agentRoutes);
 router.use('/transactions', transactionRoutes);
@@ -21,13 +19,10 @@ router.get('/test', (req, res) => {
     success: true,
     message: 'API is working!',
     endpoints: {
-      superadmin: {
-        signup: 'POST /api/superadmin/signup',
-        login: 'POST /api/superadmin/login'
-      },
       admin: {
         signup: 'POST /api/admin/signup',
-        login: 'POST /api/admin/login'
+        login: 'POST /api/admin/login (works for both admin and superadmin)',
+        list: 'GET /api/admin/list (get all admins for filter)'
       },
       signups: {
         create: 'POST /api/signups',
