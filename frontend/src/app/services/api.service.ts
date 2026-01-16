@@ -103,20 +103,32 @@ export class ApiService {
     return this.http.post<ApiResponse>(`${this.baseUrl}/api/admin/login`, payload);
   }
 
-  // SuperAdmin endpoints
-  superAdminLogin(payload: { username: string; password: string }): Observable<ApiResponse> {
-    return this.http.post<ApiResponse>(`${this.baseUrl}/api/superadmin/login`, payload);
+  /**
+   * Get all admins (for superadmin filter dropdowns)
+   */
+  getAllAdminsList(): Observable<ApiResponse<AdminUser[]>> {
+    return this.http.get<ApiResponse<AdminUser[]>>(`${this.baseUrl}/api/admin/list`);
   }
 
   /**
    * Get signups by status - uses admin-specific endpoint for admins, global for superadmins
+   * @param status - The signup status to filter by
+   * @param adminId - Optional admin ID for superadmin to filter by specific admin
    */
-  getSignupsByStatus(status: 'PENDING' | 'APPROVED' | 'ARCHIVED'): Observable<ApiResponse<Signup[]>> {
+  getSignupsByStatus(status: 'PENDING' | 'APPROVED' | 'ARCHIVED', adminId?: number | null): Observable<ApiResponse<Signup[]>> {
     const admin = this.getLoggedInAdmin();
+    
+    // If adminId is provided (superadmin filtering by specific admin)
+    if (adminId) {
+      return this.http.get<ApiResponse<Signup[]>>(`${this.baseUrl}/api/signups/admin/${adminId}/status/${status}`);
+    }
+    
+    // Regular admin - filter by their own ID
     if (admin && admin.role === 'admin') {
       return this.http.get<ApiResponse<Signup[]>>(`${this.baseUrl}/api/signups/admin/${admin.id}/status/${status}`);
     }
-    // SuperAdmin or fallback - get all
+    
+    // SuperAdmin with no filter - get all
     return this.http.get<ApiResponse<Signup[]>>(`${this.baseUrl}/api/signups/status/${status}`);
   }
 
@@ -225,8 +237,10 @@ export class ApiService {
 
   /**
    * Get transactions - uses admin-specific endpoint for admins, global for superadmins
+   * @param filters - Filter parameters
+   * @param adminId - Optional admin ID for superadmin to filter by specific admin
    */
-  getTransactions(filters: { startDate?: string; endDate?: string; promoCode?: string; channel?: string; username?: string; booking?: string }): Observable<ApiResponse> {
+  getTransactions(filters: { startDate?: string; endDate?: string; promoCode?: string; channel?: string; username?: string; booking?: string }, adminId?: number | null): Observable<ApiResponse> {
     let params: any = {};
     if (filters.startDate) params.startDate = filters.startDate;
     if (filters.endDate) params.endDate = filters.endDate;
@@ -235,11 +249,16 @@ export class ApiService {
     if (filters.username) params.username = filters.username;
     if (filters.booking) params.booking = filters.booking;
 
+    // If adminId is provided (superadmin filtering by specific admin)
+    if (adminId) {
+      return this.http.get<ApiResponse>(`${this.baseUrl}/api/transactions/admin/${adminId}`, { params });
+    }
+
     const admin = this.getLoggedInAdmin();
     if (admin && admin.role === 'admin') {
       return this.http.get<ApiResponse>(`${this.baseUrl}/api/transactions/admin/${admin.id}`, { params });
     }
-    // SuperAdmin or fallback - get all
+    // SuperAdmin with no filter - get all
     return this.http.get<ApiResponse>(`${this.baseUrl}/api/transactions`, { params });
   }
 
