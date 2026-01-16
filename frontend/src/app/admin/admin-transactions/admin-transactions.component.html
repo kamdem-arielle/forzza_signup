@@ -29,15 +29,15 @@
   <div class="filter-section card">
     <h3>{{ 'transactions.filtersTitle' | translate }}</h3>
     <div class="filter-bar">
-      <div class="filter-group">
-        <label>{{ 'transactions.startDate' | translate }}</label>
-        <input type="date" [(ngModel)]="startDate" (ngModelChange)="onFilterChange()" class="form-control">
+      <!-- Admin Filter (SuperAdmin only) -->
+      <div class="filter-group" *ngIf="isSuperAdmin">
+        <label>{{ 'filters.admin' | translate }}</label>
+        <select [(ngModel)]="selectedAdminId" (ngModelChange)="onAdminSelectChange()" class="form-control">
+          <option [ngValue]="null">{{ 'filters.allAdmins' | translate }}</option>
+          <option *ngFor="let admin of admins" [ngValue]="admin.id">{{ admin.username }}</option>
+        </select>
       </div>
-      <div class="filter-group">
-        <label>{{ 'transactions.endDate' | translate }}</label>
-        <input type="date" [(ngModel)]="endDate" (ngModelChange)="onFilterChange()" class="form-control">
-      </div>
-      <div class="filter-group">
+        <div class="filter-group">
         <label>{{ 'transactions.agent' | translate }}</label>
         <select [(ngModel)]="filterPromoCode" (ngModelChange)="onFilterChange()" class="form-control">
           <option value="">{{ 'transactions.allAgents' | translate }}</option>
@@ -45,6 +45,14 @@
             {{ agent.name || agent.promo_code }} ({{ agent.promo_code }})
           </option>
         </select>
+      </div>
+      <div class="filter-group">
+        <label>{{ 'transactions.startDate' | translate }}</label>
+        <input type="date" [(ngModel)]="startDate" (ngModelChange)="onFilterChange()" class="form-control">
+      </div>
+      <div class="filter-group">
+        <label>{{ 'transactions.endDate' | translate }}</label>
+        <input type="date" [(ngModel)]="endDate" (ngModelChange)="onFilterChange()" class="form-control">
       </div>
       <div class="filter-group">
         <label>{{ 'transactions.channel' | translate }}</label>

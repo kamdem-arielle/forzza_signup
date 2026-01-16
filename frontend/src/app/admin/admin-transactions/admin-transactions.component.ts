@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { ApiService } from '../../services/api.service';
+import { ApiService, AdminUser } from '../../services/api.service';
 import { CoreService } from '../../services/core.service';
 
 
@@ -22,6 +22,7 @@ interface Agent {
   id: number;
   name: string;
   promo_code: string;
+  admin_id?: number;
 }
 
 @Component({
@@ -32,6 +33,7 @@ interface Agent {
 export class AdminTransactionsComponent implements OnInit {
   transactions: Transaction[] = [];
   agents: Agent[] = [];
+  allAgents: Agent[] = []; // Store all agents for filtering by admin
   isLoading = false;
   isImporting = false;
   message = '';
@@ -57,6 +59,10 @@ export class AdminTransactionsComponent implements OnInit {
   totalTransactions = 0;
   totalAmount = 0;
   isSuperAdmin = false;
+  
+  // Admin filter for superadmin
+  admins: AdminUser[] = [];
+  selectedAdminId: number | null = null;
 
   constructor(
     private apiService: ApiService,
@@ -75,10 +81,40 @@ export class AdminTransactionsComponent implements OnInit {
     const adminData = JSON.parse(admin);
     this.isSuperAdmin = adminData.role === 'superadmin';
 
+    if (this.isSuperAdmin) {
+      this.loadAdmins();
+    }
+    
     this.initializeDates();
     this.loadAgents();
     this.loadFilterOptions();
     this.loadTransactions();
+  }
+
+  loadAdmins(): void {
+    this.apiService.getAllAdminsList().subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.admins = response.data;
+        }
+      },
+      error: () => {}
+    });
+  }
+
+  onAdminSelectChange(): void {
+    this.filterAgentsByAdmin();
+    this.filterPromoCode = '';
+    this.loadTransactions();
+  }
+
+  filterAgentsByAdmin(): void {
+    if (this.selectedAdminId !== null && this.selectedAdminId !== undefined) {
+      // Use == for comparison to handle string/number type differences
+      this.agents = this.allAgents.filter(agent => agent.admin_id == this.selectedAdminId);
+    } else {
+      this.agents = [...this.allAgents];
+    }
   }
 
   initializeDates(): void {
@@ -108,7 +144,8 @@ export class AdminTransactionsComponent implements OnInit {
     this.apiService.getAllAgents().subscribe({
       next: (response) => {
         if (response.success && response.data) {
-          this.agents = response.data;
+          this.allAgents = response.data;
+          this.filterAgentsByAdmin();
         }
       },
       error: (error) => {
@@ -142,7 +179,8 @@ export class AdminTransactionsComponent implements OnInit {
     if (this.filterUsername) filters.username = this.filterUsername;
     if (this.filterBooking) filters.booking = this.filterBooking;
 
-    this.apiService.getTransactions(filters).subscribe({
+    // Pass selectedAdminId to filter by admin (for superadmin)
+    this.apiService.getTransactions(filters, this.selectedAdminId).subscribe({
       next: (response: any) => {
         this.isLoading = false;
         if (response.success) {
@@ -234,6 +272,8 @@ export class AdminTransactionsComponent implements OnInit {
     this.filterChannel = '';
     this.filterUsername = '';
     this.filterBooking = '';
+    this.selectedAdminId = null;
+    this.filterAgentsByAdmin();
     this.loadTransactions();
   }
 
