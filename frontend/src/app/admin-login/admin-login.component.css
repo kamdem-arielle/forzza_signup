@@ -27,40 +27,6 @@ h2 {
   margin: 0 0 25px 0;
 }
 
-/* Login Type Toggle */
-.login-type-toggle {
-  display: flex;
-  margin-bottom: 20px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.login-type-toggle button {
-  flex: 1;
-  padding: 10px 15px;
-  border: none;
-  background: #f5f5f5;
-  color: #666;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.login-type-toggle button:first-child {
-  border-right: 1px solid #ddd;
-}
-
-.login-type-toggle button.active {
-  background: #084772;
-  color: #fff;
-}
-
-.login-type-toggle button:hover:not(.active) {
-  background: #e9e9e9;
-}
-
 .form-group {
   margin-bottom: 20px;
 }

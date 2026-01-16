@@ -14,7 +14,6 @@ export class AdminLoginComponent {
   errorMessage: string = '';
   isLoading: boolean = false;
   showPassword: boolean = false;
-  loginType: 'admin' | 'superadmin' = 'admin';
 
   constructor(
     private fb: FormBuilder,
@@ -32,11 +31,6 @@ export class AdminLoginComponent {
     this.showPassword = !this.showPassword;
   }
 
-  setLoginType(type: 'admin' | 'superadmin'): void {
-    this.loginType = type;
-    this.errorMessage = '';
-  }
-
   onSubmit(): void {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
@@ -46,11 +40,8 @@ export class AdminLoginComponent {
     this.isLoading = true;
     this.errorMessage = '';
 
-    const loginObservable = this.loginType === 'superadmin' 
-      ? this.apiService.superAdminLogin(this.loginForm.value)
-      : this.apiService.adminLogin(this.loginForm.value);
-
-    loginObservable.subscribe({
+    // Single login endpoint for both admin and superadmin
+    this.apiService.adminLogin(this.loginForm.value).subscribe({
       next: (response) => {
         this.isLoading = false;
         if (response.success) {

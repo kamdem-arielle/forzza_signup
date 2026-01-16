@@ -4,20 +4,6 @@
   <h2>{{ 'adminLogin.title' | translate }}</h2>
   <p class="subtitle">{{ 'adminLogin.subtitle' | translate }}</p>
 
-  <!-- Login Type Toggle -->
-  <div class="login-type-toggle">
-    <button type="button" 
-            [class.active]="loginType === 'admin'" 
-            (click)="setLoginType('admin')">
-      {{ 'adminLogin.adminLogin' | translate }}
-    </button>
-    <button type="button" 
-            [class.active]="loginType === 'superadmin'" 
-            (click)="setLoginType('superadmin')">
-      {{ 'adminLogin.superAdminLogin' | translate }}
-    </button>
-  </div>
-
   <div *ngIf="errorMessage" class="error-message">
     {{ errorMessage }}
   </div>
