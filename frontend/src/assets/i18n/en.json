@@ -188,12 +188,17 @@
       "registrations": "Registrations",
       "status": "Status",
       "lastLogin": "Last Login",
-      "actions": "Actions"
+      "actions": "Actions",
+      "admin": "Admin"
     },
     "activate": "Activate",
     "deactivate": "Deactivate",
     "activated": "Agent activated successfully!",
     "deactivated": "Agent deactivated successfully!"
+  },
+  "filters": {
+    "admin": "Admin",
+    "allAdmins": "All Admins"
   },
   "status": {
     "pending": "PENDING",
