@@ -95,6 +95,7 @@
               <th>#</th>
               <th>{{ 'adminStats.agentName' | translate }}</th>
               <th>{{ 'adminStats.promoCode' | translate }}</th>
+              <th *ngIf="isSuperAdmin">{{ 'adminAgents.table.admin' | translate }}</th>
               <th>{{ 'adminStats.signupsCount' | translate }}</th>
             </tr>
           </thead>
@@ -105,6 +106,7 @@
               </td>
               <td>{{ agent.name }}</td>
               <td>{{ agent.promo_code }}</td>
+              <td *ngIf="isSuperAdmin"><span class="admin-badge">{{ agent.admin_name }}</span></td>
               <td>
                 <span class="signup-count">{{ agent.signups }}</span>
               </td>

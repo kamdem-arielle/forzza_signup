@@ -36,8 +36,9 @@ export class AdminStatisticsComponent implements OnInit, OnDestroy {
   };
 
   // Top agents
-  topAgents: { promo_code: string; name: string; signups: number }[] = [];
+  topAgents: { promo_code: string; name: string; signups: number; admin_name: string }[] = [];
   agents: any[] = [];
+  isSuperAdmin = false;
 
   constructor(
     private apiService: ApiService,
@@ -51,6 +52,8 @@ export class AdminStatisticsComponent implements OnInit, OnDestroy {
       this.router.navigate(['/admin/login']);
       return;
     }
+    const adminData = JSON.parse(admin);
+    this.isSuperAdmin = adminData.role === 'superadmin';
     this.loadStats();
   }
 
@@ -100,7 +103,8 @@ export class AdminStatisticsComponent implements OnInit, OnDestroy {
                     return {
                       promo_code,
                       name: agent ? agent.name : promo_code,
-                      signups
+                      signups,
+                      admin_name: agent ? agent.admin_name : '-'
                     };
                   })
                   .sort((a, b) => b.signups - a.signups)
