@@ -8,6 +8,17 @@
     {{ message }}
   </div>
 
+  <!-- Admin Filter (SuperAdmin only) -->
+  <div class="filter-bar" *ngIf="isSuperAdmin">
+    <div class="filter-group">
+      <label>{{ 'filters.admin' | translate }}</label>
+      <select class="styled-select" [(ngModel)]="selectedAdminId" (ngModelChange)="onAdminFilterChange()">
+        <option [ngValue]="null">{{ 'filters.allAdmins' | translate }}</option>
+        <option *ngFor="let admin of admins" [ngValue]="admin.id">{{ admin.username }}</option>
+      </select>
+    </div>
+  </div>
+
   <!-- Loading -->
   <div class="loading-spinner" *ngIf="isLoading">
     <div class="spinner"></div>
@@ -73,6 +84,14 @@
         dataType="number"
         sortOrder="desc">
       </dxi-column>
+
+      <!-- Admin Name Column (SuperAdmin only) -->
+      <dxi-column 
+        *ngIf="isSuperAdmin"
+        dataField="admin_name" 
+        [caption]="'adminAgents.table.admin' | translate"
+        cellTemplate="adminNameTemplate">
+      </dxi-column>
       
       <dxi-column 
         dataField="status" 
@@ -110,6 +129,10 @@
 
       <div *dxTemplate="let data of 'phoneTemplate'">
         {{ data.value || '-' }}
+      </div>
+
+      <div *dxTemplate="let data of 'adminNameTemplate'">
+        <span class="admin-badge">{{ data.value || '-' }}</span>
       </div>
 
       <div *dxTemplate="let data of 'statusTemplate'">

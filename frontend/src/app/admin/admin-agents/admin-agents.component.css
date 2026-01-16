@@ -19,6 +19,46 @@
   font-size: 14px;
 }
 
+/* Filter Bar */
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-end;
+  margin-bottom: 20px;
+  padding: 16px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 180px;
+}
+
+.filter-group label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #666;
+}
+
+.filter-group .styled-select {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  min-width: 200px;
+  background: #fff;
+}
+
+.filter-group .styled-select:focus {
+  outline: none;
+  border-color: #004E92;
+}
+
 /* Message */
 .message {
   padding: 12px;
@@ -119,6 +159,17 @@
 .status-badge.inactive {
   background: #f8d7da;
   color: #721c24;
+}
+
+/* Admin Badge */
+.admin-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  background: #e3f2fd;
+  color: #1565c0;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
 }
 
 /* Toggle Button */
