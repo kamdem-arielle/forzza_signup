@@ -8,10 +8,18 @@
   </div>
 
   <div class="filter-bar">
+    <!-- Admin Filter (SuperAdmin only) -->
+    <div class="filter-group" *ngIf="isSuperAdmin">
+      <label>{{ 'filters.admin' | translate }}</label>
+      <select class="styled-select" [(ngModel)]="selectedAdminId" (ngModelChange)="onAdminSelectChange()">
+        <option [ngValue]="null">{{ 'filters.allAdmins' | translate }}</option>
+        <option *ngFor="let admin of admins" [ngValue]="admin.id">{{ admin.username }}</option>
+      </select>
+    </div>
     <div class="filter-group">
       <label>{{ 'dashboard.filters.agent' | translate }}</label>
       <select class="styled-select" [(ngModel)]="selectedAgentPromo" (ngModelChange)="onAgentFilterChange()">
-        <option value="" disabled selected hidden>{{ 'dashboard.filters.agentPlaceholder' | translate }}</option>
+        <option value="">{{ 'dashboard.filters.agentPlaceholder' | translate }}</option>
         <option *ngFor="let agent of agents" [value]="agent.promo_code">{{ agent.name }} &nbsp;—&nbsp; {{ agent.promo_code }}</option>
       </select>
     </div>

@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { ApiService, Signup } from '../../services/api.service';
+import { ApiService, Signup, AdminUser } from '../../services/api.service';
 
 interface Agent {
   id: number;
@@ -13,6 +13,7 @@ interface Agent {
   status: 'active' | 'inactive';
   created_at?: string;
   last_login?: string;
+  admin_id?: number;
 }
 import { BehaviorSubject, Subject, interval, takeUntil, startWith } from 'rxjs';
 
@@ -32,6 +33,7 @@ export class AdminSignupsComponent implements OnInit, OnDestroy {
   phoneFilter = '';
   promoFilter = '';
   agents: Agent[] = [];
+  allAgents: Agent[] = []; // Store all agents for filtering by admin
   selectedAgentPromo: string = '';
   private destroy$ = new Subject<void>();
   private firstPendingLoad = true;
@@ -48,6 +50,11 @@ export class AdminSignupsComponent implements OnInit, OnDestroy {
   isSuccess: boolean = false;
   isLoading: boolean = false;
   activeTab: 'pending' | 'approved' | 'archived' = 'pending';
+  
+  // SuperAdmin filter
+  isSuperAdmin = false;
+  admins: AdminUser[] = [];
+  selectedAdminId: number | null = null;
 
   // Pagination
   pageSize = 10;
@@ -63,72 +70,123 @@ export class AdminSignupsComponent implements OnInit, OnDestroy {
       this.router.navigate(['/admin/login']);
       return;
     }
+    
+    const adminData = JSON.parse(admin);
+    this.isSuperAdmin = adminData.role === 'superadmin';
+    
+    if (this.isSuperAdmin) {
+      this.loadAdmins();
+    }
     this.loadAgents();
     this.startPolling();
   }
 
-  loadAgents(): void {
-    this.apiService.getAllAgents().subscribe({
+  loadAdmins(): void {
+    this.apiService.getAllAdminsList().subscribe({
       next: (response) => {
         if (response.success && response.data) {
-          this.agents = response.data;
+          this.admins = response.data;
         }
       },
       error: () => {}
     });
   }
 
+  loadAgents(): void {
+    this.apiService.getAllAgents().subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.allAgents = response.data;
+          this.filterAgentsByAdmin();
+        }
+      },
+      error: () => {}
+    });
+  }
+
+  onAdminSelectChange(): void {
+    this.filterAgentsByAdmin();
+    this.selectedAgentPromo = '';
+    this.promoFilter = '';
+    // Reset firstPendingLoad to prevent "new signup" message when switching admin
+    this.firstPendingLoad = true;
+    // Clear current lists before reloading
+    this.pendingSignups = [];
+    this.approvedSignups = [];
+    this.archivedSignups = [];
+    // Reload signups with new admin filter
+    this.loadAllSignups();
+  }
+
+  filterAgentsByAdmin(): void {
+    if (this.selectedAdminId !== null && this.selectedAdminId !== undefined) {
+      // Use == for comparison to handle string/number type differences
+      this.agents = this.allAgents.filter(agent => agent.admin_id == this.selectedAdminId);
+    } else {
+      this.agents = [...this.allAgents];
+    }
+  }
+
+  loadAllSignups(): void {
+    this.isLoading = true;
+    
+    // Load PENDING signups
+    this.apiService.getSignupsByStatus('PENDING', this.selectedAdminId).subscribe({
+      next: (response) => {
+        const data = (response.success && response.data) ? response.data : [];
+        const sorted = [...data].sort((a, b) => (new Date(a.created_at || '').getTime()) - (new Date(b.created_at || '').getTime()));
+        const prevRaw = this.pendingSignups;
+        const newItems = sorted.filter(s => !prevRaw.find(p => p.id === s.id));
+        this.pendingSignups = sorted;
+        this.applyFiltersForAll();
+        if (!this.firstPendingLoad && newItems.length > 0) {
+          this.showMessage(this.translate.instant('dashboard.newSignup'), true);
+          newItems.forEach(n => this.markPendingAsNew(n.id));
+        }
+        this.firstPendingLoad = false;
+      },
+      error: (error) => {
+        this.showMessage(error.error?.message || this.translate.instant('dashboard.loadError'), false);
+      }
+    });
+
+    // Load APPROVED signups
+    this.apiService.getSignupsByStatus('APPROVED', this.selectedAdminId).subscribe({
+      next: (response) => {
+        this.isLoading = false;
+        const data = (response.success && response.data) ? response.data : [];
+        const sorted = [...data].sort((a, b) => (new Date(b.created_at || '').getTime()) - (new Date(a.created_at || '').getTime()) );
+        this.approvedSignups = sorted;
+        this.applyFiltersForAll();
+      },
+      error: (error) => {
+        this.isLoading = false;
+        this.showMessage(error.error?.message || this.translate.instant('dashboard.loadError'), false);
+      }
+    });
+
+    // Load ARCHIVED signups
+    this.apiService.getSignupsByStatus('ARCHIVED', this.selectedAdminId).subscribe({
+      next: (response) => {
+        const data = (response.success && response.data) ? response.data : [];
+        const sorted = [...data].sort((a, b) => (new Date(a.created_at || '').getTime()) - (new Date(b.created_at || '').getTime()));
+        this.archivedSignups = sorted;
+        this.applyFiltersForAll();
+      },
+      error: (error) => {
+        this.showMessage(error.error?.message || this.translate.instant('dashboard.loadError'), false);
+      }
+    });
+  }
+
   startPolling(): void {
     this.isLoading = true;
-    const poll$ = interval(500000).pipe(startWith(0));
-
+    const poll$ = interval(300000).pipe(startWith(0));
+// 500000
     poll$
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
-        this.apiService.getSignupsByStatus('PENDING').subscribe({
-          next: (response) => {
-            const data = (response.success && response.data) ? response.data : [];
-            const sorted = [...data].sort((a, b) => (new Date(a.created_at || '').getTime()) - (new Date(b.created_at || '').getTime()));
-            const prevRaw = this.pendingSignups;
-            const newItems = sorted.filter(s => !prevRaw.find(p => p.id === s.id));
-            this.pendingSignups = sorted;
-            this.applyFiltersForAll();
-            if (!this.firstPendingLoad && newItems.length > 0) {
-              this.showMessage(this.translate.instant('dashboard.newSignup'), true);
-              newItems.forEach(n => this.markPendingAsNew(n.id));
-            }
-            this.firstPendingLoad = false;
-          },
-          error: (error) => {
-            this.showMessage(error.error?.message || this.translate.instant('dashboard.loadError'), false);
-          }
-        });
-
-        this.apiService.getSignupsByStatus('APPROVED').subscribe({
-          next: (response) => {
-            this.isLoading = false;
-            const data = (response.success && response.data) ? response.data : [];
-            const sorted = [...data].sort((a, b) => (new Date(b.created_at || '').getTime()) - (new Date(a.created_at || '').getTime()) );
-            this.approvedSignups = sorted;
-            this.applyFiltersForAll();
-          },
-          error: (error) => {
-            this.isLoading = false;
-            this.showMessage(error.error?.message || this.translate.instant('dashboard.loadError'), false);
-          }
-        });
-
-        this.apiService.getSignupsByStatus('ARCHIVED').subscribe({
-          next: (response) => {
-            const data = (response.success && response.data) ? response.data : [];
-            const sorted = [...data].sort((a, b) => (new Date(a.created_at || '').getTime()) - (new Date(b.created_at || '').getTime()));
-            this.archivedSignups = sorted;
-            this.applyFiltersForAll();
-          },
-          error: (error) => {
-            this.showMessage(error.error?.message || this.translate.instant('dashboard.loadError'), false);
-          }
-        });
+        this.loadAllSignups();
       });
   }
 
@@ -311,10 +369,15 @@ export class AdminSignupsComponent implements OnInit, OnDestroy {
     this.phoneFilter = '';
     this.promoFilter = '';
     this.selectedAgentPromo = '';
+    this.selectedAdminId = null;
+    this.filterAgentsByAdmin();
     this.pendingPage = 1;
     this.approvedPage = 1;
     this.archivedPage = 1;
-    this.applyFiltersForAll();
+    // Reset firstPendingLoad to prevent "new signup" message
+    this.firstPendingLoad = true;
+    // Reload signups from server with cleared admin filter
+    this.loadAllSignups();
   }
 
   private applyFiltersForAll(): void {
