@@ -177,6 +177,17 @@
     "active": "Actif",
     "inactive": "Inactif",
     "noAgents": "Aucun agent trouvé",
+    "stats": {
+      "global": "Global",
+      "totalAgents": "Total Agents",
+      "totalRegistrations": "Total Inscriptions",
+      "activeAgents": "Agents Actifs",
+      "inactiveAgents": "Agents Inactifs",
+      "fromLastMonth": "par rapport au mois dernier",
+      "operatingRate": "taux d'activité",
+      "requiresAttention": "Nécessite attention",
+      "allActive": "Tous les agents actifs"
+    },
     "table": {
       "name": "Nom",
       "username": "Utilisateur",
@@ -192,6 +203,13 @@
     "deactivate": "Désactiver",
     "activated": "Agent activé avec succès !",
     "deactivated": "Agent désactivé avec succès !"
+  },
+  "adminSignups": {
+    "stats": {
+      "totalSignups": "Total Inscriptions",
+      "pendingSignups": "Inscriptions en attente",
+      "approvedSignups": "Inscriptions approuvées"
+    }
   },
   "filters": {
     "admin": "Admin",
