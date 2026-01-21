@@ -19,6 +19,89 @@
     </div>
   </div>
 
+  <!-- Statistics Cards -->
+  <div class="stats-cards" *ngIf="!isLoading">
+    <!-- Total Agents Card -->
+    <div class="stat-card">
+      <div class="stat-header">
+        <div class="stat-icon agents-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+        </div>
+        <span class="stat-label">{{ selectedAdminLabel }}</span>
+      </div>
+      <div class="stat-value">{{ stats.totalAgents }}</div>
+      <div class="stat-title">{{ 'adminAgents.stats.totalAgents' | translate }}</div>
+      <div class="stat-change" [class.positive]="stats.agentChangePercent >= 0" [class.negative]="stats.agentChangePercent < 0">
+        <span *ngIf="stats.agentChangePercent >= 0">+</span>{{ stats.agentChangePercent }}% {{ 'adminAgents.stats.fromLastMonth' | translate }}
+      </div>
+    </div>
+
+    <!-- Total Registrations Card -->
+    <div class="stat-card">
+      <div class="stat-header">
+        <div class="stat-icon registrations-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+            <polyline points="17 6 23 6 23 12"></polyline>
+          </svg>
+        </div>
+        <span class="stat-label">{{ selectedAdminLabel }}</span>
+      </div>
+      <div class="stat-value">{{ stats.totalRegistrations | number }}</div>
+      <div class="stat-title">{{ 'adminAgents.stats.totalRegistrations' | translate }}</div>
+      <div class="stat-change" [class.positive]="stats.registrationChangePercent >= 0" [class.negative]="stats.registrationChangePercent < 0">
+        <span *ngIf="stats.registrationChangePercent >= 0">+</span>{{ stats.registrationChangePercent }}% {{ 'adminAgents.stats.fromLastMonth' | translate }}
+      </div>
+    </div>
+
+    <!-- Active Agents Card -->
+    <div class="stat-card">
+      <div class="stat-header">
+        <div class="stat-icon active-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+        </div>
+        <span class="stat-label">{{ selectedAdminLabel }}</span>
+      </div>
+      <div class="stat-value">{{ stats.activeAgents }}</div>
+      <div class="stat-title">{{ 'adminAgents.stats.activeAgents' | translate }}</div>
+      <div class="stat-change neutral">
+        {{ stats.operatingRate }}% {{ 'adminAgents.stats.operatingRate' | translate }}
+      </div>
+    </div>
+
+    <!-- Inactive Agents Card -->
+    <div class="stat-card">
+      <div class="stat-header">
+        <div class="stat-icon inactive-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+        </div>
+        <span class="stat-label">{{ selectedAdminLabel }}</span>
+      </div>
+      <div class="stat-value">{{ stats.inactiveAgents }}</div>
+      <div class="stat-title">{{ 'adminAgents.stats.inactiveAgents' | translate }}</div>
+      <div class="stat-change attention" *ngIf="stats.inactiveAgents > 0">
+        {{ 'adminAgents.stats.requiresAttention' | translate }}
+      </div>
+      <div class="stat-change neutral" *ngIf="stats.inactiveAgents === 0">
+        {{ 'adminAgents.stats.allActive' | translate }}
+      </div>
+    </div>
+  </div>
+
   <!-- Loading -->
   <div class="loading-spinner" *ngIf="isLoading">
     <div class="spinner"></div>

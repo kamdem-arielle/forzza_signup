@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { ApiService, AdminUser } from '../../services/api.service';
+import { ApiService, AdminUser, Signup } from '../../services/api.service';
 import { CoreService } from '../../services/core.service';
 interface Agent {
   id: number;
@@ -16,6 +16,16 @@ interface Agent {
   registration_count?: number;
   admin_id?: number;
   admin_name?: string;
+}
+
+interface AgentStats {
+  totalAgents: number;
+  totalRegistrations: number;
+  activeAgents: number;
+  inactiveAgents: number;
+  agentChangePercent: number;
+  registrationChangePercent: number;
+  operatingRate: number;
 }
 
 @Component({
@@ -34,12 +44,27 @@ export class AdminAgentsComponent implements OnInit {
   // Admin filter for superadmin
   admins: AdminUser[] = [];
   selectedAdminId: number | null = null;
+  selectedAdminLabel: string = 'Global';
+
+  // Signups for registration change calculation
+  approvedSignups: Signup[] = [];
 
   // Status filter data for header filter
   statusFilterData = [
     { text: 'Active', value: 'active' },
     { text: 'Inactive', value: 'inactive' }
   ];
+
+  // Statistics for cards
+  stats: AgentStats = {
+    totalAgents: 0,
+    totalRegistrations: 0,
+    activeAgents: 0,
+    inactiveAgents: 0,
+    agentChangePercent: 0,
+    registrationChangePercent: 0,
+    operatingRate: 0
+  };
 
   constructor(
     private apiService: ApiService,
@@ -91,6 +116,7 @@ export class AdminAgentsComponent implements OnInit {
         if (response.success && response.data) {
           this.allAgents = response.data;
           this.applyAdminFilter();
+          this.loadApprovedSignups();
         }
       },
       error: (error) => {
@@ -101,7 +127,31 @@ export class AdminAgentsComponent implements OnInit {
   }
 
   onAdminFilterChange(): void {
+    // Update the selected admin label
+    if (this.selectedAdminId !== null && this.selectedAdminId !== undefined) {
+      const selectedAdmin = this.admins.find(a => a.id === this.selectedAdminId);
+      this.selectedAdminLabel = selectedAdmin?.username || 'Global';
+    } else {
+      this.selectedAdminLabel = 'Global';
+    }
+    
     this.applyAdminFilter();
+    this.loadApprovedSignups();
+  }
+
+  loadApprovedSignups(): void {
+    this.apiService.getSignupsByStatus('APPROVED', this.selectedAdminId).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.approvedSignups = response.data;
+          this.calculateRegistrationChange();
+        }
+      },
+      error: () => {
+        this.approvedSignups = [];
+        this.calculateRegistrationChange();
+      }
+    });
   }
 
   applyAdminFilter(): void {
@@ -110,6 +160,85 @@ export class AdminAgentsComponent implements OnInit {
       this.agents = this.allAgents.filter(agent => agent.admin_id == this.selectedAdminId);
     } else {
       this.agents = [...this.allAgents];
+    }
+    this.calculateStats();
+  }
+
+  calculateStats(): void {
+    const now = new Date();
+    const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+
+    // Total agents
+    this.stats.totalAgents = this.agents.length;
+
+    // Active and inactive agents
+    this.stats.activeAgents = this.agents.filter(a => a.status === 'active').length;
+    this.stats.inactiveAgents = this.agents.filter(a => a.status === 'inactive').length;
+
+    // Total registrations (sum of all registration_count)
+    this.stats.totalRegistrations = this.agents.reduce((sum, a) => sum + (a.registration_count || 0), 0);
+
+    // Calculate agent change percent from last month
+    const agentsCreatedThisMonth = this.agents.filter(a => {
+      if (!a.created_at) return false;
+      const createdDate = new Date(a.created_at);
+      return createdDate >= startOfThisMonth;
+    }).length;
+
+    const agentsCreatedLastMonth = this.agents.filter(a => {
+      if (!a.created_at) return false;
+      const createdDate = new Date(a.created_at);
+      return createdDate >= startOfLastMonth && createdDate <= endOfLastMonth;
+    }).length;
+
+    if (agentsCreatedLastMonth > 0) {
+      this.stats.agentChangePercent = Math.round(((agentsCreatedThisMonth - agentsCreatedLastMonth) / agentsCreatedLastMonth) * 100);
+    } else if (agentsCreatedThisMonth > 0) {
+      this.stats.agentChangePercent = 100; // 100% increase if no agents last month but some this month
+    } else {
+      this.stats.agentChangePercent = 0;
+    }
+
+    // Operating rate: percentage of active agents who have at least 1 registration
+    // This shows how productive the active agents are
+    if (this.stats.activeAgents > 0) {
+      const activeAgentsWithRegistrations = this.agents.filter(
+        a => a.status === 'active' && (a.registration_count || 0) > 0
+      ).length;
+      this.stats.operatingRate = Math.round((activeAgentsWithRegistrations / this.stats.activeAgents) * 100);
+    } else {
+      this.stats.operatingRate = 0;
+    }
+  }
+
+  calculateRegistrationChange(): void {
+    const now = new Date();
+    const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+
+    // Count signups approved this month
+    const signupsThisMonth = this.approvedSignups.filter(s => {
+      if (!s.approved_at && !s.created_at) return false;
+      const signupDate = new Date(s.approved_at || s.created_at || '');
+      return signupDate >= startOfThisMonth;
+    }).length;
+
+    // Count signups approved last month
+    const signupsLastMonth = this.approvedSignups.filter(s => {
+      if (!s.approved_at && !s.created_at) return false;
+      const signupDate = new Date(s.approved_at || s.created_at || '');
+      return signupDate >= startOfLastMonth && signupDate <= endOfLastMonth;
+    }).length;
+
+    if (signupsLastMonth > 0) {
+      this.stats.registrationChangePercent = Math.round(((signupsThisMonth - signupsLastMonth) / signupsLastMonth) * 100);
+    } else if (signupsThisMonth > 0) {
+      this.stats.registrationChangePercent = 100;
+    } else {
+      this.stats.registrationChangePercent = 0;
     }
   }
 
