@@ -81,14 +81,34 @@
   </div>
 
   <!-- Summary Section -->
-  <div class="summary-section">
-    <div class="summary-card">
-      <span class="summary-label">{{ 'transactions.totalTransactions' | translate }}</span>
-      <span class="summary-value">{{ totalTransactions }}</span>
+  <div class="stats-cards" *ngIf="!isLoading">
+    <!-- Total Transactions Card -->
+    <div class="stat-card">
+      <div class="stat-header">
+        <div class="stat-icon transactions-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="1" x2="12" y2="23"></line>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+          </svg>
+        </div>
+      </div>
+      <div class="stat-value">{{ totalTransactions | number }}</div>
+      <div class="stat-title">{{ 'transactions.totalTransactions' | translate }}</div>
     </div>
-    <div class="summary-card">
-      <span class="summary-label">{{ 'transactions.totalAmount' | translate }}</span>
-      <span class="summary-value">{{ formatCurrency(totalAmount) }} XAF</span>
+
+    <!-- Total Amount Card -->
+    <div class="stat-card">
+      <div class="stat-header">
+        <div class="stat-icon amount-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path>
+            <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path>
+            <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path>
+          </svg>
+        </div>
+      </div>
+      <div class="stat-value">{{ formatCurrency(totalAmount) }} XAF</div>
+      <div class="stat-title">{{ 'transactions.totalAmount' | translate }}</div>
     </div>
   </div>
 
