@@ -1,6 +1,7 @@
 const Agent = require('../models/Agent');
 const Signup = require('../models/Signup');
 const Transaction = require('../models/Transaction');
+const QRCode = require('qrcode');
 
 /**
  * Agent Controller
@@ -215,25 +216,46 @@ exports.getMyStats = async (req, res) => {
 
 /**
  * Create a new agent (Admin only)
+ * Request fields: surname (required), lastname (required), phone (required), city (required), email (optional), admin_id (optional)
  */
 exports.createAgent = async (req, res) => {
   try {
-    const { username, password, promo_code, name, phone, email, admin_id } = req.body;
+    const { surname, lastname, phone, city, email, admin_id } = req.body;
 
     // Validate required fields
-    if (!username || !password || !promo_code) {
+    if (!surname || !lastname || !phone || !city) {
       return res.status(400).json({
         success: false,
-        message: 'Username, password, and promo code are required'
+        message: 'Surname, lastname, phone, and city are required'
       });
     }
+
+    // Check if phone already exists
+    const phoneExists = await Agent.phoneExists(phone);
+    if (phoneExists) {
+      return res.status(409).json({
+        success: false,
+        message: 'Phone number already exists'
+      });
+    }
+
+    // Generate name from surname + lastname
+    const name = `${surname} ${lastname}`;
+
+    // Get last 3 digits of phone
+    const last3Digits = phone.slice(-3);
+
+    // Generate promo code and username: FIRST 3 LETTERS OF SURNAME (UPPERCASE) + LAST 3 DIGITS OF PHONE
+    const surnamePrefix = surname.substring(0, 3).toUpperCase();
+    const promo_code = `${surnamePrefix}${last3Digits}`;
+    const username = promo_code;
 
     // Check if username already exists
     const usernameExists = await Agent.usernameExists(username);
     if (usernameExists) {
       return res.status(409).json({
         success: false,
-        message: 'Username already exists'
+        message: 'Generated username already exists. Please try with a different surname or phone number.'
       });
     }
 
@@ -242,24 +264,48 @@ exports.createAgent = async (req, res) => {
     if (promoCodeExists) {
       return res.status(409).json({
         success: false,
-        message: 'Promo code already exists'
+        message: 'Generated promo code already exists. Please try with a different surname or phone number.'
       });
     }
 
-    // Create new agent with admin_id
-    const result = await Agent.create(username, password, promo_code, name, phone, email, admin_id);
+    // Generate password: password + last 3 digits of phone
+    const password = `password${last3Digits}`;
+
+    // Generate agent URL
+    const agent_url = `https://forzza.laureal.io/register?promo_code=${promo_code}`;
+
+    // Generate QR code as Base64 PNG from the full agent URL (not just promo code)
+    const qr_code = await QRCode.toDataURL(agent_url, {
+      type: 'image/png',
+      width: 300,
+      margin: 2
+    });
+
+    // Create new agent with all fields
+    const result = await Agent.create(
+      username,
+      password,
+      promo_code,
+      name,
+      phone,
+      email || null,
+      admin_id || null,
+      city,
+      qr_code,
+      agent_url
+    );
 
     res.status(201).json({
       success: true,
       message: 'Agent created successfully',
       data: {
         id: result.insertId,
-        username,
         promo_code,
+        agent_url,
+        qr_code,
         name,
         phone,
-        email,
-        admin_id
+        city
       }
     });
 
@@ -336,7 +382,7 @@ exports.getAgentsByAdminId = async (req, res) => {
 exports.updateAgent = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, phone, email, status } = req.body;
+    const { name, phone, email, city, status } = req.body;
 
     // Check if agent exists
     const agent = await Agent.findById(id);
@@ -348,7 +394,7 @@ exports.updateAgent = async (req, res) => {
     }
 
     // Update agent
-    await Agent.update(id, { name, phone, email, status });
+    await Agent.update(id, { name, phone, email, city, status });
 
     // Fetch updated agent
     const updatedAgent = await Agent.findById(id);

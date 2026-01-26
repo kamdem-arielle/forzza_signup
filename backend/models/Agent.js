@@ -15,14 +15,17 @@ class Agent {
    * @param {string} phone - Agent's phone number
    * @param {string} email - Agent's email
    * @param {number} admin_id - ID of the admin this agent belongs to
+   * @param {string} city - Agent's city
+   * @param {string} qr_code - Base64 encoded QR code image
+   * @param {string} agent_url - Agent's registration URL
    * @returns {Promise} Result of the insert operation
    */
-  static async create(username, password, promo_code, name = null, phone = null, email = null, admin_id = null) {
+  static async create(username, password, promo_code, name = null, phone = null, email = null, admin_id = null, city = null, qr_code = null, agent_url = null) {
     try {
       const [result] = await pool.query(
-        `INSERT INTO agents (admin_id, username, password, promo_code, name, phone, email, status, created_at) 
-         VALUES (?, ?, ?, ?, ?, ?, ?, 'active', NOW())`,
-        [admin_id, username, password, promo_code, name, phone, email]
+        `INSERT INTO agents (admin_id, username, password, promo_code, name, phone, email, city, qr_code, agent_url, status, created_at) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', NOW())`,
+        [admin_id, username, password, promo_code, name, phone, email, city, qr_code, agent_url]
       );
       return result;
     } catch (error) {
@@ -72,7 +75,7 @@ class Agent {
   static async findById(id) {
     try {
       const [rows] = await pool.query(
-        'SELECT id, admin_id, username, promo_code, name, phone, email, status, created_at, last_login_at FROM agents WHERE id = ?',
+        'SELECT id, admin_id, username, promo_code, name, phone, email, city, qr_code, agent_url, status, created_at, last_login_at FROM agents WHERE id = ?',
         [id]
       );
       return rows[0] || null;
@@ -89,7 +92,7 @@ class Agent {
     try {
       // Get all agents with registration_count and admin info
       const [rows] = await pool.query(
-        `SELECT a.id, a.admin_id, a.username, a.promo_code, a.name, a.phone, a.email, a.status, a.created_at, a.last_login_at, a.registration_count,
+        `SELECT a.id, a.admin_id, a.username, a.promo_code, a.name, a.phone, a.email, a.city, a.qr_code, a.agent_url, a.status, a.created_at, a.last_login_at, a.registration_count,
                 adm.username as admin_name
          FROM agents a
          LEFT JOIN admins adm ON a.admin_id = adm.id
@@ -109,7 +112,7 @@ class Agent {
   static async getAllByAdminId(adminId) {
     try {
       const [rows] = await pool.query(
-        `SELECT a.id, a.admin_id, a.username, a.promo_code, a.name, a.phone, a.email, a.status, a.created_at, a.last_login_at, a.registration_count,
+        `SELECT a.id, a.admin_id, a.username, a.promo_code, a.name, a.phone, a.email, a.city, a.qr_code, a.agent_url, a.status, a.created_at, a.last_login_at, a.registration_count,
                 adm.username as admin_name
          FROM agents a
          LEFT JOIN admins adm ON a.admin_id = adm.id
@@ -204,10 +207,10 @@ class Agent {
    */
   static async update(id, data) {
     try {
-      const { name, phone, email, status } = data;
+      const { name, phone, email, city, status } = data;
       const [result] = await pool.query(
-        'UPDATE agents SET name = ?, phone = ?, email = ?, status = ? WHERE id = ?',
-        [name, phone, email, status, id]
+        'UPDATE agents SET name = ?, phone = ?, email = ?, city = ?, status = ? WHERE id = ?',
+        [name, phone, email, city, status, id]
       );
       return result;
     } catch (error) {
@@ -250,6 +253,23 @@ class Agent {
       const [rows] = await pool.query(
         'SELECT id FROM agents WHERE promo_code = ?',
         [promo_code]
+      );
+      return rows.length > 0;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Check if phone number exists
+   * @param {string} phone - Phone number to check
+   * @returns {Promise<boolean>} True if phone exists
+   */
+  static async phoneExists(phone) {
+    try {
+      const [rows] = await pool.query(
+        'SELECT id FROM agents WHERE phone = ?',
+        [phone]
       );
       return rows.length > 0;
     } catch (error) {
