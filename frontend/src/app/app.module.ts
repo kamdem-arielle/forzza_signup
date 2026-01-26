@@ -9,6 +9,9 @@ import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 // DevExtreme
 import { DxDataGridModule } from 'devextreme-angular';
 
+// NgBootstrap
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { RegisterComponent } from './register/register.component';
@@ -52,6 +55,7 @@ export function HttpLoaderFactory(http: HttpClient) {
     ReactiveFormsModule,
     AppRoutingModule,
     DxDataGridModule,
+    NgbModule,
     TranslateModule.forRoot({
       defaultLanguage: 'en',
       loader: {
