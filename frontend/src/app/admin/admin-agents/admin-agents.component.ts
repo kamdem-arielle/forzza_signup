@@ -1,8 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
+import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ApiService, AdminUser, Signup } from '../../services/api.service';
 import { CoreService } from '../../services/core.service';
+import jsPDF from 'jspdf';
 interface Agent {
   id: number;
   name: string;
@@ -10,12 +13,25 @@ interface Agent {
   promo_code: string;
   phone?: string;
   email?: string;
+  city?: string;
+  qr_code?: string;
+  agent_url?: string;
   status: 'active' | 'inactive';
   created_at?: string;
   last_login?: string;
   registration_count?: number;
   admin_id?: number;
   admin_name?: string;
+}
+
+interface CreatedAgent {
+  id: number;
+  promo_code: string;
+  agent_url: string;
+  qr_code: string;
+  name: string;
+  phone: string;
+  city: string;
 }
 
 interface AgentStats {
@@ -34,9 +50,13 @@ interface AgentStats {
   styleUrls: ['./admin-agents.component.css']
 })
 export class AdminAgentsComponent implements OnInit {
+  @ViewChild('createAgentModal') createAgentModal!: TemplateRef<any>;
+  @ViewChild('successModal') successModal!: TemplateRef<any>;
+
   agents: Agent[] = [];
   allAgents: Agent[] = []; // Store all agents for filtering
   isLoading = true;
+  isCreating = false;
   message = '';
   isSuccess = false;
   isSuperAdmin = false;
@@ -48,6 +68,13 @@ export class AdminAgentsComponent implements OnInit {
 
   // Signups for registration change calculation
   approvedSignups: Signup[] = [];
+
+  // Create Agent Form (Reactive Form)
+  createAgentForm!: FormGroup;
+
+  // Created agent for success modal
+  createdAgent: CreatedAgent | null = null;
+  private modalRef: NgbModalRef | null = null;
 
   // Status filter data for header filter
   statusFilterData = [
@@ -70,8 +97,67 @@ export class AdminAgentsComponent implements OnInit {
     private apiService: ApiService,
     private router: Router,
     private translate: TranslateService,
+    private modalService: NgbModal,
+    private fb: FormBuilder,
     public coreService: CoreService 
-  ) {}
+  ) {
+    this.initCreateAgentForm();
+  }
+
+  // Cameroon phone validator: must start with 6 and have 9 digits total (or with +237/237 prefix)
+  cameroonPhoneValidator(control: AbstractControl): ValidationErrors | null {
+    if (!control.value) return null;
+    
+    // Remove spaces and dashes
+    const phone = control.value.replace(/[\s-]/g, '');
+    
+    // Valid formats:
+    // 6XXXXXXXX (9 digits starting with 6)
+    // +2376XXXXXXXX (12 digits with +237 prefix)
+    // 2376XXXXXXXX (11 digits with 237 prefix)
+    const patterns = [
+      /^6[0-9]{8}$/,                    // 6XXXXXXXX
+      /^\+237[0-9]{9}$/,                // +237XXXXXXXXX
+      /^237[0-9]{9}$/                   // 237XXXXXXXXX
+    ];
+    
+    const isValid = patterns.some(pattern => pattern.test(phone));
+    return isValid ? null : { invalidCameroonPhone: true };
+  }
+
+  initCreateAgentForm(): void {
+    this.createAgentForm = this.fb.group({
+      surname: ['', [Validators.required, Validators.minLength(2)]],
+      lastname: ['', [Validators.required, Validators.minLength(2)]],
+      phone: ['', [Validators.required, this.cameroonPhoneValidator.bind(this)]],
+      city: ['', [Validators.required]],
+      email: ['', [Validators.email]],
+      admin_id: [null]
+    });
+  }
+
+  // Update form validators based on user role
+  updateFormValidators() {
+    const adminIdControl = this.createAgentForm.get('admin_id');
+    if (this.isSuperAdmin) {
+      adminIdControl?.setValidators([Validators.required]);
+    } else {
+      adminIdControl?.clearValidators();
+    }
+    adminIdControl?.updateValueAndValidity();
+  }
+
+  // Helper to check if a field has error
+  hasError(fieldName: string, errorType: string): boolean {
+    const control = this.createAgentForm.get(fieldName);
+    return !!(control && control.hasError(errorType) && (control.dirty || control.touched));
+  }
+
+  // Check if field is invalid
+  isFieldInvalid(fieldName: string): boolean {
+    const control = this.createAgentForm.get(fieldName);
+    return !!(control && control.invalid && (control.dirty || control.touched));
+  }
 
   ngOnInit(): void {
     const admin = localStorage.getItem('admin');
@@ -82,6 +168,9 @@ export class AdminAgentsComponent implements OnInit {
     
     const adminData = JSON.parse(admin);
     this.isSuperAdmin = adminData.role === 'superadmin';
+    
+    // Update form validators based on role
+    this.updateFormValidators();
     
     if (this.isSuperAdmin) {
       this.loadAdmins();
@@ -139,7 +228,7 @@ export class AdminAgentsComponent implements OnInit {
     this.loadApprovedSignups();
   }
 
-  loadApprovedSignups(): void {
+  loadApprovedSignups(){
     this.apiService.getSignupsByStatus('APPROVED', this.selectedAdminId).subscribe({
       next: (response) => {
         if (response.success && response.data) {
@@ -266,6 +355,194 @@ export class AdminAgentsComponent implements OnInit {
 
   onToolbarPreparing(e: any): void {
     // Optional: customize toolbar if needed
+  }
+
+  // Open Create Agent Modal
+  openCreateAgentModal(): void {
+    this.createAgentForm.reset();
+    this.updateFormValidators();
+    this.modalRef = this.modalService.open(this.createAgentModal, { 
+      centered: true, 
+      size: 'md',
+      backdrop: 'static'
+    });
+  }
+
+  // Reset form
+  resetAgentForm(): void {
+    this.createAgentForm.reset();
+  }
+
+  // Close modal
+  closeModal(): void {
+    if (this.modalRef) {
+      this.modalRef.close();
+      this.modalRef = null;
+    }
+  }
+
+  // Create Agent
+  createAgent(): void {
+    // Mark all fields as touched to show validation errors
+    this.createAgentForm.markAllAsTouched();
+
+    if (this.createAgentForm.invalid) {
+      return;
+    }
+
+    this.isCreating = true;
+
+    const formValue = this.createAgentForm.value;
+    const payload = {
+      surname: formValue.surname,
+      lastname: formValue.lastname,
+      phone: formValue.phone,
+      city: formValue.city,
+      email: formValue.email || undefined,
+      admin_id: this.isSuperAdmin ? formValue.admin_id : undefined
+    };
+
+    this.apiService.createAgent(payload).subscribe({
+      next: (response) => {
+        this.isCreating = false;
+        if (response.success && response.data) {
+          this.createdAgent = response.data;
+          this.closeModal();
+          // Open success modal
+          this.modalRef = this.modalService.open(this.successModal, { 
+            centered: true, 
+            size: 'lg',
+            backdrop: 'static'
+          });
+          // Reload agents list
+          this.loadAgents();
+        } else {
+          this.showMessage(response.message || 'Failed to create agent', false);
+        }
+      },
+      error: (error) => {
+        this.isCreating = false;
+        this.showMessage(error.error?.message || 'Failed to create agent', false);
+      }
+    });
+  }
+
+  // Copy to clipboard
+  copyToClipboard(text: string): void {
+    navigator.clipboard.writeText(text).then(() => {
+      this.showMessage(this.translate.instant('adminAgents.successModal.copied'), true);
+    }).catch(() => {
+      this.showMessage('Failed to copy', false);
+    });
+  }
+
+  // Download QR Code as PDF (simplified version without all details)
+  downloadQRCode(agent: CreatedAgent | Agent): void {
+    if (!agent.qr_code) {
+      this.showMessage('No QR code available', false);
+      return;
+    }
+
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    
+    // Title
+    doc.setFontSize(24);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(0, 78, 146); // Blue color
+    doc.text('Agent QR Code', pageWidth / 2, 30, { align: 'center' });
+    
+    // QR Code image - large and centered
+    const qrCodeData = agent.qr_code;
+    const qrSize = 120;
+    const qrX = (pageWidth - qrSize) / 2;
+    doc.addImage(qrCodeData, 'PNG', qrX, 50, qrSize, qrSize);
+    
+    // Agent name
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(0, 0, 0);
+    doc.text(agent.name?.toUpperCase() || 'AGENT', pageWidth / 2, 190, { align: 'center' });
+    
+    // Promo code
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(0, 78, 146);
+    doc.text(`Promo Code: ${agent.promo_code}`, pageWidth / 2, 205, { align: 'center' });
+    
+    // Save
+    doc.save(`${agent.promo_code}_qrcode.pdf`);
+  }
+
+  // Download Agent Details as PDF (format matching attached image)
+  downloadDetails(agent: CreatedAgent | Agent): void {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    
+    // Title
+    doc.setFontSize(24);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(0, 78, 146); // Blue color
+    doc.text('Agent QR Code', pageWidth / 2, 30, { align: 'center' });
+    
+    // QR Code image - large and centered
+    if (agent.qr_code) {
+      const qrSize = 120;
+      const qrX = (pageWidth - qrSize) / 2;
+      doc.addImage(agent.qr_code, 'PNG', qrX, 45, qrSize, qrSize);
+    }
+    
+    let yPos = 180;
+    
+    // Agent name
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(0, 0, 0);
+    doc.text(agent.name?.toUpperCase() || 'AGENT', pageWidth / 2, yPos, { align: 'center' });
+    yPos += 12;
+    
+    // Phone
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(0, 0, 0);
+    doc.text(`Phone: ${agent.phone || '-'}`, pageWidth / 2, yPos, { align: 'center' });
+    yPos += 12;
+    
+    // Promo code
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(0, 78, 146);
+    doc.text(`Promo Code: ${agent.promo_code}`, pageWidth / 2, yPos, { align: 'center' });
+    yPos += 12;
+    
+    // URL
+    const agentUrl = agent.agent_url || `https://forzza.laureal.io/register?promo_code=${agent.promo_code}`;
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(0, 78, 146);
+    doc.text(`URL: ${agentUrl}`, pageWidth / 2, yPos, { align: 'center' });
+    yPos += 12;
+    
+    // City/Quarter
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(0, 0, 0);
+    doc.text(`Quarter: ${agent.city || '-'}`, pageWidth / 2, yPos, { align: 'center' });
+    
+    // Save
+    doc.save(`${agent.promo_code}_details.pdf`);
+  }
+
+  // Download all (QR + Details)
+  downloadAll(): void {
+    if (this.createdAgent) {
+      this.downloadQRCode(this.createdAgent);
+      setTimeout(() => {
+        if (this.createdAgent) {
+          this.downloadDetails(this.createdAgent);
+        }
+      }, 500);
+    }
   }
 
   private showMessage(msg: string, success: boolean): void {

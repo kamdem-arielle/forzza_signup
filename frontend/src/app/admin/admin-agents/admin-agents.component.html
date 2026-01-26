@@ -1,7 +1,18 @@
 <div class="agents-container">
   <div class="page-header">
-    <h2>{{ 'adminNav.agents' | translate }}</h2>
-    <p class="page-subtitle">{{ 'adminAgents.subtitle' | translate }}</p>
+    <div class="header-content">
+      <div class="header-text">
+        <h2>{{ 'adminNav.agents' | translate }}</h2>
+        <p class="page-subtitle">{{ 'adminAgents.subtitle' | translate }}</p>
+      </div>
+      <button class="btn-create-agent" (click)="openCreateAgentModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        {{ 'adminAgents.createAgent' | translate }}
+      </button>
+    </div>
   </div>
 
   <div *ngIf="message" class="message" [class.success]="isSuccess" [class.error]="!isSuccess">
@@ -195,7 +206,7 @@
       <dxi-column 
         [caption]="'adminAgents.table.actions' | translate"
         cellTemplate="actionsTemplate"
-        [width]="120">
+        >
       </dxi-column>
 
       <!-- Cell Templates -->
@@ -229,14 +240,204 @@
       </div>
 
       <div *dxTemplate="let data of 'actionsTemplate'">
-        <button 
-          class="btn-toggle" 
-          [class.deactivate]="data.data.status === 'active'"
-          [class.activate]="data.data.status === 'inactive'"
-          (click)="toggleAgentStatus(data.data)">
-          {{ (data.data.status === 'active' ? 'adminAgents.deactivate' : 'adminAgents.activate') | translate }}
-        </button>
+        <div class="actions-cell">
+          <button 
+            class="btn-toggle" 
+            [class.deactivate]="data.data.status === 'active'"
+            [class.activate]="data.data.status === 'inactive'"
+            (click)="toggleAgentStatus(data.data)">
+            {{ (data.data.status === 'active' ? 'adminAgents.deactivate' : 'adminAgents.activate') | translate }}
+          </button>
+            <button 
+            class="btn-action btn-qr" 
+            title="Download QR Code"
+            (click)="downloadQRCode(data.data)"
+            *ngIf="data.data.qr_code">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+          </button>
+          <button 
+            class="btn-action btn-details" 
+            title="Download Details"
+            (click)="downloadDetails(data.data)"
+            *ngIf="data.data.qr_code">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+          </button>
+        </div>
       </div>
     </dx-data-grid>
   </div>
 </div>
+
+<!-- Create Agent Modal -->
+<ng-template #createAgentModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title">{{ 'adminAgents.createModal.title' | translate }}</h4>
+    <button type="button" class="btn-close" (click)="closeModal()"></button>
+  </div>
+  <div class="modal-body">
+    <!-- Tabs - Only Single Agent for now -->
+    <div class="modal-tabs">
+      <button class="tab-btn active">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+        {{ 'adminAgents.createModal.singleAgent' | translate }}
+      </button>
+      <button class="tab-btn" disabled>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+        {{ 'adminAgents.createModal.bulkUpload' | translate }}
+      </button>
+    </div>
+
+    <!-- Form -->
+    <form class="create-agent-form" [formGroup]="createAgentForm">
+      <div class="form-row">
+        <div class="form-group">
+          <label>{{ 'adminAgents.createModal.firstName' | translate }} <span class="text-danger">*</span> </label>
+          <input type="text" formControlName="surname" class="form-control" [class.is-invalid]="isFieldInvalid('surname')">
+          <div class="field-error" *ngIf="hasError('surname', 'required')">
+            {{ 'adminAgents.createModal.errors.surnameRequired' | translate }}
+          </div>
+          <div class="field-error" *ngIf="hasError('surname', 'minlength')">
+            {{ 'adminAgents.createModal.errors.surnameMinLength' | translate }}
+          </div>
+        </div>
+        <div class="form-group">
+          <label>{{ 'adminAgents.createModal.lastName' | translate }} <span class="text-danger">*</span></label>
+          <input type="text" formControlName="lastname" class="form-control" [class.is-invalid]="isFieldInvalid('lastname')">
+          <div class="field-error" *ngIf="hasError('lastname', 'required')">
+            {{ 'adminAgents.createModal.errors.lastnameRequired' | translate }}
+          </div>
+          <div class="field-error" *ngIf="hasError('lastname', 'minlength')">
+            {{ 'adminAgents.createModal.errors.lastnameMinLength' | translate }}
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>{{ 'adminAgents.createModal.phone' | translate }} <span class="text-danger">*</span></label>
+          <input type="tel" formControlName="phone" class="form-control" [class.is-invalid]="isFieldInvalid('phone')" placeholder="6XXXXXXXX">
+          <div class="field-error" *ngIf="hasError('phone', 'required')">
+            {{ 'adminAgents.createModal.errors.phoneRequired' | translate }}
+          </div>
+          <div class="field-error" *ngIf="hasError('phone', 'invalidCameroonPhone')">
+            {{ 'adminAgents.createModal.errors.phoneInvalid' | translate }}
+          </div>
+        </div>
+        <div class="form-group">
+          <label>{{ 'adminAgents.createModal.email' | translate }}</label>
+          <input type="email" formControlName="email" class="form-control" [class.is-invalid]="isFieldInvalid('email')">
+          <div class="field-error" *ngIf="hasError('email', 'email')">
+            {{ 'adminAgents.createModal.errors.emailInvalid' | translate }}
+          </div>
+        </div> 
+      </div>
+
+      <div class="form-group">
+        <label>{{ 'adminAgents.createModal.city' | translate }} <span class="text-danger">*</span></label>
+        <input type="text" formControlName="city" class="form-control" [class.is-invalid]="isFieldInvalid('city')">
+        <div class="field-error" *ngIf="hasError('city', 'required')">
+          {{ 'adminAgents.createModal.errors.cityRequired' | translate }}
+        </div>
+      </div>
+
+      <div class="form-group" *ngIf="isSuperAdmin">
+        <label>{{ 'adminAgents.createModal.assignAdmin' | translate }} <span class="text-danger">*</span></label>
+        <select formControlName="admin_id" class="form-control form-select" [class.is-invalid]="isFieldInvalid('admin_id')">
+          <option [ngValue]="null" disabled>{{ 'adminAgents.createModal.selectAdminPlaceholder' | translate }}</option>
+          <option *ngFor="let admin of admins" [ngValue]="admin.id">{{ admin.username }}</option>
+        </select>
+        <div class="field-error" *ngIf="hasError('admin_id', 'required')">
+          {{ 'adminAgents.createModal.errors.adminRequired' | translate }}
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="closeModal()">{{ 'common.cancel' | translate }}</button>
+    <button type="button" class="btn btn-primary" (click)="createAgent()" 
+            [disabled]="isCreating || createAgentForm.invalid"
+            [class.btn-disabled]="createAgentForm.invalid">
+      <span *ngIf="isCreating" class="spinner-small"></span>
+      {{ 'adminAgents.createAgent' | translate }}
+    </button>
+  </div>
+</ng-template>
+
+<!-- Success Modal -->
+<ng-template #successModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title">{{ 'adminAgents.successModal.title' | translate }}</h4>
+    <button type="button" class="btn-close" (click)="closeModal()"></button>
+  </div>
+  <div class="modal-body success-modal-body">
+    <!-- Success Icon -->
+    <div class="success-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+      </svg>
+    </div>
+    
+    <p class="success-message">{{ 'adminAgents.successModal.message' | translate }}</p>
+
+    <!-- Agent Details Card -->
+    <div class="agent-details-card" *ngIf="createdAgent">
+      <div class="agent-qr">
+        <img [src]="createdAgent.qr_code" alt="QR Code" class="qr-image">
+      </div>
+      <div class="agent-info">
+        <h5 class="agent-name">{{ createdAgent.name }}</h5>
+        <div class="promo-badge">{{ createdAgent.promo_code }}</div>
+        <span class="promo-label">{{ 'adminAgents.successModal.promoCode' | translate }}</span>
+        <div class="agent-url-container">
+          <input type="text" [value]="createdAgent.agent_url" readonly class="url-input">
+          <button class="btn-copy" (click)="copyToClipboard(createdAgent.agent_url)" title="Copy URL">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="agent-actions">
+        <button class="btn-download" (click)="downloadQRCode(createdAgent)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          {{ 'adminAgents.successModal.qrCode' | translate }}
+        </button>
+        <button class="btn-download" (click)="downloadDetails(createdAgent)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+          </svg>
+          {{ 'adminAgents.successModal.details' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="closeModal()">{{ 'common.close' | translate }}</button>
+    <button type="button" class="btn btn-primary" (click)="downloadAll()">{{ 'adminAgents.successModal.downloadAll' | translate }}</button>
+  </div>
+</ng-template>
