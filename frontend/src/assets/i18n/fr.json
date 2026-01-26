@@ -177,6 +177,7 @@
     "active": "Actif",
     "inactive": "Inactif",
     "noAgents": "Aucun agent trouvé",
+    "createAgent": "Créer un Agent",
     "stats": {
       "global": "Global",
       "totalAgents": "Total Agents",
@@ -202,7 +203,41 @@
     "activate": "Activer",
     "deactivate": "Désactiver",
     "activated": "Agent activé avec succès !",
-    "deactivated": "Agent désactivé avec succès !"
+    "deactivated": "Agent désactivé avec succès !",
+    "createModal": {
+      "title": "Créer un Nouvel Agent",
+      "singleAgent": "Agent Individuel",
+      "bulkUpload": "Import en Masse",
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "phone": "Numéro de Téléphone",
+      "city": "Ville",
+      "email": "Email (Optionnel)",
+      "assignAdmin": "Assigner à un Admin",
+      "selectAdminPlaceholder": "Sélectionner un admin...",
+      "requiredFields": "Veuillez remplir tous les champs obligatoires",
+      "selectAdmin": "Veuillez sélectionner un admin",
+      "errors": {
+        "surnameRequired": "Le prénom est requis",
+        "surnameMinLength": "Le prénom doit contenir au moins 2 caractères",
+        "lastnameRequired": "Le nom est requis",
+        "lastnameMinLength": "Le nom doit contenir au moins 2 caractères",
+        "phoneRequired": "Le numéro de téléphone est requis",
+        "phoneInvalid": "Veuillez entrer un numéro de téléphone camerounais valide (ex: 6XXXXXXXX)",
+        "cityRequired": "La ville est requise",
+        "emailInvalid": "Veuillez entrer une adresse email valide",
+        "adminRequired": "Veuillez sélectionner un admin"
+      }
+    },
+    "successModal": {
+      "title": "Agent(s) Créé(s) avec Succès",
+      "message": "1 agent a été créé avec succès. Vous pouvez maintenant télécharger ses identifiants et codes QR.",
+      "promoCode": "Code Promo",
+      "qrCode": "Code QR",
+      "details": "Détails",
+      "downloadAll": "Tout Télécharger",
+      "copied": "Lien copié dans le presse-papiers !"
+    }
   },
   "adminSignups": {
     "stats": {
@@ -219,6 +254,14 @@
     "pending": "EN ATTENTE",
     "approved": "APPROUVÉ",
     "archived": "ARCHIVÉ"
+  },
+  "common": {
+    "cancel": "Annuler",
+    "close": "Fermer",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "loading": "Chargement..."
   },
   "transactions": {
     "title": "Transactions",

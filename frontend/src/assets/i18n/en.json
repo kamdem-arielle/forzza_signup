@@ -180,6 +180,7 @@
     "active": "Active",
     "inactive": "Inactive",
     "noAgents": "No agents found",
+    "createAgent": "Create Agent",
     "stats": {
       "global": "Global",
       "totalAgents": "Total Agents",
@@ -205,7 +206,41 @@
     "activate": "Activate",
     "deactivate": "Deactivate",
     "activated": "Agent activated successfully!",
-    "deactivated": "Agent deactivated successfully!"
+    "deactivated": "Agent deactivated successfully!",
+    "createModal": {
+      "title": "Create New Agent",
+      "singleAgent": "Single Agent",
+      "bulkUpload": "Bulk Upload",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "phone": "Phone Number",
+      "city": "City",
+      "email": "Email (Optional)",
+      "assignAdmin": "Assign to Admin",
+      "selectAdminPlaceholder": "Select an admin...",
+      "requiredFields": "Please fill in all required fields",
+      "selectAdmin": "Please select an admin",
+      "errors": {
+        "surnameRequired": "First name is required",
+        "surnameMinLength": "First name must be at least 2 characters",
+        "lastnameRequired": "Last name is required",
+        "lastnameMinLength": "Last name must be at least 2 characters",
+        "phoneRequired": "Phone number is required",
+        "phoneInvalid": "Please enter a valid Cameroonian phone number (e.g., 6XXXXXXXX)",
+        "cityRequired": "City is required",
+        "emailInvalid": "Please enter a valid email address",
+        "adminRequired": "Please select an admin"
+      }
+    },
+    "successModal": {
+      "title": "Agent(s) Created Successfully",
+      "message": "1 agent has been successfully created. You can now download their credentials and QR codes.",
+      "promoCode": "Promo Code",
+      "qrCode": "QR Code",
+      "details": "Details",
+      "downloadAll": "Download All",
+      "copied": "Link copied to clipboard!"
+    }
   },
   "adminSignups": {
     "stats": {
@@ -222,6 +257,14 @@
     "pending": "PENDING",
     "approved": "APPROVED",
     "archived": "ARCHIVED"
+  },
+  "common": {
+    "cancel": "Cancel",
+    "close": "Close",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading..."
   },
   "transactions": {
     "title": "Transactions",
