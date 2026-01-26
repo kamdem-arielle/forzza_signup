@@ -221,11 +221,39 @@ export class ApiService {
 
   /**
    * Create agent - includes admin_id for the creating admin
+   * Uses new endpoint with surname, lastname, phone, city, email fields
    */
-  createAgent(data: { username: string; password: string; promo_code: string; name?: string; phone?: string; email?: string }): Observable<ApiResponse> {
+  createAgent(data: { 
+    surname: string; 
+    lastname: string; 
+    phone: string; 
+    city: string; 
+    email?: string;
+    admin_id?: number | null;
+  }): Observable<ApiResponse<{
+    id: number;
+    promo_code: string;
+    agent_url: string;
+    qr_code: string;
+    name: string;
+    phone: string;
+    city: string;
+  }>> {
     const admin = this.getLoggedInAdmin();
-    const payload = { ...data, admin_id: admin?.id };
-    return this.http.post<ApiResponse>(`${this.baseUrl}/api/agents`, payload);
+    // If admin_id is not provided and user is an admin (not superadmin), use their ID
+    const payload = { 
+      ...data, 
+      admin_id: data.admin_id !== undefined ? data.admin_id : (admin?.role === 'admin' ? admin?.id : null)
+    };
+    return this.http.post<ApiResponse<{
+      id: number;
+      promo_code: string;
+      agent_url: string;
+      qr_code: string;
+      name: string;
+      phone: string;
+      city: string;
+    }>>(`${this.baseUrl}/api/agents`, payload);
   }
 
   // Transaction endpoints
