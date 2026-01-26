@@ -45,11 +45,11 @@
 
   <!-- Main Content -->
   <main class="main-content">
-    <div class="nav-actions">
+    <div class="nav-actions layout-container">
     <button (click)="switchLanguage('en')" [class.active]="currentLang === 'en'">EN</button>
     <button (click)="switchLanguage('fr')" [class.active]="currentLang === 'fr'">FR</button>
   </div>
-  <div class="container" >
+  <div class="layout-container" >
    <router-outlet></router-outlet>
   </div>
 

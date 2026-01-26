@@ -25,14 +25,14 @@
   top: 0px;
 }
 
-.container{
+.layout-container{
   padding: 0px 30px;
 }
 
 .nav-actions {
   display: flex;
   gap: 8px;
-  padding: 10px 20px;
+  padding: 10px 30px;
   justify-content: flex-end;
     /* background: linear-gradient(180deg, #004E92 0%, #000428 100%); */
 }
@@ -227,7 +227,7 @@
   .sidebar {
     width: 70px;
   }
-  .container{
+  .layout-container{
   padding: 0px 15px;
 }
 
