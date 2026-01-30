@@ -284,16 +284,16 @@
     <button type="button" class="btn-close" (click)="closeModal()"></button>
   </div>
   <div class="modal-body">
-    <!-- Tabs - Only Single Agent for now -->
+    <!-- Tabs -->
     <div class="modal-tabs">
-      <button class="tab-btn active">
+      <button class="tab-btn" [class.active]="activeTab === 'single'" (click)="switchTab('single')">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
           <circle cx="12" cy="7" r="4"></circle>
         </svg>
         {{ 'adminAgents.createModal.singleAgent' | translate }}
       </button>
-      <button class="tab-btn" disabled>
+      <button class="tab-btn" [class.active]="activeTab === 'bulk'" (click)="switchTab('bulk')">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
           <circle cx="9" cy="7" r="4"></circle>
@@ -304,8 +304,8 @@
       </button>
     </div>
 
-    <!-- Form -->
-    <form class="create-agent-form" [formGroup]="createAgentForm">
+    <!-- Single Agent Form -->
+    <form class="create-agent-form" [formGroup]="createAgentForm" *ngIf="activeTab === 'single'">
       <div class="form-row">
         <div class="form-group">
           <label>{{ 'adminAgents.createModal.firstName' | translate }} <span class="text-danger">*</span> </label>
@@ -367,14 +367,101 @@
         </div>
       </div>
     </form>
+
+    <!-- Bulk Upload Section -->
+    <div class="bulk-upload-section" *ngIf="activeTab === 'bulk'">
+      <!-- Admin Selection for SuperAdmin -->
+      <div class="form-group admin-select-group" *ngIf="isSuperAdmin">
+        <label>{{ 'adminAgents.createModal.assignAdmin' | translate }} <span class="text-danger">*</span></label>
+        <select [(ngModel)]="bulkAdminId" class="form-control form-select">
+          <option [ngValue]="null">{{ 'adminAgents.createModal.selectAdminPlaceholder' | translate }}</option>
+          <option *ngFor="let admin of admins" [ngValue]="admin.id">{{ admin.username }}</option>
+        </select>
+        <div class="field-hint" *ngIf="!bulkAdminId">
+          {{ 'adminAgents.bulkUpload.selectAdminForTemplate' | translate }}
+        </div>
+      </div>
+      
+      <div class="file-upload-zone" 
+           [class.drag-over]="isDragOver"
+           [class.has-file]="selectedFile"
+           (dragover)="onDragOver($event)"
+           (dragleave)="onDragLeave($event)"
+           (drop)="onDrop($event)">
+        <div class="upload-content" *ngIf="!selectedFile">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <p>{{ 'adminAgents.bulkUpload.dragDrop' | translate }}</p>
+          <span class="or-text">{{ 'adminAgents.bulkUpload.or' | translate }}</span>
+          <label class="btn-browse">
+            {{ 'adminAgents.bulkUpload.browse' | translate }}
+            <input type="file" accept=".xlsx,.xls" (change)="onFileSelected($event)" hidden>
+          </label>
+        </div>
+        <div class="file-selected" *ngIf="selectedFile">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+          </svg>
+          <div class="file-info">
+            <span class="file-name">{{ selectedFile.name }}</span>
+            <span class="file-size">{{ formatFileSize(selectedFile.size) }}</span>
+          </div>
+          <button class="btn-remove-file" (click)="removeSelectedFile()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Download Template & Format Info -->
+      <div class="template-row">
+        <button class="btn-download-template" 
+                (click)="downloadTemplate()"
+                [disabled]="isSuperAdmin && !bulkAdminId"
+                [class.disabled]="isSuperAdmin && !bulkAdminId">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          {{ 'adminAgents.bulkUpload.downloadTemplate' | translate }}
+        </button>
+        <span class="format-info">{{ 'adminAgents.bulkUpload.supportedFormats' | translate }}: .xlsx, .xls</span>
+      </div>
+
+      <!-- Bulk Upload Error -->
+      <div class="bulk-error" *ngIf="bulkUploadError">
+        {{ bulkUploadError }}
+      </div>
+    </div>
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-secondary" (click)="closeModal()">{{ 'common.cancel' | translate }}</button>
+    
+    <!-- Single Agent Submit -->
     <button type="button" class="btn btn-primary" (click)="createAgent()" 
+            *ngIf="activeTab === 'single'"
             [disabled]="isCreating || createAgentForm.invalid"
             [class.btn-disabled]="createAgentForm.invalid">
       <span *ngIf="isCreating" class="spinner-small"></span>
       {{ 'adminAgents.createAgent' | translate }}
+    </button>
+    
+    <!-- Bulk Upload Submit -->
+    <button type="button" class="btn btn-primary" (click)="bulkCreateAgents()" 
+            *ngIf="activeTab === 'bulk'"
+            [disabled]="isCreating || !selectedFile"
+            [class.btn-disabled]="!selectedFile">
+      <span *ngIf="isCreating" class="spinner-small"></span>
+      {{ 'adminAgents.bulkUpload.createAgents' | translate }}
     </button>
   </div>
 </ng-template>
@@ -382,7 +469,8 @@
 <!-- Success Modal -->
 <ng-template #successModal let-modal>
   <div class="modal-header">
-    <h4 class="modal-title">{{ 'adminAgents.successModal.title' | translate }}</h4>
+    <h4 class="modal-title" *ngIf="!isBulkSuccess">{{ 'adminAgents.successModal.title' | translate }}</h4>
+    <h4 class="modal-title" *ngIf="isBulkSuccess">{{ bulkResults?.summary?.successful }} {{ 'adminAgents.bulkUpload.successful' | translate }}</h4>
     <button type="button" class="btn-close" (click)="closeModal()"></button>
   </div>
   <div class="modal-body success-modal-body">
@@ -394,10 +482,16 @@
       </svg>
     </div>
     
-    <p class="success-message">{{ 'adminAgents.successModal.message' | translate }}</p>
+    <!-- Single Agent Success Message -->
+    <p class="success-message" *ngIf="!isBulkSuccess">{{ 'adminAgents.successModal.message' | translate }}</p>
+    
+    <!-- Bulk Success Message -->
+    <p class="success-message" *ngIf="isBulkSuccess">
+      {{ bulkResults?.summary?.successful }} agents have been successfully created. You can search, filter, and download their credentials below.
+    </p>
 
-    <!-- Agent Details Card -->
-    <div class="agent-details-card" *ngIf="createdAgent">
+    <!-- Single Agent Details Card -->
+    <div class="agent-details-card" *ngIf="!isBulkSuccess && createdAgent">
       <div class="agent-qr">
         <img [src]="createdAgent.qr_code" alt="QR Code" class="qr-image">
       </div>
@@ -435,9 +529,122 @@
         </button>
       </div>
     </div>
+
+    <!-- Bulk Results Section -->
+    <div class="bulk-results-section" *ngIf="isBulkSuccess && bulkResults">
+      <!-- Export Button -->
+      <div class="bulk-results-toolbar">
+        <button class="btn-export" (click)="downloadAllBulk()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Export All
+        </button>
+      </div>
+
+      <!-- Bulk Results DevExtreme DataGrid -->
+      <div class="bulk-results-grid-container">
+        <dx-data-grid
+          [dataSource]="bulkResultsDataSource"
+          [showBorders]="false"
+          [rowAlternationEnabled]="true"
+          [hoverStateEnabled]="true"
+          [columnAutoWidth]="true"
+          [showColumnLines]="false"
+          [showRowLines]="false"
+          height="300">
+          
+          <!-- Search -->
+          <dxo-search-panel [visible]="true" placeholder="Search agents..."></dxo-search-panel>
+          
+          <!-- Paging -->
+          <dxo-paging [pageSize]="10"></dxo-paging>
+          <dxo-pager
+            [showPageSizeSelector]="true"
+            [allowedPageSizes]="[10, 25, 50]"
+            [showInfo]="true">
+          </dxo-pager>
+
+          <!-- Columns -->
+          <dxi-column 
+            dataField="name" 
+            [caption]="'adminAgents.columns.fullName' | translate">
+          </dxi-column>
+          
+          <dxi-column 
+            dataField="promo_code" 
+            [caption]="'adminAgents.columns.promoCode' | translate"
+            cellTemplate="bulkPromoCodeTemplate">
+          </dxi-column>
+          
+          <dxi-column 
+            dataField="agent_url" 
+            [caption]="'adminAgents.columns.signupLink' | translate"
+            cellTemplate="bulkUrlTemplate">
+          </dxi-column>
+          
+          <dxi-column 
+            dataField="phone" 
+            [caption]="'adminAgents.columns.phone' | translate">
+          </dxi-column>
+          
+          <dxi-column 
+            dataField="city" 
+            [caption]="'adminAgents.columns.city' | translate">
+          </dxi-column>
+          
+          <dxi-column 
+            [caption]="'common.actions' | translate"
+            cellTemplate="bulkActionsTemplate"
+            [width]="100"
+            [allowSorting]="false"
+            [allowFiltering]="false">
+          </dxi-column>
+
+          <!-- Cell Templates -->
+          <div *dxTemplate="let data of 'bulkPromoCodeTemplate'">
+            <span class="promo-badge-small">{{ data.value }}</span>
+          </div>
+
+          <div *dxTemplate="let data of 'bulkUrlTemplate'">
+            <div class="url-cell">
+              <input type="text" [value]="data.value" readonly class="url-input-small">
+              <button class="btn-copy-small" (click)="copyToClipboard(data.value)" title="Copy URL">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div *dxTemplate="let data of 'bulkActionsTemplate'">
+            <div class="action-buttons">
+              <button class="btn-action" (click)="downloadQRCode(data.data)" title="Download QR Code">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="7" height="7"></rect>
+                  <rect x="14" y="3" width="7" height="7"></rect>
+                  <rect x="14" y="14" width="7" height="7"></rect>
+                  <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+              </button>
+              <button class="btn-action" (click)="downloadDetails(data.data)" title="Download Details">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </dx-data-grid>
+      </div>
+    </div>
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-secondary" (click)="closeModal()">{{ 'common.close' | translate }}</button>
-    <button type="button" class="btn btn-primary" (click)="downloadAll()">{{ 'adminAgents.successModal.downloadAll' | translate }}</button>
+    <button type="button" class="btn btn-primary" *ngIf="!isBulkSuccess" (click)="downloadAll()">{{ 'adminAgents.successModal.downloadAll' | translate }}</button>
   </div>
 </ng-template>

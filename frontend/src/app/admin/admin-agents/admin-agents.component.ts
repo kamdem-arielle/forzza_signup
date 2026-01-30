@@ -6,6 +6,9 @@ import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ApiService, AdminUser, Signup } from '../../services/api.service';
 import { CoreService } from '../../services/core.service';
 import jsPDF from 'jspdf';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+
 interface Agent {
   id: number;
   name: string;
@@ -52,6 +55,7 @@ interface AgentStats {
 export class AdminAgentsComponent implements OnInit {
   @ViewChild('createAgentModal') createAgentModal!: TemplateRef<any>;
   @ViewChild('successModal') successModal!: TemplateRef<any>;
+  isBulkSuccess = false;
 
   agents: Agent[] = [];
   allAgents: Agent[] = []; // Store all agents for filtering
@@ -75,6 +79,22 @@ export class AdminAgentsComponent implements OnInit {
   // Created agent for success modal
   createdAgent: CreatedAgent | null = null;
   private modalRef: NgbModalRef | null = null;
+
+  // Tab control for create modal
+  activeTab: 'single' | 'bulk' = 'single';
+
+  // Bulk upload properties
+  selectedFile: File | null = null;
+  isDragOver = false;
+  bulkUploadError = '';
+  bulkAdminId: number | null = null; // Admin ID for bulk template
+  bulkResults: {
+    successful: Array<{ row: number; data: any }>;
+    failed: Array<{ row: number; data: any; error: string }>;
+    summary: { total: number; successful: number; failed: number };
+  } | null = null;
+  showSuccessfulList = false;
+  bulkResultsDataSource: any[] = [];
 
   // Status filter data for header filter
   statusFilterData = [
@@ -361,11 +381,21 @@ export class AdminAgentsComponent implements OnInit {
   openCreateAgentModal(): void {
     this.createAgentForm.reset();
     this.updateFormValidators();
+    this.activeTab = 'single';
+    this.selectedFile = null;
+    this.bulkUploadError = '';
+    this.bulkAdminId = null;
     this.modalRef = this.modalService.open(this.createAgentModal, { 
       centered: true, 
       size: 'md',
       backdrop: 'static'
     });
+  }
+
+  // Switch tab in create modal
+  switchTab(tab: 'single' | 'bulk'): void {
+    this.activeTab = tab;
+    this.bulkUploadError = '';
   }
 
   // Reset form
@@ -379,6 +409,51 @@ export class AdminAgentsComponent implements OnInit {
       this.modalRef.close();
       this.modalRef = null;
     }
+  }
+
+  // Download Excel template for bulk upload
+  downloadTemplate(): void {
+    // Get admin ID - for regular admin use their ID, for superadmin use selected ID
+    let adminId: number | null;
+    if (this.isSuperAdmin) {
+      if (!this.bulkAdminId) {
+        this.bulkUploadError = this.translate.instant('adminAgents.bulkUpload.selectAdminFirst');
+        return;
+      }
+      adminId = this.bulkAdminId;
+    } else {
+      const admin = localStorage.getItem('admin');
+      adminId = admin ? JSON.parse(admin).id : null;
+    }
+
+    // Create template data with headers and sample rows
+    const templateData = [
+      ['Surname', 'Lastname', 'Phone', 'City', 'Adminid'],
+      ['Doe', 'John', '691234567', 'Douala', adminId],
+      ['Smith', 'Jane', '677654321', 'Yaoundé', adminId]
+    ];
+
+    // Create workbook and worksheet
+    const worksheet = XLSX.utils.aoa_to_sheet(templateData);
+    
+    // Set column widths
+    worksheet['!cols'] = [
+      { wch: 15 }, // Surname
+      { wch: 15 }, // Lastname
+      { wch: 15 }, // Phone
+      { wch: 15 }, // City
+      { wch: 10 }  // Adminid
+    ];
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Agents');
+
+    // Generate Excel file
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    
+    // Download file
+    saveAs(blob, 'agents_template.xlsx');
   }
 
   // Create Agent
@@ -408,7 +483,9 @@ export class AdminAgentsComponent implements OnInit {
         if (response.success && response.data) {
           this.createdAgent = response.data;
           this.closeModal();
-          // Open success modal
+          // Open success modal (single mode)
+          this.isBulkSuccess = false;
+          this.bulkResults = null;
           this.modalRef = this.modalService.open(this.successModal, { 
             centered: true, 
             size: 'lg',
@@ -543,6 +620,127 @@ export class AdminAgentsComponent implements OnInit {
         }
       }, 500);
     }
+  }
+
+  // Bulk upload file handlers
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver = true;
+  }
+
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver = false;
+  }
+
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver = false;
+    
+    const files = event.dataTransfer?.files;
+    if (files && files.length > 0) {
+      this.handleFileSelection(files[0]);
+    }
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.handleFileSelection(input.files[0]);
+    }
+  }
+
+  handleFileSelection(file: File): void {
+    const allowedExtensions = ['.xlsx', '.xls'];
+    const fileExtension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+    
+    if (!allowedExtensions.includes(fileExtension)) {
+      this.bulkUploadError = this.translate.instant('adminAgents.bulkUpload.invalidFileType');
+      this.selectedFile = null;
+      return;
+    }
+    
+    this.selectedFile = file;
+    this.bulkUploadError = '';
+  }
+
+  removeSelectedFile(): void {
+    this.selectedFile = null;
+    this.bulkUploadError = '';
+  }
+
+  formatFileSize(bytes: number): string {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  // Bulk create agents
+  bulkCreateAgents(): void {
+    if (!this.selectedFile) {
+      this.bulkUploadError = this.translate.instant('adminAgents.bulkUpload.noFileSelected');
+      return;
+    }
+
+    this.isCreating = true;
+    this.bulkUploadError = '';
+
+    this.apiService.bulkCreateAgents(this.selectedFile).subscribe({
+      next: (response) => {
+        this.isCreating = false;
+        if (response.data) {
+          this.bulkResults = response.data;
+          this.closeModal();
+          // Open success modal with bulk mode
+          this.isBulkSuccess = true;
+          this.createdAgent = null;
+         this.bulkResultsDataSource = this.bulkResults.successful.map(item => item.data);
+          this.modalRef = this.modalService.open(this.successModal, { 
+            centered: true, 
+            size: 'lg',
+            backdrop: 'static'
+          });
+          // Reload agents list
+          this.loadAgents();
+        }
+      },
+      error: (error) => {
+        this.isCreating = false;
+        this.bulkUploadError = error.error?.message || this.translate.instant('adminAgents.bulkUpload.uploadError');
+      }
+    });
+  }
+
+  // Toggle successful list visibility
+  toggleSuccessfulList(): void {
+    this.showSuccessfulList = !this.showSuccessfulList;
+  }
+
+  // // Get bulk results data source for DevExtreme grid
+  // get bulkResultsDataSource(): any[] {
+  //   if (!this.bulkResults?.successful) return [];
+  //   return this.bulkResults.successful.map(item => item.data);
+  // }
+
+  // Download all bulk created agents
+  downloadAllBulk(): void {
+    if (!this.bulkResults?.successful?.length) return;
+    
+    let index = 0;
+    const downloadNext = () => {
+      if (index < this.bulkResults!.successful.length) {
+        const agent = this.bulkResults!.successful[index].data;
+        this.downloadDetails(agent);
+        index++;
+        setTimeout(downloadNext, 300);
+      }
+    };
+    downloadNext();
   }
 
   private showMessage(msg: string, success: boolean): void {
