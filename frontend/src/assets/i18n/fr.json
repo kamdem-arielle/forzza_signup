@@ -237,6 +237,36 @@
       "details": "Détails",
       "downloadAll": "Tout Télécharger",
       "copied": "Lien copié dans le presse-papiers !"
+    },
+    "columns": {
+      "fullName": "Nom Complet",
+      "promoCode": "Code Promo",
+      "signupLink": "Lien d'Inscription",
+      "phone": "Téléphone",
+      "city": "Ville"
+    },
+    "bulkUpload": {
+      "instructions": "Téléchargez un fichier Excel (.xlsx ou .xls) contenant les informations des agents.",
+      "formatHint": "Colonnes requises",
+      "dragDrop": "Glissez-déposez votre fichier Excel ici",
+      "or": "ou cliquez pour parcourir depuis votre ordinateur",
+      "browse": "Parcourir les fichiers",
+      "upload": "Importer & Créer les Agents",
+      "createAgents": "Créer les Agents",
+      "noFileSelected": "Veuillez d'abord sélectionner un fichier",
+      "invalidFileType": "Seuls les fichiers Excel (.xlsx, .xls) sont autorisés",
+      "uploadError": "Erreur lors de l'importation du fichier. Veuillez réessayer.",
+      "resultsTitle": "Résultats de l'Import en Masse",
+      "successful": "Créés",
+      "failed": "Échoués",
+      "total": "Total",
+      "failedItems": "Éléments Échoués",
+      "successfulItems": "Créés avec Succès",
+      "downloadAllCreated": "Télécharger Tous les Créés",
+      "downloadTemplate": "Télécharger le Modèle",
+      "supportedFormats": "Formats supportés",
+      "selectAdminForTemplate": "Sélectionnez un admin pour générer le modèle avec l'ID Admin pré-rempli",
+      "selectAdminFirst": "Veuillez d'abord sélectionner un admin"
     }
   },
   "adminSignups": {

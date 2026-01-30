@@ -240,6 +240,36 @@
       "details": "Details",
       "downloadAll": "Download All",
       "copied": "Link copied to clipboard!"
+    },
+    "columns": {
+      "fullName": "Full Name",
+      "promoCode": "Promo Code",
+      "signupLink": "Signup Link",
+      "phone": "Phone",
+      "city": "City"
+    },
+    "bulkUpload": {
+      "instructions": "Upload an Excel file (.xlsx or .xls) containing agent information.",
+      "formatHint": "Required columns",
+      "dragDrop": "Drag and drop your Excel file here",
+      "or": "or click to browse from your computer",
+      "browse": "Browse Files",
+      "upload": "Upload & Create Agents",
+      "createAgents": "Create Agents",
+      "noFileSelected": "Please select a file first",
+      "invalidFileType": "Only Excel files (.xlsx, .xls) are allowed",
+      "uploadError": "Error uploading file. Please try again.",
+      "resultsTitle": "Bulk Import Results",
+      "successful": "Created",
+      "failed": "Failed",
+      "total": "Total",
+      "failedItems": "Failed Items",
+      "successfulItems": "Successfully Created",
+      "downloadAllCreated": "Download All Created",
+      "downloadTemplate": "Download Template",
+      "supportedFormats": "Supported formats",
+      "selectAdminForTemplate": "Select an admin to generate template with prefilled Admin ID",
+      "selectAdminFirst": "Please select an admin first"
     }
   },
   "adminSignups": {
