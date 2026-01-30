@@ -2,6 +2,33 @@ const Agent = require('../models/Agent');
 const Signup = require('../models/Signup');
 const Transaction = require('../models/Transaction');
 const QRCode = require('qrcode');
+const multer = require('multer');
+const xlsx = require('xlsx');
+const path = require('path');
+
+// Configure multer for file upload
+const storage = multer.memoryStorage();
+const upload = multer({
+  storage: storage,
+  fileFilter: (req, file, cb) => {
+    const allowedMimes = [
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+      'application/vnd.ms-excel', // .xls
+      'application/octet-stream' // Some systems send this for xlsx
+    ];
+    const allowedExtensions = ['.xlsx', '.xls'];
+    const ext = path.extname(file.originalname).toLowerCase();
+    
+    if (allowedMimes.includes(file.mimetype) || allowedExtensions.includes(ext)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only Excel files (.xlsx, .xls) are allowed'), false);
+    }
+  },
+  limits: {
+    fileSize: 10 * 1024 * 1024 // 10MB limit
+  }
+});
 
 /**
  * Agent Controller
@@ -506,3 +533,211 @@ exports.getMyTransactionStats = async (req, res) => {
     });
   }
 };
+
+/**
+ * Bulk Create Agents from Excel File
+ * Expects Excel with columns: Surname, Lastname, Phone, City, Adminid
+ */
+exports.bulkCreateAgents = [
+  upload.single('excelFile'),
+  async (req, res) => {
+    try {
+      // Check if file was uploaded
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          message: 'No Excel file uploaded'
+        });
+      }
+
+      // Parse Excel file
+      const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const rawData = xlsx.utils.sheet_to_json(worksheet, { header: 1, defval: null });
+
+      // Check if file has data
+      if (!rawData || rawData.length < 2) {
+        return res.status(400).json({
+          success: false,
+          message: 'Excel file is empty or has no data rows'
+        });
+      }
+
+      // Validate header row
+      const headerRow = rawData[0];
+      const expectedHeaders = ['Surname', 'Lastname', 'Phone', 'City', 'Adminid'];
+      
+      // Normalize headers (trim whitespace, case-insensitive)
+      const normalizedHeaders = headerRow.map(h => 
+        h ? String(h).trim().toLowerCase() : ''
+      );
+      const expectedNormalized = expectedHeaders.map(h => h.toLowerCase());
+
+      // Check if all expected headers are present
+      const headersMatch = expectedNormalized.every((expected, index) => 
+        normalizedHeaders[index] === expected
+      );
+
+      if (!headersMatch) {
+        return res.status(400).json({
+          success: false,
+          message: `Invalid Excel format. Expected columns: ${expectedHeaders.join(', ')}. Found: ${headerRow.join(', ')}`
+        });
+      }
+
+      // Process data rows
+      const dataRows = rawData.slice(1); // Skip header row
+      const results = {
+        successful: [],
+        failed: [],
+        summary: {
+          total: dataRows.length,
+          successful: 0,
+          failed: 0
+        }
+      };
+
+      // Process each row
+      for (let i = 0; i < dataRows.length; i++) {
+        const row = dataRows[i];
+        const rowNumber = i + 2; // Excel row number (1-indexed + header)
+
+        // Extract values
+        const surname = row[0] ? String(row[0]).trim() : null;
+        const lastname = row[1] ? String(row[1]).trim() : null;
+        const phone = row[2] ? String(row[2]).trim() : null;
+        const city = row[3] ? String(row[3]).trim() : null;
+        const admin_id = row[4] ? parseInt(row[4]) : null;
+
+        // Validate required fields
+        if (!surname || !lastname || !phone || !city) {
+          results.failed.push({
+            row: rowNumber,
+            data: { surname, lastname, phone, city, admin_id },
+            error: 'Missing required fields (Surname, Lastname, Phone, or City)'
+          });
+          continue;
+        }
+
+        try {
+          // Check if phone already exists
+          const phoneExists = await Agent.phoneExists(phone);
+          if (phoneExists) {
+            results.failed.push({
+              row: rowNumber,
+              data: { surname, lastname, phone, city, admin_id },
+              error: 'Phone number already exists'
+            });
+            continue;
+          }
+
+          // Generate name from surname + lastname
+          const name = `${surname} ${lastname}`;
+
+          // Get last 3 digits of phone
+          const last3Digits = phone.slice(-3);
+
+          // Generate promo code and username
+          const surnamePrefix = surname.substring(0, 3).toUpperCase();
+          const promo_code = `${surnamePrefix}${last3Digits}`;
+          const username = promo_code;
+
+          // Check if username already exists
+          const usernameExists = await Agent.usernameExists(username);
+          if (usernameExists) {
+            results.failed.push({
+              row: rowNumber,
+              data: { surname, lastname, phone, city, admin_id },
+              error: `Generated username/promo_code "${promo_code}" already exists`
+            });
+            continue;
+          }
+
+          // Check if promo code already exists
+          const promoCodeExists = await Agent.promoCodeExists(promo_code);
+          if (promoCodeExists) {
+            results.failed.push({
+              row: rowNumber,
+              data: { surname, lastname, phone, city, admin_id },
+              error: `Generated promo code "${promo_code}" already exists`
+            });
+            continue;
+          }
+
+          // Generate password
+          const password = `password${last3Digits}`;
+
+          // Generate agent URL
+          const agent_url = `https://forzza.laureal.io/register?promo_code=${promo_code}`;
+
+          // Generate QR code as Base64 PNG
+          const qr_code = await QRCode.toDataURL(agent_url, {
+            type: 'image/png',
+            width: 300,
+            margin: 2
+          });
+
+          // Create new agent
+          const result = await Agent.create(
+            username,
+            password,
+            promo_code,
+            name,
+            phone,
+            null, // email
+            admin_id,
+            city,
+            qr_code,
+            agent_url
+          );
+
+          results.successful.push({
+            row: rowNumber,
+            data: {
+              id: result.insertId,
+              name,
+              promo_code,
+              agent_url,
+              qr_code,
+              phone,
+              city,
+              admin_id
+            }
+          });
+
+        } catch (error) {
+          results.failed.push({
+            row: rowNumber,
+            data: { surname, lastname, phone, city, admin_id },
+            error: error.message
+          });
+        }
+      }
+
+      // Update summary
+      results.summary.successful = results.successful.length;
+      results.summary.failed = results.failed.length;
+
+      // Determine response status
+      const statusCode = results.summary.successful > 0 ? 201 : 400;
+      const message = results.summary.successful > 0
+        ? `Bulk import completed: ${results.summary.successful} agents created, ${results.summary.failed} failed`
+        : 'Bulk import failed: No agents were created';
+
+      res.status(statusCode).json({
+        success: results.summary.successful > 0,
+        message,
+        data: results
+      });
+
+    } catch (error) {
+      console.error('Bulk create agents error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error processing bulk agent creation',
+        error: error.message
+      });
+    }
+  }
+];

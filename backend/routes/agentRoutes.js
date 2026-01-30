@@ -36,6 +36,10 @@ router.get('/:promo_code/transactions/stats', agentController.getMyTransactionSt
 // POST /api/agents
 router.post('/', agentController.createAgent);
 
+// Bulk create agents from Excel file (Admin only)
+// POST /api/agents/bulk
+router.post('/bulk', agentController.bulkCreateAgents);
+
 // Get all agents (SuperAdmin only - returns ALL agents)
 // GET /api/agents
 router.get('/', agentController.getAllAgents);
