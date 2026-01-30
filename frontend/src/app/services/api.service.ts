@@ -256,6 +256,76 @@ export class ApiService {
     }>>(`${this.baseUrl}/api/agents`, payload);
   }
 
+  /**
+   * Bulk create agents from Excel file
+   * Expected columns: Surname, Lastname, Phone, City, Adminid
+   */
+  bulkCreateAgents(excelFile: File): Observable<ApiResponse<{
+    successful: Array<{
+      row: number;
+      data: {
+        id: number;
+        name: string;
+        promo_code: string;
+        agent_url: string;
+        qr_code: string;
+        phone: string;
+        city: string;
+        admin_id: number | null;
+      };
+    }>;
+    failed: Array<{
+      row: number;
+      data: {
+        surname: string;
+        lastname: string;
+        phone: string;
+        city: string;
+        admin_id: number | null;
+      };
+      error: string;
+    }>;
+    summary: {
+      total: number;
+      successful: number;
+      failed: number;
+    };
+  }>> {
+    const formData = new FormData();
+    formData.append('excelFile', excelFile);
+    return this.http.post<ApiResponse<{
+      successful: Array<{
+        row: number;
+        data: {
+          id: number;
+          name: string;
+          promo_code: string;
+          agent_url: string;
+          qr_code: string;
+          phone: string;
+          city: string;
+          admin_id: number | null;
+        };
+      }>;
+      failed: Array<{
+        row: number;
+        data: {
+          surname: string;
+          lastname: string;
+          phone: string;
+          city: string;
+          admin_id: number | null;
+        };
+        error: string;
+      }>;
+      summary: {
+        total: number;
+        successful: number;
+        failed: number;
+      };
+    }>>(`${this.baseUrl}/api/agents/bulk`, formData);
+  }
+
   // Transaction endpoints
   importTransactions(excelFile: File): Observable<ApiResponse> {
     const formData = new FormData();
